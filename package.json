@@ -1,0 +1,18 @@
+{
+  "name": "slick2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "s": "node dist/tests/simple.js"
+  },
+  "dependencies": {
+    "@types/node": "^12.7.8",
+    "decimal.js": "^10.2.0"
+  },
+  "author": "Kevin Li",
+  "license": "MIT",
+  "devDependencies": {
+    "ascii-table": "0.0.9"
+  }
+}
