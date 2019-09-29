@@ -6,6 +6,8 @@ export enum TokenType {
     RIGHT_BRACE = "RIGHT_BRACE",
     LEFT_BRACKET = "LEFT_BRACKET",
     RIGHT_BRACKET = "RIGHT_BRACKET",
+    BANG = "BANG",
+    QUESTION = "QUESTION",
     COMMA = "COMMA",
     DOT = "DOT",
     MINUS = "MINUS",
@@ -25,9 +27,8 @@ export enum TokenType {
     INDENT = "INDENT",
     DEDENT = "DEDENT",
 
-    BANG_EQUAL = "BANG_EQUAL",
+    NOT_EQUAL = "NOT_EQUAL",
     EQUAL = "EQUAL",
-    EQUAL_EQUAL = "EQUAL_EQUAL",
     GREATER = "GREATER",
     GREATER_EQUAL = "GREATER_EQUAL",
     LESS = "LESS",
@@ -40,7 +41,6 @@ export enum TokenType {
 
     // Keywords.                                     
     AND = "AND",
-    NOT = "NOT",
     ELSE = "ELSE",
     ELIF = "ELIF",
     FALSE = "FALSE",

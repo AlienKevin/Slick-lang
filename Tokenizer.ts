@@ -72,9 +72,8 @@ export class Scanner {
             case '/': this.addToken(TokenType.SLASH); break;
             case '%': this.addToken(TokenType.MODULO); break;
             case ':': this.addToken(TokenType.COLON); break;
-
-            // symbols with length 2
-            case '!': this.addToken(TokenType.NOT); break;
+            case '?': this.addToken(TokenType.QUESTION); break;
+            case '!': this.addToken(TokenType.BANG); break;
             case '&': this.addToken(TokenType.AND); break;
             case '|': this.addToken(TokenType.OR); break;
             case '=': this.addToken(TokenType.EQUAL); break;
@@ -82,7 +81,7 @@ export class Scanner {
             case '>': this.addToken(TokenType.GREATER); break;
             case '≥': this.addToken(TokenType.GREATER_EQUAL); break;
             case '≤': this.addToken(TokenType.LESS_EQUAL); break;
-            case '≠': this.addToken(TokenType.BANG_EQUAL); break;
+            case '≠': this.addToken(TokenType.NOT_EQUAL); break;
 
             case '#':
                 // skip the whole comment line
