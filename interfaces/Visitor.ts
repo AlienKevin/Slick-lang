@@ -1,5 +1,5 @@
-import { Expr } from "./Expr";
-import { Stmt } from "./Stmt";
+import { Expr } from "../Expr";
+import { Stmt } from "../Stmt";
 export interface Visitor {
 	visitTernaryExpr(expr: Expr): any;
 	visitBinaryExpr(expr: Expr): any;
@@ -9,6 +9,7 @@ export interface Visitor {
 	visitVariableExpr(expr: Expr): any;
 	visitAssignExpr(expr: Expr): any;
 	visitCallExpr(expr: Expr): any;
+	visitFunctionExpr(expr: Expr): any;
 	visitGetExpr(expr: Expr): any;
 	visitSetExpr(expr: Expr): any;
 	visitExpressionStmt(stmt: Stmt): any;
@@ -16,7 +17,6 @@ export interface Visitor {
 	visitIfStmt(stmt: Stmt): any;
 	visitWhileStmt(stmt: Stmt): any;
 	visitBreakStmt(stmt: Stmt): any;
-	visitFunctionStmt(stmt: Stmt): any;
 	visitReturnStmt(stmt: Stmt): any;
 	visitVarDeclarationStmt(stmt: Stmt): any;
 }

@@ -1,5 +1,7 @@
 import {Visitor} from "./interfaces/Visitor";
 import {Token} from "./Token"
+import {Param} from "./interfaces/Param";
+import {Block} from "./Stmt";
 export abstract class Expr {
     abstract accept(visitor: Visitor): any;
 }
@@ -65,6 +67,14 @@ export class Call extends Expr {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitCallExpr(this);
+	}
+}
+export class Function extends Expr {
+	constructor(public params: Param[], public body: Block) {
+		super();
+	}
+	accept(visitor: Visitor) {
+		return visitor.visitFunctionExpr(this);
 	}
 }
 export class Get extends Expr {

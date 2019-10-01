@@ -179,36 +179,38 @@ export class Scanner {
     }
 
     private identifier() {
-        const getIdType = () => {
-            const text = this.source.substring(this.start, this.current);
-            const type = keywords.get(text);
-            const prev = this.tokens[this.tokens.length - 1];
-            const prevType = prev === undefined ? undefined : prev.type;
-            return (type !== undefined
-                && (prevType === undefined
-                    || prevType === TokenType.NEWLINE
-                    || prevType === TokenType.INDENT
-                )) ?
-                    type
-                    : TokenType.IDENTIFIER;
-        }
         while (isAlphaNumeric(this.peek()) || (isSingleSpace(this.peek()) && isAlphaNumeric(this.peekNext()))) {
-            if (isSingleSpace(this.peek())) {
-                const type = getIdType();
-                if (type !== TokenType.IDENTIFIER) {
-                    this.addToken(type);
-                    return;
-                }
-                this.advance();
-            } 
             this.advance();
         }
-        if (this.peek() === '?') {
+        if (!isSingleSpace(this.previous()) && this.peek() === '?') {
             this.advance();
         }
 
         const text = this.source.substring(this.start, this.current);
-        this.addToken(TokenType.IDENTIFIER, text);
+        const spaceIndex = text.indexOf(" ");
+        // extract out the first keyword of words
+        if (spaceIndex > 0) {
+            const firstWord = text.slice(0, spaceIndex);
+            const type = keywords.get(firstWord);
+            // first word is a keyword
+            if (type !== undefined) {
+                this.addToken(type, firstWord, 0, firstWord);
+                const restWords = text.slice(spaceIndex + 1);
+                this.addToken(TokenType.IDENTIFIER, restWords, spaceIndex + 1, restWords);
+            }
+            // first word is NOT a keyword
+            else {
+                this.addToken(TokenType.IDENTIFIER, text);    
+            }
+        }
+        // single word keyword
+        else if (keywords.get(text) !== undefined) {
+            this.addToken(keywords.get(text), text);
+        }
+        // single word identifier
+        else {
+            this.addToken(TokenType.IDENTIFIER, text);
+        }
     }
 
     private string() {
@@ -220,7 +222,7 @@ export class Scanner {
                 if (['n', 't', "'", '\\'].every((ch) => this.peek() !== ch)) {
                     this.error(`Invalid escape character!`);
                 } else { // find a valid escape character
-                    switch(this.peek()) {
+                    switch (this.peek()) {
                         case 't':
                             value += '\t'
                             break;
@@ -238,7 +240,7 @@ export class Scanner {
             } else if (this.peek() !== '\\') {
                 value += this.peek();
             }
-            if (this.previous() === '\\'  && this.peek() === '\\') {
+            if (this.previous() === '\\' && this.peek() === '\\') {
                 this.advance();
                 if (this.peek() === "'") {
                     break;
@@ -291,7 +293,7 @@ export class Scanner {
             if (this.peek() === '-') {
                 this.advance();
             }
-            while (isDigit(this.peek())) { 
+            while (isDigit(this.peek())) {
                 this.advance();
             }
         }
@@ -351,13 +353,14 @@ export class Scanner {
         return this.source[this.current - 1];
     }
 
-    private addToken(type: TokenType, literal: any = undefined, offset = 0) {
+    private addToken(type: TokenType, literal: any = undefined, offset = 0, lexeme?: string) {
         if (type === TokenType.EOF) {
             this.runner.lineStarts.push(this.source.length);
         }
-        const lexeme = this.source.substring(this.start, this.current);
+        if (lexeme === undefined) {
+            lexeme = this.source.substring(this.start, this.current)
+        }
         const index = this.start + offset;
-        // console.log("TCL: Scanner -> addToken -> offset", offset)
         this.tokens.push(new Token(type, lexeme, literal, this.line, index));
     }
 

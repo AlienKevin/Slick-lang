@@ -2,8 +2,6 @@ import {Visitor} from "./interfaces/Visitor";
 import {Expr, Variable} from "./Expr";
 import { TokenType } from "./TokenType";
 import { Token } from "./Token";
-import {Param} from "./interfaces/Param"
-import {Branch} from "./interfaces/Branch"
 export abstract class Stmt {
     abstract accept(visitor: Visitor): any;
 }
@@ -16,7 +14,7 @@ export class Expression extends Stmt {
 	}
 }
 export class Block extends Stmt {
-	constructor(public statements: (Stmt | Block)[]) {
+	constructor(public statements: Stmt[]) {
 		super();
 	}
 	accept(visitor: Visitor) {
@@ -24,7 +22,7 @@ export class Block extends Stmt {
 	}
 }
 export class If extends Stmt {
-	constructor(public condition: Expr, public thenBranch: Block, public elseBranches: Branch[]) {
+	constructor(public condition: Expr, public thenBranch: Block, public elseBranch: Block) {
 		super();
 	}
 	accept(visitor: Visitor) {
@@ -45,14 +43,6 @@ export class Break extends Stmt {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitBreakStmt(this);
-	}
-}
-export class Function extends Stmt {
-	constructor(public name: Token, public params: Param[], public body: (Stmt | Block)[]) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitFunctionStmt(this);
 	}
 }
 export class Return extends Stmt {

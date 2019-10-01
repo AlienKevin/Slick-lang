@@ -1,7 +1,7 @@
 import { TokenType } from "./TokenType";
 import { Param } from "./interfaces/Param";
-import { Expr, Binary, Grouping, Literal, Unary, Variable, Assign, Call, Ternary, Get, Set } from "./Expr";
-import { Expression, Block, If, While, Break, Function, Return, VarDeclaration } from "./Stmt";
+import { Expr, Binary, Grouping, Literal, Unary, Variable, Assign, Call, Ternary, Get, Set, Function } from "./Expr";
+import { Expression, Block, If, While, Break, Return, VarDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 
@@ -46,8 +46,6 @@ export class Parser {
         try {
             if (this.check(TokenType.VAR, TokenType.MUT)) {
                 return this.varDeclaration();
-            } else if (this.match(TokenType.F)) {
-                return this.funcDeclaration();
             }
             return this.statement();
         } catch (error) {
@@ -60,23 +58,16 @@ export class Parser {
         }
     }
 
-    // funDecl  → FUNC function
-    // function → IDENTIFIER "(" parameters? ")"  (":" RETURN_TYPE)? block
-    funcDeclaration() {
-        return this.func();
-    }
-
     // sample partial function declaration:
-    // printNum(mut n: num) => void:
+    // (m, n)       // parameters
+    //     print(n) // function body
     func() {
-        const kind = "function";
-        const nameToken = this.consume(TokenType.IDENTIFIER, `Expected a name in ${kind} declaration!`);
-        this.consume(TokenType.LEFT_PAREN, `Expect '(' after ${kind} name!`);
+        this.consume(TokenType.LEFT_PAREN, `Expect '(' after 'f' keyword!`);
         let params = this.consumeParameters();
-        this.consume(TokenType.RIGHT_PAREN, `Expect ')' after ${kind} parameters!`);
-        this.consume(TokenType.NEWLINE, `${kind} body must be on a newline!`);
-        const body = this.block().statements;
-        return new Function(nameToken, params, body);
+        this.consume(TokenType.RIGHT_PAREN, `Expect ')' after function parameters!`);
+        this.consume(TokenType.NEWLINE, `Function body must be on a newline!`);
+        const body = this.block();
+        return new Function(params, body);
     }
 
     consumeParameters() {
@@ -101,7 +92,7 @@ export class Parser {
     varDeclaration() {
         const typeModifier: TokenType = this.consume([TokenType.VAR, TokenType.MUT], `Variable declaration must begin with the 'var' or 'mut' keyword!`).type;
         const nameToken: Token = this.consume(TokenType.IDENTIFIER, `Variable must have a valid name!`);
-        this.consume(TokenType.EQUAL, `Variable '${nameToken.lexeme}' must be initialized when declared!`);
+        this.consume(TokenType.COLON, `Variable '${nameToken.lexeme}' must be initialized when declared!`);
         const initializer: Expr = this.expression();
         this.consume([TokenType.NEWLINE, TokenType.EOF], "Expected newline or EOF after value!");
         return new VarDeclaration(nameToken, initializer, typeModifier);
@@ -173,25 +164,16 @@ export class Parser {
         const condition = this.expression();
         this.consume(TokenType.NEWLINE, "if block must be on its own line!");
         const thenBranch = this.block();
-        let elseBranches = [];
-        while (this.match(TokenType.ELIF)) {
-            const condition = this.expression();
-            this.consume(TokenType.NEWLINE, "elif block must be on its own line!");
-            const thenBranch = this.block();
-            elseBranches.push({
-                condition: condition,
-                body: thenBranch
-            });
+        if (this.match(TokenType.ELIF)) {
+            return new If(condition, thenBranch, this.ifStatement());
         }
         // last else without if
         if (this.match(TokenType.ELSE)) {
             this.consume(TokenType.NEWLINE, "else block must be on its own line!");
-            elseBranches.push({
-                condition: new Literal(true),
-                body: this.block()
-            });
+            return new If(condition, thenBranch, this.block());
         }
-        return new If(condition, thenBranch, elseBranches);
+        // single if statement without elif and else
+        return new If(condition, thenBranch, undefined);
     }
 
     expressionStatement() {
@@ -210,10 +192,10 @@ export class Parser {
     }
 
     assignment() {
-        const expr = this.ternary();
+        const expr = this.funcExpr();
         if (this.match(TokenType.COLON)) {
             const equal = this.previous();
-            const value = this.ternary();
+            const value = this.funcExpr();
             if (expr instanceof Variable) {
                 const name = expr.name;
                 return new Assign(name, value);
@@ -225,6 +207,13 @@ export class Parser {
         } else {
             return expr;
         }
+    }
+
+    funcExpr() {
+        if (this.match(TokenType.F)) {
+            return this.func();
+        }
+        return this.ternary();
     }
 
     // ternary → or ("?" expression ! ternary)?
@@ -373,7 +362,13 @@ export class Parser {
             // arguments → expression ( "," expression )*
             do {
                 argumentList.push(this.expression());
-            } while (this.match(TokenType.COMMA) && this.peek().type !== endTokenType);
+            } while (
+                (
+                    this.match(TokenType.COMMA)
+                    || this.match(TokenType.SOFT_NEWLINE)
+                )
+                && this.peek().type !== endTokenType
+            );
         }
         this.consume(endTokenType,
             `Expect right '${endTokenType === TokenType.RIGHT_PAREN ? ")" : "]"}' after arguments!`);
@@ -403,7 +398,7 @@ export class Parser {
         throw this.error(this.peek(), "Expression expected!");
     }
 
-    consume(tokenType: TokenType | TokenType[], errorMessage: string) {
+    private consume(tokenType: TokenType | TokenType[], errorMessage: string) {
         let matched = false;
         if (Array.isArray(tokenType)) {
             tokenType.some((type) => {
@@ -423,7 +418,7 @@ export class Parser {
         throw this.error(this.peek(), errorMessage);
     }
 
-    error(token: Token, errorMessage: string) {
+    private error(token: Token, errorMessage: string) {
         if (this.runner.detailedError) {
             this.runner.error(token, errorMessage, "SyntaxError");
         } else {
@@ -445,7 +440,7 @@ export class Parser {
         return new SyntaxError();
     }
 
-    synchronize() {
+    private synchronize() {
         this.advance();
         while (!this.isAtEnd()) {
             if (this.previous().type === TokenType.NEWLINE) {
@@ -465,7 +460,7 @@ export class Parser {
         }
     }
 
-    match(...tokenTypes: TokenType[]) {
+    private match(...tokenTypes: TokenType[]) {
         return tokenTypes.some((tokenType) => {
             if (this.check(tokenType)) {
                 // console.log(`token type ${tokenType} is checked!`);
@@ -475,7 +470,7 @@ export class Parser {
         });
     }
 
-    check(...tokenType: TokenType[]) {
+    private check(...tokenType: TokenType[]) {
         return tokenType.some((tokenType) => {
             if (this.peek().type === TokenType.SOFT_NEWLINE &&
                 tokenType !== TokenType.SOFT_NEWLINE &&
@@ -488,7 +483,7 @@ export class Parser {
         });
     }
 
-    checkNext(...tokenType: TokenType[]) {
+    private checkNext(...tokenType: TokenType[]) {
         return tokenType.some((tokenType) => {
             if (this.peekNext().type === TokenType.SOFT_NEWLINE &&
                 tokenType !== TokenType.SOFT_NEWLINE) {
@@ -503,33 +498,33 @@ export class Parser {
         });
     }
 
-    peek() {
+    private peek() {
         return this.tokens[this.current];
     }
 
-    peekNext() {
+    private peekNext() {
         return this.tokens[this.current + 1];
     }
 
-    advance() {
+    private advance() {
         if (!this.isAtEnd()) {
             this.current++;
         }
         return this.previous();
     }
 
-    backtrack(steps = 1) {
+    private backtrack(steps = 1) {
         if (this.current >= steps) {
             this.current -= steps;
         }
         return this.peek();
     }
 
-    previous() {
+    private previous() {
         return this.tokens[this.current - 1];
     }
 
-    isAtEnd() {
+    private isAtEnd() {
         return this.tokens[this.current].type === TokenType.EOF;
     }
 }

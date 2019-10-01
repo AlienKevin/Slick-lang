@@ -2,11 +2,10 @@ const fs = require('fs');
 
 const stmtDescriptions = {
     "Expression": ["expression: Expr"],
-    "Block": ["statements: (Stmt | Block)[]"],
-    "If": ["condition: Expr", "thenBranch: Block", "elseBranches: Branch[]"],
+    "Block": ["statements: Stmt[]"],
+    "If": ["condition: Expr", "thenBranch: Block", "elseBranch: Block"],
     "While": ["condition: Expr", "body: Block"],
     "Break": [],
-    "Function": ["name: Token", "params: Param[]", "body: (Stmt | Block)[]"],
     "Return": ["keyword: Token", "value: any"],
     "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType"],
 };
@@ -20,6 +19,7 @@ const exprDescriptions = {
     "Variable": ["name: Token"],
     "Assign": ["name: Token", "value: Expr"],
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
+    "Function": ["params: Param[]", "body: Block"],
     "Get": ["object: Expr", "name: Token | Expr", "bracket?: Token"],
     "Set": ["object: Expr", "name: Token | Expr", "value: Expr", "bracket?: Token"],
 };
@@ -30,7 +30,9 @@ function createExpr() {
     const descriptions: {[exprType: string]: string[]} = exprDescriptions;
     const parentClassName = "Expr";
     const imports = 
-`import {Token} from "./Token"\n`;
+`import {Token} from "./Token"
+import {Param} from "./interfaces/Param";
+import {Block} from "./Stmt";\n`;
     createAst(filePath, parentClassName, descriptions, imports);
 }
 
@@ -41,9 +43,7 @@ function createStmt() {
     const imports =  
 `import {Expr, Variable} from "./Expr";
 import { TokenType } from "./TokenType";
-import { Token } from "./Token";
-import {Param} from "./interfaces/Param"
-import {Branch} from "./interfaces/Branch"\n`
+import { Token } from "./Token";\n`
     createAst(filePath, parentClassName, descriptions, imports);
 }
 
@@ -62,23 +62,22 @@ function createAst(filePath: string, parentClassName: string, descriptions: {[st
 
     // add inherited classes
     Object.entries(descriptions).forEach(([type, operands]) => {
-        astClasses += `export class ${type} extends ${parentClassName} {\n`;
-        astClasses += `\tconstructor(${operands.map((operand) => `public ${operand}`).join(", ")}) {\n`;
-        astClasses += `\t\tsuper();\n`;
-        astClasses += `\t}\n`;
-        astClasses += `\taccept(visitor: Visitor) {\n`;
-        astClasses += `\t\treturn visitor.visit${type}${parentClassName}(this);\n`;
-        astClasses += `\t}\n`
-        astClasses += `}\n`;
+        astClasses += `export class ${type} extends ${parentClassName} {\n`
+        + `\tconstructor(${operands.map((operand) => `public ${operand}`).join(", ")}) {\n`
+        + `\t\tsuper();\n`
+        + `\t}\n`
+        + `\taccept(visitor: Visitor) {\n`
+        + `\t\treturn visitor.visit${type}${parentClassName}(this);\n`
+        + `\t}\n`
+        + `}\n`;
     });
 
-    // astClasses += `module.exports = {${parentClassName}, ${Object.keys(descriptions).map((varName) => varName.split(":")[0]).join(", ")}};`;
     fs.writeFileSync(filePath, astClasses);
 }
 
 function createVisitor() {
     const visitorFilePath: string = `./interfaces/Visitor.ts`;
-    let visitorContent = `import { Expr } from "./Expr";\nimport { Stmt } from "./Stmt";\n`;
+    let visitorContent = `import { Expr } from "../Expr";\nimport { Stmt } from "../Stmt";\n`;
     visitorContent += `export interface Visitor {\n`;
     visitorContent += createVisitorContent("Expr", exprDescriptions) 
         + createVisitorContent("Stmt", stmtDescriptions);
