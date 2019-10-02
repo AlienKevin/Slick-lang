@@ -56,6 +56,34 @@ else
 } else {
     sing_like_a_rainbow();
 }`
+],
+[
+
+`{a: 32}`,
+
+`const $SLK32 = $SLK.number("32");
+
+$SLK.record($SLK.list("a"), $SLK.list($SLK32));`
+],
+[
+`var wala : {
+    some thing: true
+}
+{
+    a: 0.1
+    b: 'lala'
+    a long var name: wala
+}`,
+
+`const $SLK0_1 = $SLK.number("0.1");
+
+var wala = $SLK.record($SLK.list("some thing"), $SLK.list(true));
+$SLK.record($SLK.list("a", "b", "a long var name"), $SLK.list($SLK0_1, "lala", wala));`
+],
+[
+`var record: {}`,
+
+`var record = $SLK.record();`
 ]
 ]);
 import { test } from "./Tester";

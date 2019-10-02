@@ -303,27 +303,43 @@ export class Parser {
         let expr: Expr;
         if (this.match(TokenType.LEFT_BRACKET)) {
             const bracket = this.previous();
-            expr = new Variable(new Token(TokenType.IDENTIFIER, "List", undefined, bracket.line, bracket.index));
+            expr = new Variable(new Token(TokenType.IDENTIFIER, "list", undefined, bracket.line, bracket.index));
             expr = this.finishCall(expr, TokenType.RIGHT_BRACKET);
         } else if (this.match(TokenType.LEFT_BRACE)) {
             const leftBrace = this.previous();
-            const listCallee = new Variable(new Token(TokenType.IDENTIFIER, "List", undefined, leftBrace.line, leftBrace.index));
-            let argumentList: Expr[] = []; // default to no arguments
+            const listCallee = new Variable(new Token(TokenType.IDENTIFIER, "list", undefined, leftBrace.line, leftBrace.index));
+            let keys = [];
+            let values = [];
             if (!this.check(TokenType.RIGHT_BRACE)) { // has arguments
                 // arguments → expression ( "," expression )*
                 do {
-                    const key = this.expression();
+                    let key = this.expression();
+                    if (!(key instanceof Variable)) {
+                        throw this.error(this.peek(), `Record key must be an identifier!`);
+                    }
+                    key = new Literal(key.name.lexeme);
+                    keys.push(key);
                     this.consume(TokenType.COLON, `Expected ':' after map key!`);
                     const value = this.expression();
-                    argumentList.push(new Call(listCallee, leftBrace, [key, value]));
-                } while (this.match(TokenType.COMMA) && this.peek().type !== TokenType.RIGHT_BRACE);
+                    values.push(value);
+                    
+                } while (
+                    (
+                        this.match(TokenType.COMMA)
+                        || this.match(TokenType.SOFT_NEWLINE)
+                    )
+                && this.peek().type !== TokenType.RIGHT_BRACE);
+            }
+            let argumentList: Expr[] = []; // default to no arguments
+            if (keys.length > 0) {
+                argumentList.push(new Call(listCallee, leftBrace, keys));
+            }
+            if (values.length > 0) {
+                argumentList.push(new Call(listCallee, leftBrace, values));
             }
             this.consume(TokenType.RIGHT_BRACE, `Expect right '}' after arguments!`);
-            expr = new Variable(new Token(TokenType.IDENTIFIER, "Map", undefined, leftBrace.line, leftBrace.index));
-            expr = new Call(expr, leftBrace, 
-                argumentList.length === 0 ? 
-                [] : [new Call(listCallee, leftBrace, argumentList)]
-            );
+            expr = new Variable(new Token(TokenType.IDENTIFIER, "record", undefined, leftBrace.line, leftBrace.index));
+            expr = new Call(expr, leftBrace, argumentList);
         } else {
             expr = this.primary();
         }
