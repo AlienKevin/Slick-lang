@@ -1,17 +1,9 @@
 import {Visitor} from "./interfaces/Visitor";
-import {Expr, Variable} from "./Expr";
+import {Expr, Variable, Call as CallExpr} from "./Expr";
 import { TokenType } from "./TokenType";
 import { Token } from "./Token";
 export abstract class Stmt {
     abstract accept(visitor: Visitor): any;
-}
-export class Expression extends Stmt {
-	constructor(public expression: Expr) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitExpressionStmt(this);
-	}
 }
 export class Block extends Stmt {
 	constructor(public statements: Stmt[]) {
@@ -27,6 +19,14 @@ export class If extends Stmt {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitIfStmt(this);
+	}
+}
+export class Call extends Stmt {
+	constructor(public call: CallExpr) {
+		super();
+	}
+	accept(visitor: Visitor) {
+		return visitor.visitCallStmt(this);
 	}
 }
 export class While extends Stmt {

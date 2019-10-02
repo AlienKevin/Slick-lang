@@ -1,9 +1,9 @@
 const fs = require('fs');
 
 const stmtDescriptions = {
-    "Expression": ["expression: Expr"],
     "Block": ["statements: Stmt[]"],
     "If": ["condition: Expr", "thenBranch: Block", "elseBranch: Block"],
+    "Call": ["call: CallExpr"],
     "While": ["condition: Expr", "body: Block"],
     "Break": [],
     "Return": ["keyword: Token", "value: any"],
@@ -41,7 +41,7 @@ function createStmt() {
     const descriptions: {[stmtType: string]: string[]} = stmtDescriptions;
     const parentClassName = "Stmt";
     const imports =  
-`import {Expr, Variable} from "./Expr";
+`import {Expr, Variable, Call as CallExpr} from "./Expr";
 import { TokenType } from "./TokenType";
 import { Token } from "./Token";\n`
     createAst(filePath, parentClassName, descriptions, imports);

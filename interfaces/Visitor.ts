@@ -12,9 +12,9 @@ export interface Visitor {
 	visitFunctionExpr(expr: Expr): any;
 	visitGetExpr(expr: Expr): any;
 	visitSetExpr(expr: Expr): any;
-	visitExpressionStmt(stmt: Stmt): any;
 	visitBlockStmt(stmt: Stmt): any;
 	visitIfStmt(stmt: Stmt): any;
+	visitCallStmt(stmt: Stmt): any;
 	visitWhileStmt(stmt: Stmt): any;
 	visitBreakStmt(stmt: Stmt): any;
 	visitReturnStmt(stmt: Stmt): any;

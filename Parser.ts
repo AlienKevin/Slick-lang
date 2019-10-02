@@ -1,17 +1,9 @@
 import { TokenType } from "./TokenType";
 import { Param } from "./interfaces/Param";
 import { Expr, Binary, Grouping, Literal, Unary, Variable, Assign, Call, Ternary, Get, Set, Function } from "./Expr";
-import { Expression, Block, If, While, Break, Return, VarDeclaration } from "./Stmt";
+import { Block, If, While, Break, Return, VarDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
-
-// program   → statement* EOF
-// declaration → varDecl | statement;
-// varDecl   → const IDENTIFIER "=" expression (NEWLINE | EOF)
-// statement → exprStmt
-// exprStmt  → expression (NEWLINE | EOF)
-// expression→ assignment
-// assignment→ IDENTIFIER "=" equality
 
 export class Parser {
     private loopDepth: number;
@@ -127,7 +119,7 @@ export class Parser {
         } else if (this.match(TokenType.RETURN)) {
             return this.returnStatement();
         }
-        return this.expressionStatement();
+        return this.callStatement();
     }
 
     returnStatement() {
@@ -176,14 +168,10 @@ export class Parser {
         return new If(condition, thenBranch, undefined);
     }
 
-    expressionStatement() {
-        if (this.match(TokenType.NEWLINE, TokenType.EOF)) {
-            // empty line or empty file
-            return null;
-        }
-        const expr = this.expression();
-        this.consume([TokenType.NEWLINE, TokenType.EOF], "Expected newline after expression!");
-        return new Expression(expr);
+    callStatement() {
+        const call = this.call(true);
+        this.consume([TokenType.NEWLINE, TokenType.EOF], `Expected newline or EOF after call statement`);
+        return call;
     }
 
     // expression → assignment
@@ -310,7 +298,7 @@ export class Parser {
 
     // call  → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     //       → "[" arguments? "]"
-    call() {
+    call(required = false) {
         let expr: Expr;
         if (this.match(TokenType.LEFT_BRACKET)) {
             const bracket = this.previous();
@@ -338,6 +326,7 @@ export class Parser {
         } else {
             expr = this.primary();
         }
+        let invokations = 0;
         while (true) {
             if (this.match(TokenType.LEFT_PAREN)) {
                 expr = this.finishCall(expr, TokenType.RIGHT_PAREN);
@@ -349,8 +338,12 @@ export class Parser {
                 expr = new Get(expr, this.expression(), bracket);
                 this.consume(TokenType.RIGHT_BRACKET, `Expect right ']' after arguments!`);
             } else {
+                if (required && invokations === 0) {
+                    throw this.error(this.peek(), `Expected invokation after callee!`);
+                }
                 break;
             }
+            invokations ++;
         }
         return expr;
     }
