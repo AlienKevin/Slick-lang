@@ -11,7 +11,7 @@ export class Runner {
 
     constructor(readonly detailedError = false, public input?: (prompt: string) => string, public output = console["log"]) {}
 
-    run(source: string, printTokenList = false) {
+    run(source: string, options = {printTokenList: false, genereateFrontMatters: true}) {
         this.source = source;
         this.lineStarts = [];
 
@@ -20,7 +20,7 @@ export class Runner {
         scanner.scan();
 
         // display token list
-        if (printTokenList) {
+        if (options.printTokenList) {
             const table = new AsciiTable();
             table.setHeading("Type", "Lexeme", "Literal", "Line", "Index");
             scanner.tokens.forEach((token) => {
@@ -44,7 +44,7 @@ export class Runner {
         }
 
         // generate code
-        const code = new CodeGenerator().generateCode(statements);
+        const code = new CodeGenerator().generateCode(statements, options.genereateFrontMatters);
         this.output(code);
     }
 

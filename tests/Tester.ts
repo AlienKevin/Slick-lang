@@ -10,7 +10,10 @@ export function test(source: Map<string, string>, runner: Runner) {
     let passedAllTests = true;
     try {
         source.forEach((answer, source) => {
-            runner.run(source);
+            runner.run(source, {
+                printTokenList: false,
+                genereateFrontMatters: false
+            });
             if (trimNewlines(outputs) !== answer) {
                 console.warn(`Source:\n${source}`);
                 const diff = differ.diffLines(answer, outputs, { newlineIsToken: true });

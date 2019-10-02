@@ -106,9 +106,14 @@ export class CodeGenerator implements Visitor {
         "SLASH": "$SLK.div",
     });
 
-    public generateCode(stmts: Stmt[]) {
+    public generateCode(stmts: Stmt[], generateFrontMatters = true) {
         const bulk = this.statements(stmts).replace(/$\n+/, "");
-        return this.frontMatter.join("") + bulk;
+        return (
+            generateFrontMatters 
+                ? this.frontMatter.join("") 
+                : ""
+            + bulk
+        );
     }
 
     private indent() {

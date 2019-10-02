@@ -2,9 +2,7 @@ const source = new Map([
 [
 `print(3e-10)`,
 
-`const $SLK3e_10 = $SLK.number("3e-10");
-
-$SLK.print($SLK3e_10);`
+`$SLK.print($SLK3e_10);`
 ],
 [
 `var my simple name of a variable: 'a string 📆🤞🌈'`,
@@ -16,9 +14,7 @@ $SLK.print($SLK3e_10);`
     element nr: 0
     return final value`,
     
-`const $SLK0 = $SLK.number("0");
-
-var exit = $SLK.stone(function (final_value) {
+`var exit = $SLK.stone(function (final_value) {
     element_nr = $SLK0;
     return final_value;
 });`
@@ -33,10 +29,7 @@ var exit = $SLK.stone(function (final_value) {
         exit
     )`,
 
-`const $SLK0 = $SLK.number("0");
-const $SLK1 = $SLK.number("1");
-
-while ($SLK.ge(element_nr, $SLK0)){
+`while ($SLK.ge(element_nr, $SLK0)){
     element_nr = $SLK.sub(element_nr, $SLK1);
     reduction = callback_function(reduction, $SLK.get(array, element_nr), element_nr, exit);
 }`
@@ -61,9 +54,7 @@ else
 
 `{a: 32}`,
 
-`const $SLK32 = $SLK.number("32");
-
-$SLK.record($SLK.list("a"), $SLK.list($SLK32));`
+`$SLK.record($SLK.list("a"), $SLK.list($SLK32));`
 ],
 [
 `var wala : {
@@ -75,9 +66,7 @@ $SLK.record($SLK.list("a"), $SLK.list($SLK32));`
     a long var name: wala
 }`,
 
-`const $SLK0_1 = $SLK.number("0.1");
-
-var wala = $SLK.record($SLK.list("some thing"), $SLK.list(true));
+`var wala = $SLK.record($SLK.list("some thing"), $SLK.list(true));
 $SLK.record($SLK.list("a", "b", "a long var name"), $SLK.list($SLK0_1, "lala", wala));`
 ],
 [
@@ -88,11 +77,7 @@ $SLK.record($SLK.list("a", "b", "a long var name"), $SLK.list($SLK0_1, "lala", w
 [
 `var a: [1, 2, '3'][0]`,
 
-`const $SLK1 = $SLK.number("1");
-const $SLK2 = $SLK.number("2");
-const $SLK0 = $SLK.number("0");
-
-var a = $SLK.get($SLK.list($SLK1, $SLK2, "3"), $SLK0);`
+`var a = $SLK.get($SLK.list($SLK1, $SLK2, "3"), $SLK0);`
 ],
 [
 `var a: []`,
@@ -107,9 +92,7 @@ var a = $SLK.get($SLK.list($SLK1, $SLK2, "3"), $SLK0);`
     false
 ]`,
 
-`const $SLK3 = $SLK.number("3");
-
-var a = $SLK.list("we", $SLK3, true, false);`
+`var a = $SLK.list("we", $SLK3, true, false);`
 ],
 [
 `var a: [
@@ -119,9 +102,7 @@ var a = $SLK.list("we", $SLK3, true, false);`
     false
 ]`,
 
-`const $SLK3 = $SLK.number("3");
-
-var a = $SLK.list("we", $SLK3, true, false);`
+`var a = $SLK.list("we", $SLK3, true, false);`
 ]
 ]);
 import { test } from "./Tester";
