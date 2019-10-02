@@ -7,7 +7,6 @@ export interface Visitor {
 	visitLiteralExpr(expr: Expr): any;
 	visitUnaryExpr(expr: Expr): any;
 	visitVariableExpr(expr: Expr): any;
-	visitAssignExpr(expr: Expr): any;
 	visitCallExpr(expr: Expr): any;
 	visitFunctionExpr(expr: Expr): any;
 	visitGetExpr(expr: Expr): any;
@@ -19,4 +18,5 @@ export interface Visitor {
 	visitBreakStmt(stmt: Stmt): any;
 	visitReturnStmt(stmt: Stmt): any;
 	visitVarDeclarationStmt(stmt: Stmt): any;
+	visitAssignStmt(stmt: Stmt): any;
 }

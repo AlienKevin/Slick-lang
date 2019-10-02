@@ -61,3 +61,11 @@ export class VarDeclaration extends Stmt {
 		return visitor.visitVarDeclarationStmt(this);
 	}
 }
+export class Assign extends Stmt {
+	constructor(public name: Token, public value: Expr) {
+		super();
+	}
+	accept(visitor: Visitor) {
+		return visitor.visitAssignStmt(this);
+	}
+}

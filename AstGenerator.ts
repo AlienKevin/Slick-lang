@@ -8,6 +8,7 @@ const stmtDescriptions = {
     "Break": [],
     "Return": ["keyword: Token", "value: any"],
     "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType"],
+    "Assign": ["name: Token", "value: Expr"],
 };
 
 const exprDescriptions = {
@@ -17,7 +18,6 @@ const exprDescriptions = {
     "Literal": ["value: any"],
     "Unary": ["operator: Token", "right: Expr"],
     "Variable": ["name: Token"],
-    "Assign": ["name: Token", "value: Expr"],
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
     "Function": ["params: Param[]", "body: Block"],
     "Get": ["object: Expr", "name: Token | Expr", "bracket?: Token"],

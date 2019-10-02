@@ -1,7 +1,7 @@
 import { TokenType } from "./TokenType";
 import { Param } from "./interfaces/Param";
-import { Expr, Binary, Grouping, Literal, Unary, Variable, Assign, Call, Ternary, Get, Set, Function } from "./Expr";
-import { Block, If, While, Break, Return, VarDeclaration } from "./Stmt";
+import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function } from "./Expr";
+import { Block, If, While, Break, Return, VarDeclaration, Assign } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 
@@ -86,7 +86,7 @@ export class Parser {
         const nameToken: Token = this.consume(TokenType.IDENTIFIER, `Variable must have a valid name!`);
         this.consume(TokenType.COLON, `Variable '${nameToken.lexeme}' must be initialized when declared!`);
         const initializer: Expr = this.expression();
-        this.consume([TokenType.NEWLINE, TokenType.EOF], "Expected newline or EOF after value!");
+        this.endStmt("value");
         return new VarDeclaration(nameToken, initializer, typeModifier);
     }
 
@@ -119,7 +119,7 @@ export class Parser {
         } else if (this.match(TokenType.RETURN)) {
             return this.returnStatement();
         }
-        return this.callStatement();
+        return this.assignStatement();
     }
 
     returnStatement() {
@@ -128,7 +128,7 @@ export class Parser {
         if (!this.check(TokenType.NEWLINE, TokenType.EOF)) {
             value = this.expression();
         }
-        this.consume([TokenType.NEWLINE, TokenType.EOF], `Expect newline or EOF after return`);
+        this.endStmt("return");
         return new Return(returnToken, value);
     }
 
@@ -136,7 +136,7 @@ export class Parser {
         if (this.loopDepth <= 0) {
             throw this.error(this.previous(), "Break statement cannot appear outside a loop!");
         }
-        this.consume([TokenType.NEWLINE, TokenType.EOF], "Expect newline or EOF after break!");
+        this.endStmt("break");
         return new Break();
     }
 
@@ -168,22 +168,17 @@ export class Parser {
         return new If(condition, thenBranch, undefined);
     }
 
-    callStatement() {
-        const call = this.call(true);
-        this.consume([TokenType.NEWLINE, TokenType.EOF], `Expected newline or EOF after call statement`);
-        return call;
-    }
-
-    // expression → assignment
-    expression() {
-        return this.assignment();
-    }
-
-    assignment() {
-        const expr = this.funcExpr();
-        if (this.match(TokenType.COLON)) {
+    assignStatement() {
+        const expr = this.expression();
+        // call statement
+        if (expr instanceof Call) {
+            this.endStmt("call");
+        }
+        // assignment statement
+        else if (this.match(TokenType.COLON)) {
             const equal = this.previous();
             const value = this.funcExpr();
+            this.endStmt("assignment");
             if (expr instanceof Variable) {
                 const name = expr.name;
                 return new Assign(name, value);
@@ -193,8 +188,13 @@ export class Parser {
                 throw this.error(equal, "Invalid assignment target!");
             }
         } else {
-            return expr;
+            throw this.error(this.peek(), `Expected a statement!`);
         }
+    }
+
+    // expression → assignment
+    expression() {
+        return this.funcExpr();
     }
 
     funcExpr() {
@@ -409,6 +409,10 @@ export class Parser {
             return this.previous();
         }
         throw this.error(this.peek(), errorMessage);
+    }
+
+    private endStmt(name: string) {
+        this.consume([TokenType.NEWLINE, TokenType.EOF], `Expected newline or EOF after ${name}!`);
     }
 
     private error(token: Token, errorMessage: string) {

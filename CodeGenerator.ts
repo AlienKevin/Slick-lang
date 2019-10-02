@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
-import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variable, Assign, Function } from "./Expr";
-import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break } from "./Stmt";
+import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variable, Function } from "./Expr";
+import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
 import { TokenType } from "./TokenType";
@@ -223,14 +223,8 @@ export class CodeGenerator implements Visitor {
         return "return " + this.expression(stmt.value) + ";";
     }
     visitVarDeclarationStmt(stmt: VarDeclaration) {
-        let modifier;
-        if (stmt.typeModifier === TokenType.MUT) {
-            modifier = "var ";
-        } else {
-            modifier = "const ";
-        }
         return (
-            modifier + stmt.name.lexeme + " = "
+            "var " + stmt.name.lexeme + " = "
             + this.expression(stmt.initializer) + ";"
         );
     }
@@ -239,8 +233,10 @@ export class CodeGenerator implements Visitor {
         return expr.accept(this);
     }
 
-    visitAssignExpr(expr: Assign) {
-        return CodeGenerator.mangle(expr.name.lexeme) + " = " + this.expression(expr.value);
+    visitAssignStmt(stmt: Assign) {
+        return (
+            CodeGenerator.mangle(stmt.name.lexeme) + " = " + this.expression(stmt.value) + ";"
+        );
     }
 
     visitSetExpr(expr: Set) {

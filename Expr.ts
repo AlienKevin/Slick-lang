@@ -53,14 +53,6 @@ export class Variable extends Expr {
 		return visitor.visitVariableExpr(this);
 	}
 }
-export class Assign extends Expr {
-	constructor(public name: Token, public value: Expr) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitAssignExpr(this);
-	}
-}
 export class Call extends Expr {
 	constructor(public callee: Expr, public paren: Token, public argumentList: Expr[]) {
 		super();
