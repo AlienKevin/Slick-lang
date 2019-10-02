@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "s": "node dist/tests/simple.js"
+    "s": "node dist/tests/simple.js",
+    "t": "node dist/tests/test.js"
   },
   "dependencies": {
     "@types/node": "^12.7.8",
@@ -15,6 +16,8 @@
   "devDependencies": {
     "ascii-table": "0.0.9",
     "ts-node": "^8.4.1",
-    "typescript": "^3.6.3"
+    "typescript": "^3.6.3",
+    "colors": "^1.3.3",
+    "diff": "^4.0.1"
   }
 }

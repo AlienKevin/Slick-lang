@@ -107,7 +107,7 @@ export class CodeGenerator implements Visitor {
     });
 
     public generateCode(stmts: Stmt[]) {
-        const bulk = this.statements(stmts);
+        const bulk = this.statements(stmts).replace(/$\n+/, "");
         return this.frontMatter.join("") + bulk;
     }
 
@@ -202,7 +202,7 @@ export class CodeGenerator implements Visitor {
             + (
                 stmt.elseBranch === undefined
                 ? ""
-                : "else " + (
+                : " else " + (
                     stmt.elseBranch instanceof If
                     ? this.visitIfStmt(stmt.elseBranch)
                     : this.block(stmt.elseBranch)
@@ -224,7 +224,7 @@ export class CodeGenerator implements Visitor {
     }
     visitVarDeclarationStmt(stmt: VarDeclaration) {
         return (
-            "var " + stmt.name.lexeme + " = "
+            "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
             + this.expression(stmt.initializer) + ";"
         );
     }

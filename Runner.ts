@@ -11,7 +11,7 @@ export class Runner {
 
     constructor(readonly detailedError = false, public input?: (prompt: string) => string, public output = console["log"]) {}
 
-    run(source: string) {
+    run(source: string, printTokenList = false) {
         this.source = source;
         this.lineStarts = [];
 
@@ -20,16 +20,18 @@ export class Runner {
         scanner.scan();
 
         // display token list
-        const table = new AsciiTable();
-        table.setHeading("Type", "Lexeme", "Literal", "Line", "Index");
-        scanner.tokens.forEach((token) => {
-            let lexeme = token.lexeme;
-            if (token.lexeme.indexOf("\n") >= 0) { // don't print line break in table
-                lexeme = token.lexeme.replace(/\n/g, "\\n");
-            }
-            table.addRow(token.type, lexeme, token.literal, token.line, token.index);
-        });
-        console.log(table.toString());
+        if (printTokenList) {
+            const table = new AsciiTable();
+            table.setHeading("Type", "Lexeme", "Literal", "Line", "Index");
+            scanner.tokens.forEach((token) => {
+                let lexeme = token.lexeme;
+                if (token.lexeme.indexOf("\n") >= 0) { // don't print line break in table
+                    lexeme = token.lexeme.replace(/\n/g, "\\n");
+                }
+                table.addRow(token.type, lexeme, token.literal, token.line, token.index);
+            });
+            console.log(table.toString());
+        }
 
         // parse
         const parser = new Parser(scanner.tokens, this);
@@ -43,7 +45,7 @@ export class Runner {
 
         // generate code
         const code = new CodeGenerator().generateCode(statements);
-        console.log(code);
+        this.output(code);
     }
 
     error(line: string, lineNumer: number, index: number, message: string): void;

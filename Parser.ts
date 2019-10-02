@@ -1,7 +1,7 @@
 import { TokenType } from "./TokenType";
 import { Param } from "./interfaces/Param";
 import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function } from "./Expr";
-import { Block, If, While, Break, Return, VarDeclaration, Assign } from "./Stmt";
+import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 
@@ -173,6 +173,7 @@ export class Parser {
         // call statement
         if (expr instanceof Call) {
             this.endStmt("call");
+            return new CallStmt(expr);
         }
         // assignment statement
         else if (this.match(TokenType.COLON)) {
