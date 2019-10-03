@@ -20,7 +20,7 @@ export class Parser {
         try {
             while (!this.isAtEnd()) {
                 const declaration = this.declaration();
-                if (declaration !== null) {
+                if (declaration !== undefined) {
                     statements.push(declaration);
                 }
             }
@@ -169,6 +169,10 @@ export class Parser {
     }
 
     assignStatement() {
+        // ignore blank lines or comment lines
+        if (this.match(TokenType.NEWLINE)) {
+            return undefined;
+        }
         const expr = this.expression();
         // call statement
         if (expr instanceof Call) {

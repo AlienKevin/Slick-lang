@@ -103,6 +103,31 @@ $SLK.record($SLK.list("a", "b", "a long var name"), $SLK.list($SLK0_1, "lala", w
 ]`,
 
 `var a = $SLK.list("we", $SLK3, true, false);`
+],
+[
+`#comment1
+#comment2`,
+
+``
+],
+[
+`var a: 3 #comment1
+#comment2
+print(a)`,
+
+`var a = $SLK3;
+$SLK.print(a);`
+],
+[
+`
+
+# comment
+
+# comment 1
+# comment 2
+`,
+
+``
 ]
 ]);
 import { test } from "./Tester";
