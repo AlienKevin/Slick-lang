@@ -2,3 +2,4 @@ node_modules
 dist
 .vscode
 tests/simple.ts
+tests/dist.js

@@ -4,6 +4,7 @@ import { Token } from "./Token";
 import AsciiTable from "ascii-table";
 import { Parser } from "./Parser";
 import { TypeChecker } from "./typeCheck/TypeChecker";
+import * as fs from 'fs';
 
 export class Runner {
     public hadError = false;
@@ -56,7 +57,9 @@ export class Runner {
 
         // generate code
         const code = new CodeGenerator().generateCode(statements, options.genereateFrontMatters);
-        this.output(code);
+        // this.output(code);
+
+        fs.writeFileSync("./tests/dist.js", code);
     }
 
     error(line: string, lineNumer: number, index: number, message: string): void;
