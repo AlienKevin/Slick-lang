@@ -4,7 +4,6 @@ import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variab
 import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
-import { TokenType } from "./TokenType";
 
 Decimal.set({
     toExpPos: 5,
@@ -323,7 +322,7 @@ export class CodeGenerator implements Visitor {
 
     funcExpr(expr: Function) {
         return "$SLK.stone(function (" + expr.params.map((param) => {
-            return CodeGenerator.mangle(param.token.lexeme);
+            return CodeGenerator.mangle(param.name.lexeme);
         }).join(", ") + ") " + (
             this.block(expr.body)
         ) + ")";

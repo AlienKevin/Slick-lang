@@ -75,7 +75,7 @@ export class Parser {
             name = this.consume(TokenType.IDENTIFIER, "Expect a parameter name!");
             params.push({
                 "mutable": mutable,
-                "token": name,
+                "name": name,
             });
         }
         return params;
@@ -182,7 +182,7 @@ export class Parser {
         // assignment statement
         else if (this.match(TokenType.COLON)) {
             const equal = this.previous();
-            const value = this.funcExpr();
+            const value = this.expression();
             this.endStmt("assignment");
             if (expr instanceof Variable) {
                 const name = expr.name;

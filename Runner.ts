@@ -3,6 +3,7 @@ import {CodeGenerator} from "./CodeGenerator";
 import { Token } from "./Token";
 import AsciiTable from "ascii-table";
 import { Parser } from "./Parser";
+import { TypeChecker } from "./typeCheck/TypeChecker";
 
 export class Runner {
     public hadError = false;
@@ -42,6 +43,16 @@ export class Runner {
             this.hadError = false;
             return;
         }
+
+        // check type
+        // const typeChecker = new TypeChecker(this);
+        // typeChecker.checkType(statements);
+
+        // if (this.hadError) {
+        //     // reset back to default!!!
+        //     this.hadError = false;
+        //     return;
+        // }
 
         // generate code
         const code = new CodeGenerator().generateCode(statements, options.genereateFrontMatters);

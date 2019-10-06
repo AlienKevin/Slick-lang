@@ -15,3 +15,15 @@ export function isAlpha(char: string) {
 export function isAlphaNumeric(char: string) {
     return isAlpha(char) || isDigit(char);
 }
+
+export function isList(value: any) {
+    return Array.isArray(value);
+}
+
+export function capitalize(str: string) {
+    return (
+        str.length > 0
+            ? str[0].toUpperCase() + str.slice(1)
+            : ""
+    )
+}
