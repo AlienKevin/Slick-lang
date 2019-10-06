@@ -12,7 +12,11 @@ export class Runner {
 
     constructor(readonly detailedError = false, public input?: (prompt: string) => string, public output = console["log"]) {}
 
-    run(source: string, options = {printTokenList: false, genereateFrontMatters: true}) {
+    run(source: string, options = {
+        printTokenList: false,
+        printGeneratedCode: false,
+        genereateFrontMatters: true,
+        }) {
         this.source = source;
         this.lineStarts = [];
 
@@ -46,9 +50,11 @@ export class Runner {
 
         // generate code
         const code = new CodeGenerator().generateCode(statements, options.genereateFrontMatters);
-        // this.output(code);
-
-        fs.writeFileSync("./tests/dist.js", code);
+        if (options.printGeneratedCode) {
+            this.output(code);
+        } else {
+            fs.writeFileSync("./tests/dist.js", code);
+        }
     }
 
     error(line: string, lineNumer: number, index: number, message: string): void;

@@ -12,7 +12,8 @@ export function test(source: Map<string, string>, runner: Runner) {
         source.forEach((answer, source) => {
             runner.run(source, {
                 printTokenList: false,
-                genereateFrontMatters: false
+                printGeneratedCode: true,
+                genereateFrontMatters: false,
             });
             if (trimNewlines(outputs) !== answer) {
                 console.warn(`Source:\n${source}`);

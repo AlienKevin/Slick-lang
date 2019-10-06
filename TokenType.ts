@@ -17,12 +17,6 @@ export enum TokenType {
     MODULO = "MODULO",
     COLON = "COLON",
 
-    // Newline (implicit statement terminator)
-    NEWLINE = "NEWLINE",
-    // newline inside braces (i.e. {}, [], ())
-    // usually ignored by the parser except when there's a brace mismatch
-    SOFT_NEWLINE = "SOFT_NEWLINE",
-    
     // indentation tokens
     INDENT = "INDENT",
     DEDENT = "DEDENT",

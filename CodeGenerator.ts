@@ -4,6 +4,7 @@ import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variab
 import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
+import { isNumber } from "./utils";
 
 Decimal.set({
     toExpPos: 5,
@@ -340,7 +341,7 @@ export class CodeGenerator implements Visitor {
     }
 
     visitGroupingExpr(expr: Grouping) {
-        return "(" + this.expression(expr) + ")";
+        return "(" + this.expression(expr.expression) + ")";
     }
 
     visitLiteralExpr(expr: Literal) {
@@ -354,7 +355,7 @@ export class CodeGenerator implements Visitor {
                     : "false"
             );
         }
-        if (expr.value instanceof Decimal) {
+        if (isNumber(expr.value)) {
             return this.numgle(expr.value);
         }
     }

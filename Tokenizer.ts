@@ -27,7 +27,6 @@ export class Scanner {
     private line: number;
     private braceStack: string[];
     private indentStack: number[];
-    private lastIndent: string = undefined;
 
     public hadError: boolean;
 
@@ -92,7 +91,6 @@ export class Scanner {
 
             // whitespace
             case ' ':
-            case '\t':
                 // ignore whitespace not at the start of a line (not indentation)
                 break;
 
@@ -102,54 +100,37 @@ export class Scanner {
 
             // newlines
             case '\n':
-                if (this.braceStack.length > 0) { // newlines inside braces found
-                    // generate a soft newline used specifically inside braces
-                    this.addToken(TokenType.SOFT_NEWLINE);
-                    this.incrementLineCount();
-                } else {
-                    // this newline token is on the current line, not the next
-                    // so this.line++ need to be after addToken(TokenType.NEWLINE)
-                    this.addToken(TokenType.NEWLINE);
-                    this.incrementLineCount();
-                    // all the rest token peeks are at the next line
+                // this newline token is on the current line, not the next
+                // so this.line++ need to be after addToken(TokenType.NEWLINE)
+                this.incrementLineCount();
+                // all the rest token peeks are at the next line
 
-                    // move start to start of next token
-                    this.start = this.current;
-                    let indentLevel = 0;
-                    let spaceStack = [];
-                    let hasIndentationError = false; // used to prevent duplicated error messages for the same line
-                    while (this.peek() === ' ' || this.peek() === '\t') {
-                        // space and tab are mixed, throw error
-                        if (this.lastIndent !== undefined &&
-                            this.peek() !== this.lastIndent &&
-                            !hasIndentationError) {
-                            hasIndentationError = true;
-                            this.error("Indentations must either be all spaces or tabs throughout the program!");
-                        } else {
-                            this.lastIndent = this.peek();
-                        }
-                        spaceStack.push(this.advance());
-                        indentLevel++;
+                // move start to start of next token
+                this.start = this.current;
+                let indentLevel = 0;
+                let spaceStack = [];
+                while (this.peek() === ' ') {
+                    spaceStack.push(this.advance());
+                    indentLevel++;
+                }
+                // deeper indented
+                if (indentLevel > this.indentStack[this.indentStack.length - 1]) {
+                    this.addToken(TokenType.INDENT);
+                    this.indentStack.push(indentLevel);
+                    // dedented
+                } else if (indentLevel < this.indentStack[this.indentStack.length - 1]) {
+                    let dedentLevel = 0;
+                    while (this.indentStack.length > 1 &&
+                        indentLevel < this.indentStack[this.indentStack.length - 1]) {
+                        this.indentStack.pop();
+                        dedentLevel++;
                     }
-                    // deeper indented
-                    if (indentLevel > this.indentStack[this.indentStack.length - 1]) {
-                        this.addToken(TokenType.INDENT);
-                        this.indentStack.push(indentLevel);
-                        // dedented
-                    } else if (indentLevel < this.indentStack[this.indentStack.length - 1]) {
-                        let dedentLevel = 0;
-                        while (this.indentStack.length > 1 &&
-                            indentLevel < this.indentStack[this.indentStack.length - 1]) {
-                            this.indentStack.pop();
-                            dedentLevel++;
-                        }
-                        if (indentLevel < this.indentStack[this.indentStack.length - 1]) {
-                            this.error("Invalid indentations!");
-                        }
-                        while (dedentLevel > 0) {
-                            this.addToken(TokenType.DEDENT);
-                            dedentLevel--;
-                        }
+                    if (indentLevel < this.indentStack[this.indentStack.length - 1]) {
+                        this.error("Invalid indentations!");
+                    }
+                    while (dedentLevel > 0) {
+                        this.addToken(TokenType.DEDENT);
+                        dedentLevel--;
                     }
                     // else: indentation stays the same
                 }
@@ -179,7 +160,7 @@ export class Scanner {
     }
 
     private identifier() {
-        while (isAlphaNumeric(this.peek()) || (isSingleSpace(this.peek()) && isAlphaNumeric(this.peekNext()))) {
+        while (isAlphaNumeric(this.peek()) || (isSingleSpace(this.peek()) && isAlpha(this.peekNext()))) {
             this.advance();
         }
         if (!isSingleSpace(this.previous()) && this.peek() === '?') {
