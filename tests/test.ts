@@ -128,6 +128,37 @@ $SLK.print(a);`
 `,
 
 ``
+],
+// multi-line expression
+[
+`var a: (
+    1
+    +
+    2
+)`,
+
+`var a = ($SLK.add($SLK1, $SLK2));`
+],
+[
+`var a: (
+    false
+        ? 3
+        ! (
+            3 ≠ 4
+            ? '3 ≠ 4'
+            ! '3 = 4'
+        )
+)`,
+
+`var a = (
+    false
+    ? $SLK3
+    : (
+        $SLK.ne($SLK3, $SLK4)
+        ? "3 ≠ 4"
+        : "3 = 4"
+    )
+);`
 ]
 ]);
 import { test } from "./Tester";

@@ -444,7 +444,6 @@ export class Parser {
         if (this.match(TRUE)) {
             return new Literal(true);
         }
-        // can contain anonymous functions that are invoked immediately
         if (this.match(LEFT_PAREN)) {
             const expr = this.expression();
             this.consume(RIGHT_PAREN, "Expect ')' after expression!");
