@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Param } from "./interfaces/Param";
-import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function } from "./Expr";
+import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function, List } from "./Expr";
 import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
@@ -350,14 +350,13 @@ export class Parser {
     call(required = false) {
         let expr: Expr;
         if (this.match(LEFT_BRACKET)) {
-            const bracket = this.previous();
-            expr = new Variable(new Token(IDENTIFIER, "list", undefined, bracket.line, bracket.index));
-            expr = this.finishCall(expr, RIGHT_BRACKET);
+            const list = this.getCommaSeparatedList(TokenType.RIGHT_BRACKET);
+            this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
+            expr = new List(list);
         } else if (this.match(LEFT_BRACE)) {
             const leftBrace = this.previous();
-            const listCallee = new Variable(new Token(IDENTIFIER, "list", undefined, leftBrace.line, leftBrace.index));
-            let keys = [];
-            let values = [];
+            let keys: Expr[] = [];
+            let values: Expr[] = [];
             if (!this.check(RIGHT_BRACE)) { // has arguments
                 // arguments → expression ( "," expression )*
                 do {
@@ -380,10 +379,10 @@ export class Parser {
             }
             let argumentList: Expr[] = []; // default to no arguments
             if (keys.length > 0) {
-                argumentList.push(new Call(listCallee, leftBrace, keys));
+                argumentList.push(new List(keys));
             }
             if (values.length > 0) {
-                argumentList.push(new Call(listCallee, leftBrace, values));
+                argumentList.push(new List(values));
             }
             this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
             expr = new Variable(new Token(IDENTIFIER, "record", undefined, leftBrace.line, leftBrace.index));
@@ -394,7 +393,7 @@ export class Parser {
         let invokations = 0;
         while (true) {
             if (this.match(LEFT_PAREN)) {
-                expr = this.finishCall(expr, RIGHT_PAREN);
+                expr = this.finishCall(expr);
             } else if (this.match(DOT)) {
                 const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
                 expr = new Get(expr, property);
@@ -413,24 +412,28 @@ export class Parser {
         return expr;
     }
 
-    finishCall(callee: Expr, endTokenType: TokenType) {
+    finishCall(callee: Expr) {
         const leftParen: Token = this.previous();
-        let argumentList: Expr[] = []; // default to no arguments
+        let argumentList = this.getCommaSeparatedList(TokenType.RIGHT_PAREN);
+        this.consume(TokenType.RIGHT_PAREN, `Expect ')' after arguments!`);
+        return new Call(callee, leftParen, argumentList);
+    }
+
+    getCommaSeparatedList(endTokenType: TokenType) {
+        let list: Expr[] = [];
         if (!this.check(endTokenType)) { // has arguments
             // arguments → expression ( "," expression )*
             do {
-                argumentList.push(this.expression());
+                list.push(this.expression());
             } while (
                 (
                     this.match(COMMA)
                     || this.match(SOFT_NEWLINE)
                 )
-                && this.peek().type !== endTokenType
+                && !this.check(endTokenType)
             );
         }
-        this.consume(endTokenType,
-            `Expect right '${endTokenType === RIGHT_PAREN ? ")" : "]"}' after arguments!`);
-        return new Call(callee, leftParen, argumentList);
+        return list;
     }
 
     // primary → NUMBER | STRING | "false" | "true" | "(" expression ")" | IDENTIFIER

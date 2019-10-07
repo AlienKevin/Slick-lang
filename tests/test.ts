@@ -54,7 +54,7 @@ else
 
 `{a: 32}`,
 
-`$SLK.record($SLK.list("a"), $SLK.list($SLK32));`
+`$SLK.record(["a"], [$SLK32]);`
 ],
 [
 `var wala : {
@@ -66,8 +66,8 @@ else
     a long var name: wala
 }`,
 
-`var wala = $SLK.record($SLK.list("some thing"), $SLK.list(true));
-$SLK.record($SLK.list("a", "b", "a long var name"), $SLK.list($SLK0_1, "lala", wala));`
+`var wala = $SLK.record(["some thing"], [true]);
+$SLK.record(["a", "b", "a long var name"], [$SLK0_1, "lala", wala]);`
 ],
 [
 `var record: {}`,
@@ -77,12 +77,12 @@ $SLK.record($SLK.list("a", "b", "a long var name"), $SLK.list($SLK0_1, "lala", w
 [
 `var a: [1, 2, '3'][0]`,
 
-`var a = $SLK.get($SLK.list($SLK1, $SLK2, "3"), $SLK0);`
+`var a = $SLK.get([$SLK1, $SLK2, "3"], $SLK0);`
 ],
 [
 `var a: []`,
 
-`var a = $SLK.list();`
+`var a = [];`
 ],
 [
 `var a: [
@@ -92,7 +92,7 @@ $SLK.record($SLK.list("a", "b", "a long var name"), $SLK.list($SLK0_1, "lala", w
     false
 ]`,
 
-`var a = $SLK.list("we", $SLK3, true, false);`
+`var a = ["we", $SLK3, true, false];`
 ],
 [
 `var a: [
@@ -102,7 +102,7 @@ $SLK.record($SLK.list("a", "b", "a long var name"), $SLK.list($SLK0_1, "lala", w
     false
 ]`,
 
-`var a = $SLK.list("we", $SLK3, true, false);`
+`var a = ["we", $SLK3, true, false];`
 ],
 [
 `#comment1

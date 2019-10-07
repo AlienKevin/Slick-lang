@@ -15,11 +15,20 @@ function toString(any) {
         return "[" + any.join(", ") + "]";
     }
     if (typeof any === "object") {
-        "{\n"
-        + Object.entries(any).map(([key, value]) => 
-            "    " + toString(key) + ": " + toString(value) + "\n"
-        )
-        + "}";
+        let linebreak = "";
+        let padding = "";
+        if (Object.keys(any).length > 1) {
+            linebreak = "\n";
+            padding = "    ";
+        }
+        return (
+            "{" + linebreak
+            + Object.entries(any).map(([key, value]) => 
+                padding + toString(key) + ": " + toString(value)
+            ).join(linebreak)
+            + linebreak
+            + "}"
+        );
     }
 }
 
@@ -54,10 +63,18 @@ function get(container, key) {
         return checkIndex(key, container);
     }
     if (typeof container === "object") {
-        if (records.get(container)[key] !== undefined) {
-            return records.get(container).get(key);
-        } else {
+        if (isNumber(key)) {
+            key = key.toString();
+        }
+        const value = (
+            isText(key)
+            ? container[key]
+            : records.get(container).get(key)
+        );
+        if (value === undefined) {
             error(`Record does not contain key ${key}!`);
+        } else {
+            return value;
         }
     }
 }
@@ -72,18 +89,26 @@ function set(container, key, value) {
     }
     // set key and value of record
     else if (typeof container === "object") {
-        let record = records.get(container);
-        // create new record if not yet initialized
-        if (record === undefined) {
-            record = new WeakMap();
-            records.set(container, record);
+        if (isNumber(key)) {
+            key = key.toString();
         }
-        // update record
-        else {
-            record.set(key, value);
+        // if key is string, update object itself
+        if (isText(key)) {
+            container[key] = value;
+        } else {
+        // otherwise update a weakmap associated with the key
+            let record = records.get(container);
+            // create new record if not yet initialized
+            if (record === undefined) {
+                record = new WeakMap();
+                records.set(container, record);
+            }
+            // update record
+            else {
+                record.set(key, value);
+            }
         }
     }
-    error(`Invalid arguments for set()`);
 }
 
 function list(zeroth, oneth, ...rest) {

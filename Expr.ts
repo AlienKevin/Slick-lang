@@ -61,6 +61,14 @@ export class Call extends Expr {
 		return visitor.visitCallExpr(this);
 	}
 }
+export class List extends Expr {
+	constructor(public list: Expr[]) {
+		super();
+	}
+	accept(visitor: Visitor) {
+		return visitor.visitListExpr(this);
+	}
+}
 export class Function extends Expr {
 	constructor(public params: Param[], public body: Block) {
 		super();

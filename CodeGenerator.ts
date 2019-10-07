@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
-import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variable, Function } from "./Expr";
+import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variable, Function, List } from "./Expr";
 import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
@@ -316,6 +316,16 @@ export class CodeGenerator implements Visitor {
         return (
             this.expression(expr.callee) + "("
             + expr.argumentList.map(this.expression, this).join(", ") + ")"
+        );
+    }
+
+    visitListExpr(expr: List) {
+        return (
+            "["
+            + expr.list.map(
+                (element) => this.expression(element)
+            ,this).join(", ")
+            + "]"
         );
     }
 
