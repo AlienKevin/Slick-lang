@@ -545,21 +545,6 @@ export class Parser {
         });
     }
 
-    private checkNext(...tokenType: TokenType[]) {
-        return tokenType.some((tokenType) => {
-            if (this.peekNext().type === SOFT_NEWLINE &&
-                tokenType !== SOFT_NEWLINE) {
-                this.advance(); // skip over soft newline
-                // backtrack if the token after soft newline is not the one we want to find
-                // in this case, soft newline is the token that we need for error report
-                if (this.peekNext().type !== tokenType) {
-                    this.backtrack(1);
-                }
-            }
-            return this.peekNext().type === tokenType;
-        });
-    }
-
     private peek() {
         return this.tokens[this.current];
     }
@@ -573,13 +558,6 @@ export class Parser {
             this.current++;
         }
         return this.previous();
-    }
-
-    private backtrack(steps = 1) {
-        if (this.current >= steps) {
-            this.current -= steps;
-        }
-        return this.peek();
     }
 
     private previous() {
