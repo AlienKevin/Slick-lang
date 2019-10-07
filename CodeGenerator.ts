@@ -341,7 +341,13 @@ export class CodeGenerator implements Visitor {
     }
 
     visitGroupingExpr(expr: Grouping) {
-        return "(" + this.expression(expr.expression) + ")";
+        const code: string = this.expression(expr.expression)
+        // avoid repeated parentheses
+        if (code.startsWith("(")) {
+            return code;
+        } else {
+            return "(" + code + ")";
+        }
     }
 
     visitLiteralExpr(expr: Literal) {
