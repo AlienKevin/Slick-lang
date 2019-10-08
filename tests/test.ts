@@ -50,29 +50,60 @@ else
     sing_like_a_rainbow();
 }`
 ],
+// records
+[
+`var obj: {
+    3: 3.230
+    'hello': {
+        'something': true
+    }
+}`,
+
+`var obj = (function (o) {
+    $SLK.set(o, $SLK3, $SLK3_23);
+    $SLK.set(o, "hello", (function (o) {
+        $SLK.set(o, "something", true);
+        return o;
+    }(Object.create(null))));
+    return o;
+}(Object.create(null)));`
+],
 [
 
-`{a: 32}`,
+`var a: {a: 32}`,
 
-`$SLK.record(["a"], [$SLK32]);`
+`var a = (function (o) {
+    $SLK.set(o, a, $SLK32);
+    return o;
+}(Object.create(null)));`
 ],
 [
 `var wala : {
     some thing: true
 }
-{
-    a: 0.1
-    b: 'lala'
-    a long var name: wala
+var three: {
+    'a': 0.1
+    'b': 'lala'
+    'a long var name': wala
 }`,
 
-`var wala = $SLK.record(["some thing"], [true]);
-$SLK.record(["a", "b", "a long var name"], [$SLK0_1, "lala", wala]);`
+`var wala = (function (o) {
+    $SLK.set(o, some_thing, true);
+    return o;
+}(Object.create(null)));
+var three = (function (o) {
+    $SLK.set(o, "a", $SLK0_1);
+    $SLK.set(o, "b", "lala");
+    $SLK.set(o, "a long var name", wala);
+    return o;
+}(Object.create(null)));`
 ],
 [
 `var record: {}`,
 
-`var record = $SLK.record();`
+`var record = (function (o) {
+    return o;
+}(Object.create(null)));`
 ],
 [
 `var a: [1, 2, '3'][0]`,
@@ -159,7 +190,7 @@ $SLK.print(a);`
         : "3 = 4"
     )
 );`
-]
+],
 ]);
 import { test } from "./Tester";
 import { Runner } from "../Runner";

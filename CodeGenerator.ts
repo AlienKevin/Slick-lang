@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
-import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variable, Function, List } from "./Expr";
+import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variable, Function, List, RecordLiteral } from "./Expr";
 import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
@@ -327,6 +327,34 @@ export class CodeGenerator implements Visitor {
             ,this).join(", ")
             + "]"
         );
+    }
+
+    visitRecordLiteralExpr(expr: RecordLiteral) {
+        this.indent();
+        const padding = this.begin();
+        const string = "(function (o) {"
+        + expr.keys.map((key, index) => {
+            const value = expr.values[index];
+            return padding + (
+                typeof key === "string"
+                ? (
+                    "o["
+                    + '"' + key + '"'
+                    + "] = "
+                    + this.expression(value)
+                    + ";"
+                )
+                : (
+                    "$SLK.set(o, "
+                    + this.expression(key)
+                    + ", "
+                    + this.expression(value)
+                    + ");"
+                    )
+                );
+            }).join("") + padding + "return o;";
+        this.outdent();
+        return string + this.begin() + "}(Object.create(null)))";
     }
 
     visitFunctionExpr(expr: Function) {

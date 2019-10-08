@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Param } from "./interfaces/Param";
-import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function, List } from "./Expr";
+import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function, List, RecordLiteral } from "./Expr";
 import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
@@ -354,17 +354,12 @@ export class Parser {
             this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
             expr = new List(list);
         } else if (this.match(LEFT_BRACE)) {
-            const leftBrace = this.previous();
             let keys: Expr[] = [];
             let values: Expr[] = [];
             if (!this.check(RIGHT_BRACE)) { // has arguments
                 // arguments → expression ( "," expression )*
                 do {
                     let key = this.expression();
-                    if (!(key instanceof Variable)) {
-                        throw this.error(this.peek(), `Record key must be an identifier!`);
-                    }
-                    key = new Literal(key.name.lexeme);
                     keys.push(key);
                     this.consume(COLON, `Expected ':' after map key!`);
                     const value = this.expression();
@@ -377,16 +372,8 @@ export class Parser {
                     )
                 && this.peek().type !== RIGHT_BRACE);
             }
-            let argumentList: Expr[] = []; // default to no arguments
-            if (keys.length > 0) {
-                argumentList.push(new List(keys));
-            }
-            if (values.length > 0) {
-                argumentList.push(new List(values));
-            }
             this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
-            expr = new Variable(new Token(IDENTIFIER, "record", undefined, leftBrace.line, leftBrace.index));
-            expr = new Call(expr, leftBrace, argumentList);
+            expr = new RecordLiteral(keys, values);
         } else {
             expr = this.primary();
         }

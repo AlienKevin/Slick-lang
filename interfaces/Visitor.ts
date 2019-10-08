@@ -9,6 +9,7 @@ export interface Visitor {
 	visitVariableExpr(expr: Expr): any;
 	visitCallExpr(expr: Expr): any;
 	visitListExpr(expr: Expr): any;
+	visitRecordLiteralExpr(expr: Expr): any;
 	visitFunctionExpr(expr: Expr): any;
 	visitGetExpr(expr: Expr): any;
 	visitSetExpr(expr: Expr): any;

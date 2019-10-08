@@ -69,6 +69,14 @@ export class List extends Expr {
 		return visitor.visitListExpr(this);
 	}
 }
+export class RecordLiteral extends Expr {
+	constructor(public keys: Expr[], public values: Expr[]) {
+		super();
+	}
+	accept(visitor: Visitor) {
+		return visitor.visitRecordLiteralExpr(this);
+	}
+}
 export class Function extends Expr {
 	constructor(public params: Param[], public body: Block) {
 		super();
