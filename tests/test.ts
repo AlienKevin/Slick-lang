@@ -191,6 +191,33 @@ $SLK.print(a);`
     )
 );`
 ],
+// logical connectives
+[
+`var a: true \\/ false`,
+
+`var a = (true || false);`
+],
+[
+`var a: true /\\ false`,
+
+`var a = (true && false);`
+],
+[
+`var a: (
+    true /\\ false \\/ true
+    /\\ false
+)`,
+
+`var a = ((true && false) || (true && false));`
+],
+[
+`if first boolean variable \\/ second boolean variable
+    print('Either the first or the second is true')`,
+
+`if (($SLK.assert_boolean(first_boolean_variable) || $SLK.assert_boolean(second_boolean_variable))){
+    $SLK.print("Either the first or the second is true");
+}`
+]
 ]);
 import { test } from "./Tester";
 import { Runner } from "../Runner";

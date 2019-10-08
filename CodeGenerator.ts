@@ -62,7 +62,7 @@ function isBooleanOperator(op) {
     } else {
         const booleanBinaryOperators = makeSet([
             "=", "≠", "<", ">", "≤", "≥",
-            "&", "|",
+            "/\\", "\\/",
         ]);
         return (
             op instanceof Binary
@@ -167,7 +167,7 @@ export class CodeGenerator implements Visitor {
         return (
             isBooleanOperator(expr)
             ? string
-            : "$NEO.assert_boolean(" + string + ")"
+            : "$SLK.assert_boolean(" + string + ")"
         );
     }
 

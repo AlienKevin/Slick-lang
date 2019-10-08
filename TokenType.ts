@@ -13,6 +13,7 @@ export enum TokenType {
     MINUS = "MINUS",
     PLUS = "PLUS",
     SLASH = "SLASH",
+    BACK_SLASH = "BACK_SLASH",
     STAR = "STAR",
     MODULO = "MODULO",
     COLON = "COLON",
