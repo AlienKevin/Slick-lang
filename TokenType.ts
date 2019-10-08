@@ -55,6 +55,9 @@ export enum TokenType {
     VAR = "VAR",
     F = "F",
 
+    // bottom type
+    NULL = "NULL",
+
     // End of File
     EOF = "EOF"
 };

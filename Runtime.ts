@@ -1,4 +1,4 @@
-import { isList, isNumber, isText, isBoolean } from "./utils";
+import { isList, isNumber, isText, isBoolean, isNull } from "./utils";
 import Decimal from "decimal.js";
 
 let records = new WeakMap();
@@ -10,6 +10,9 @@ function print(any) {
 function toString(any) {
     if (isNumber(any) || isText(any) || isBoolean(any)) {
         return any.toString();
+    }
+    if (isNull(any)) {
+        return "null";
     }
     if (isList(any)) {
         return "[" + any.join(", ") + "]";

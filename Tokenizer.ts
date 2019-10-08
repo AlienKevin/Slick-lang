@@ -10,6 +10,7 @@ export const keywords = new Map([
     ["else", TokenType.ELSE],
     ["true", TokenType.TRUE],
     ["false", TokenType.FALSE],
+    ["null", TokenType.NULL],
     ["while", TokenType.WHILE],
     ["break", TokenType.BREAK],
     ["return", TokenType.RETURN],

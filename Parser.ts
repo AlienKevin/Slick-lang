@@ -48,6 +48,7 @@ const F =TokenType.F;
 const EOF =TokenType.EOF;
 const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
+const NULL = TokenType.NULL;
 
 export class Parser {
     private loopDepth: number;
@@ -423,7 +424,7 @@ export class Parser {
         return list;
     }
 
-    // primary → NUMBER | STRING | "false" | "true" | "(" expression ")" | IDENTIFIER
+    // primary → NUMBER | STRING | "false" | "true" | "null" | "(" expression ")" | IDENTIFIER
     primary() {
         if (this.match(NUMBER, STRING)) {
             return new Literal(this.previous().literal);
@@ -433,6 +434,9 @@ export class Parser {
         }
         if (this.match(TRUE)) {
             return new Literal(true);
+        }
+        if (this.match(NULL)) {
+            return new Literal(undefined);
         }
         if (this.match(LEFT_PAREN)) {
             const expr = this.expression();
