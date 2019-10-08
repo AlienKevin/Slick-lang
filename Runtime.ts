@@ -33,6 +33,9 @@ function toString(any) {
             + "}"
         );
     }
+    if (typeof any === "function") {
+        return "<function>";
+    }
 }
 
 function error(message: string) {
