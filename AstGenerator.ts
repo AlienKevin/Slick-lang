@@ -19,7 +19,7 @@ const exprDescriptions = {
     "Unary": ["operator: Token", "right: Expr"],
     "Variable": ["name: Token"],
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
-    "List": ["list: Expr[]"],
+    "ListLiteral": ["list: Expr[]"],
     "RecordLiteral": ["keys: Expr[]", "values: Expr[]"],
     "Function": ["params: Param[]", "body: Block"],
     "Get": ["object: Expr", "name: Token | Expr", "bracket?: Token"],

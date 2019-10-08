@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Param } from "./interfaces/Param";
-import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function, List, RecordLiteral } from "./Expr";
+import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function, ListLiteral, RecordLiteral } from "./Expr";
 import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
@@ -352,7 +352,7 @@ export class Parser {
         if (this.match(LEFT_BRACKET)) {
             const list = this.getCommaSeparatedList(TokenType.RIGHT_BRACKET);
             this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
-            expr = new List(list);
+            expr = new ListLiteral(list);
         } else if (this.match(LEFT_BRACE)) {
             let keys: Expr[] = [];
             let values: Expr[] = [];

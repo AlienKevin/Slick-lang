@@ -61,12 +61,12 @@ export class Call extends Expr {
 		return visitor.visitCallExpr(this);
 	}
 }
-export class List extends Expr {
+export class ListLiteral extends Expr {
 	constructor(public list: Expr[]) {
 		super();
 	}
 	accept(visitor: Visitor) {
-		return visitor.visitListExpr(this);
+		return visitor.visitListLiteralExpr(this);
 	}
 }
 export class RecordLiteral extends Expr {
