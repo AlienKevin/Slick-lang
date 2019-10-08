@@ -470,6 +470,9 @@ export class Parser {
     }
 
     private endStmt(name: string) {
+        if (this.previous().type === DEDENT) {
+            return;
+        }
         this.consume([NEWLINE, EOF], `Expected newline or EOF after ${name}!`);
     }
 

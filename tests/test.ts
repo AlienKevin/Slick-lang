@@ -217,6 +217,16 @@ $SLK.print(a);`
 `if (($SLK.assert_boolean(first_boolean_variable) || $SLK.assert_boolean(second_boolean_variable))){
     $SLK.print("Either the first or the second is true");
 }`
+],
+[
+`var a: f ()
+    print('b')
+print('a')`,
+
+`var a = $SLK.stone(function () {
+    $SLK.print("b");
+});
+$SLK.print("a");`
 ]
 ]);
 import { test } from "./Tester";
