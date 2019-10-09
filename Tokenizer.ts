@@ -17,6 +17,7 @@ export const keywords = new Map([
     ["mut", TokenType.MUT],
     ["var", TokenType.VAR],
     ["f", TokenType.F],
+    ["call", TokenType.CALL],
 ]);
 
 export class Scanner {

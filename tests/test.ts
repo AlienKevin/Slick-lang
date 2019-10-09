@@ -1,6 +1,6 @@
 const source = new Map([
 [
-`print(3e-10)`,
+`call print(3e-10)`,
 
 `$SLK.print($SLK3e_10);`
 ],
@@ -38,12 +38,12 @@ const source = new Map([
 `if my hero = 'monster'
     call blood curdling scream()
 elif my hero = 'butterfly'
-    do not make a sound()
+    call do not make a sound()
 else
-    sing like a rainbow()`,
+    call sing like a rainbow()`,
 
 `if ($SLK.eq(my_hero, "monster")){
-    call_blood_curdling_scream();
+    blood_curdling_scream();
 } else if ($SLK.eq(my_hero, "butterfly")){
     do_not_make_a_sound();
 } else {
@@ -144,7 +144,7 @@ var three = (function (o) {
 [
 `var a: 3 #comment1
 #comment2
-print(a)`,
+call print(a)`,
 
 `var a = $SLK3;
 $SLK.print(a);`
@@ -212,7 +212,7 @@ $SLK.print(a);`
 ],
 [
 `if first boolean variable \\/ second boolean variable
-    print('Either the first or the second is true')`,
+    call print('Either the first or the second is true')`,
 
 `if (($SLK.assert_boolean(first_boolean_variable) || $SLK.assert_boolean(second_boolean_variable))){
     $SLK.print("Either the first or the second is true");
@@ -220,8 +220,8 @@ $SLK.print(a);`
 ],
 [
 `var a: f ()
-    print('b')
-print('a')`,
+    call print('b')
+call print('a')`,
 
 `var a = $SLK.stone(function () {
     $SLK.print("b");

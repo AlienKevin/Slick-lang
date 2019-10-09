@@ -45,6 +45,7 @@ const BREAK =TokenType.BREAK;
 const MUT =TokenType.MUT;
 const VAR =TokenType.VAR;
 const F =TokenType.F;
+const CALL = TokenType.CALL;
 const EOF =TokenType.EOF;
 const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
@@ -218,26 +219,34 @@ export class Parser {
         if (this.match(NEWLINE)) {
             return undefined;
         }
-        const expr = this.expression();
         // call statement
-        if (expr instanceof Call) {
-            this.endStmt("call");
-            return new CallStmt(expr);
+        if (this.match(CALL)) {
+            const keyword = this.previous();
+            const expr = this.expression();
+            // call statement
+            if (expr instanceof Call) {
+                this.endStmt("call");
+                return new CallStmt(expr);
+            } else {
+                throw this.error(keyword, `Expected a function call!`);
+            }
         }
         // assignment statement
-        else if (this.match(COLON)) {
-            const equal = this.previous();
-            const value = this.expression();
-            this.endStmt("assignment");
-            if (expr instanceof Variable) {
-                const name = expr.name;
-                return new Assign(name, value);
-            } else if (expr instanceof Get) {
-                return new Set(expr.object, expr.name, value, expr.bracket);
-            } else {
-                throw this.error(equal, "Invalid assignment target!");
+        else {
+            const expr = this.expression();
+            if (this.match(COLON)) {
+                const equal = this.previous();
+                const value = this.expression();
+                this.endStmt("assignment");
+                if (expr instanceof Variable) {
+                    const name = expr.name;
+                    return new Assign(name, value);
+                } else if (expr instanceof Get) {
+                    return new Set(expr.object, expr.name, value, expr.bracket);
+                } else {
+                    throw this.error(equal, "Invalid assignment target!");
+                }
             }
-        } else {
             throw this.error(this.peek(), `Expected a statement!`);
         }
     }
