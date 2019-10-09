@@ -46,6 +46,7 @@ const MUT =TokenType.MUT;
 const VAR =TokenType.VAR;
 const F =TokenType.F;
 const CALL = TokenType.CALL;
+const LET = TokenType.LET;
 const EOF =TokenType.EOF;
 const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
@@ -232,23 +233,21 @@ export class Parser {
             }
         }
         // assignment statement
-        else {
+        else if (this.match(LET)) {
             const expr = this.expression();
-            if (this.match(COLON)) {
-                const equal = this.previous();
-                const value = this.expression();
-                this.endStmt("assignment");
-                if (expr instanceof Variable) {
-                    const name = expr.name;
-                    return new Assign(name, value);
-                } else if (expr instanceof Get) {
-                    return new Set(expr.object, expr.name, value, expr.bracket);
-                } else {
-                    throw this.error(equal, "Invalid assignment target!");
-                }
+            const equal = this.consume(COLON, `Expected ':' after assignment target!`);
+            const value = this.expression();
+            this.endStmt("assignment");
+            if (expr instanceof Variable) {
+                const name = expr.name;
+                return new Assign(name, value);
+            } else if (expr instanceof Get) {
+                return new Set(expr.object, expr.name, value, expr.bracket);
+            } else {
+                throw this.error(equal, "Invalid assignment target!");
             }
-            throw this.error(this.peek(), `Expected a statement!`);
         }
+        throw this.error(this.peek(), `Expected a statement!`);
     }
 
     // expression → assignment

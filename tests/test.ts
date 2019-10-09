@@ -11,7 +11,7 @@ const source = new Map([
 ],
 [
 `var exit: f (final value)
-    element nr: 0
+    let element nr: 0
     return final value`,
     
 `var exit = $SLK.stone(function (final_value) {
@@ -21,8 +21,8 @@ const source = new Map([
 ],
 [
 `while element nr ≥ 0
-    element nr: element nr - 1
-    reduction: callback function(
+    let element nr: element nr - 1
+    let reduction: callback function(
         reduction
         array[element nr]
         element nr

@@ -54,7 +54,8 @@ export enum TokenType {
     MUT = "MUT",
     VAR = "VAR",
     F = "F",
-    CALL = "call",
+    CALL = "CALL",
+    LET = "LET",
 
     // bottom type
     NULL = "NULL",
