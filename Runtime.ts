@@ -95,23 +95,36 @@ function set(container, key, value) {
     }
     // set key and value of record
     else if (typeof container === "object") {
+        // convert number key to string key for storage
         if (isNumber(key)) {
             key = key.toString();
         }
+        // if key is null, delete the value in object
+        if (isNull(value)) {
+            delete container[key];
+        }
         // if key is string, update object itself
-        if (isText(key)) {
+        else if (isText(key)) {
             container[key] = value;
-        } else {
+        }
         // otherwise update a weakmap associated with the key
+        else {
             let record = records.get(container);
             // create new record if not yet initialized
             if (record === undefined) {
+                if (isNull(key)) {
+                    return;
+                }
                 record = new WeakMap();
                 records.set(container, record);
             }
             // update record
             else {
-                record.set(key, value);
+                if (isNull(key)) {
+                    record.delete(key);
+                } else {
+                    record.set(key, value);
+                }
             }
         }
     }
