@@ -4,23 +4,6 @@ import { Token } from "./Token";
 import { isDigit, isAlpha, isAlphaNumeric, isSpace as isSingleSpace } from "./utils";
 import { Runner } from "./Runner";
 
-export const keywords = new Map([
-    ["if", TokenType.IF],
-    ["elif", TokenType.ELIF],
-    ["else", TokenType.ELSE],
-    ["true", TokenType.TRUE],
-    ["false", TokenType.FALSE],
-    ["null", TokenType.NULL],
-    ["while", TokenType.WHILE],
-    ["break", TokenType.BREAK],
-    ["return", TokenType.RETURN],
-    ["mut", TokenType.MUT],
-    ["var", TokenType.VAR],
-    ["f", TokenType.F],
-    ["call", TokenType.CALL],
-    ["let", TokenType.LET],
-]);
-
 export class Scanner {
 
     public tokens: Token[];
@@ -202,28 +185,11 @@ export class Scanner {
         }
 
         const text = this.source.substring(this.start, this.current);
-        const spaceIndex = text.indexOf(" ");
-        // extract out the first keyword of words
-        if (spaceIndex > 0) {
-            const firstWord = text.slice(0, spaceIndex);
-            const type = keywords.get(firstWord);
-            // first word is a keyword
-            if (type !== undefined) {
-                this.addToken(type, firstWord, 0, firstWord);
-                const restWords = text.slice(spaceIndex + 1);
-                this.addToken(TokenType.IDENTIFIER, restWords, spaceIndex + 1, restWords);
-            }
-            // first word is NOT a keyword
-            else {
-                this.addToken(TokenType.IDENTIFIER, text);    
-            }
-        }
-        // single word keyword
-        else if (keywords.get(text) !== undefined) {
-            this.addToken(keywords.get(text), text);
-        }
-        // single word identifier
-        else {
+        if (text === "true") {
+            this.addToken(TokenType.TRUE, text);
+        } else if (text === "false") {
+            this.addToken(TokenType.FALSE, text);
+        } else {
             this.addToken(TokenType.IDENTIFIER, text);
         }
     }

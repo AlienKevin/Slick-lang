@@ -43,6 +43,7 @@ export function test(source: Map<string, string>, runner: Runner) {
         });
     } catch (error) {
         // do not print the error, relevant info already printed
+        console.warn(outputs);
         passedAllTests = false;
     }
     if (passedAllTests) {

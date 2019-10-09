@@ -52,6 +52,21 @@ const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
 const NULL = TokenType.NULL;
 
+export const keywords = new Map([
+    ["if", TokenType.IF],
+    ["elif", TokenType.ELIF],
+    ["else", TokenType.ELSE],
+    ["null", TokenType.NULL],
+    ["while", TokenType.WHILE],
+    ["break", TokenType.BREAK],
+    ["return", TokenType.RETURN],
+    ["mut", TokenType.MUT],
+    ["var", TokenType.VAR],
+    ["f", TokenType.F],
+    ["call", TokenType.CALL],
+    ["let", TokenType.LET],
+]);
+
 export class Parser {
     private loopDepth: number;
     private current: number;
@@ -81,8 +96,37 @@ export class Parser {
         }
     }
 
+    prelude() {
+        const text = this.peek().lexeme;
+        const spaceIndex = text.indexOf(" ");
+        // extract out the first keyword of words
+        if (spaceIndex > 0) {
+            const firstWord = text.slice(0, spaceIndex);
+            const type = keywords.get(firstWord);
+            // first word is a keyword
+            if (type !== undefined) {
+                this.peek().type = type;
+                this.peek().lexeme = firstWord;
+                const restWords = text.slice(spaceIndex + 1);
+                const restToken = new Token(
+                    TokenType.IDENTIFIER,
+                    restWords,
+                    undefined,
+                    this.peek().line,
+                    this.peek().index + spaceIndex + 1
+                    );
+                this.tokens.splice(this.current + 1, 0, restToken);
+            }
+        }
+        // single word keyword
+        else if (keywords.get(text) !== undefined) {
+            this.tokens[this.current].type = keywords.get(text);
+        }
+    }
+
     declaration() {
         try {
+            this.prelude();
             if (this.check(VAR, MUT)) {
                 return this.varDeclaration();
             }
@@ -143,6 +187,7 @@ export class Parser {
         let statements = []; // a list of blocks (nested arrays) and statements
         let indentStack = [INDENT]; // push the first indent
         while (indentStack.length > 0 && !this.isAtEnd()) {
+            this.prelude();
             if (this.check(INDENT)) { // a nested block
                 statements.push(this.block());
             } else if (this.check(DEDENT)) {
@@ -203,6 +248,7 @@ export class Parser {
         const condition = this.expression();
         this.consume(NEWLINE, "if block must be on its own line!");
         const thenBranch = this.block();
+        this.prelude();
         if (this.match(ELIF)) {
             return new If(condition, thenBranch, this.ifStatement());
         }
@@ -256,7 +302,11 @@ export class Parser {
     }
 
     funcExpr() {
-        if (this.match(F)) {
+        if (
+            this.peek().type === TokenType.IDENTIFIER
+            && this.peek().lexeme === "f"
+        ) {
+            this.advance();
             return this.func();
         }
         return this.ternary();

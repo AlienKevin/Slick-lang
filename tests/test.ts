@@ -227,6 +227,23 @@ call print('a')`,
     $SLK.print("b");
 });
 $SLK.print("a");`
+],
+// using keyword as identifier
+[
+`var let var if: 3
+let let var if: let var if + 1
+call print(let var if)`,
+
+`var let_var_if = $SLK3;
+let_var_if = $SLK.add(let_var_if, $SLK1);
+$SLK.print(let_var_if);`
+],
+[
+`var var: 3
+call print(var)`,
+
+`var $SLKvar = $SLK3;
+$SLK.print($SLKvar);`
 ]
 ]);
 import { test } from "./Tester";
