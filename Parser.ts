@@ -35,11 +35,9 @@ const NUMBER =TokenType.NUMBER;
 const AND =TokenType.AND;
 const ELSE =TokenType.ELSE;
 const ELIF =TokenType.ELIF;
-const FALSE =TokenType.FALSE;
 const IF =TokenType.IF;
 const OR =TokenType.OR;
 const RETURN =TokenType.RETURN;
-const TRUE =TokenType.TRUE;
 const WHILE =TokenType.WHILE;
 const BREAK =TokenType.BREAK;
 const MUT =TokenType.MUT;
@@ -50,13 +48,11 @@ const LET = TokenType.LET;
 const EOF =TokenType.EOF;
 const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
-const NULL = TokenType.NULL;
 
 export const keywords = new Map([
     ["if", TokenType.IF],
     ["elif", TokenType.ELIF],
     ["else", TokenType.ELSE],
-    ["null", TokenType.NULL],
     ["while", TokenType.WHILE],
     ["break", TokenType.BREAK],
     ["return", TokenType.RETURN],
@@ -490,22 +486,25 @@ export class Parser {
         if (this.match(NUMBER, STRING)) {
             return new Literal(this.previous().literal);
         }
-        if (this.match(FALSE)) {
-            return new Literal(false);
-        }
-        if (this.match(TRUE)) {
-            return new Literal(true);
-        }
-        if (this.match(NULL)) {
-            return new Literal(undefined);
-        }
         if (this.match(LEFT_PAREN)) {
             const expr = this.expression();
             this.consume(RIGHT_PAREN, "Expect ')' after expression!");
             return new Grouping(expr);
         }
         if (this.match(IDENTIFIER)) {
-            return new Variable(this.previous());
+            const name = this.previous();
+            if (!this.env.lookup(name)) {
+                switch (name.lexeme) {
+                    case "true":
+                        return new Literal(true);
+                    case "false":
+                        return new Literal(false);
+                    case "null":
+                        return new Literal(undefined);
+                }
+                throw this.error(name, `Variable '${name.lexeme}' is not declared!`);
+            }
+            return new Variable(name);
         }
         throw this.error(this.peek(), "Expression expected!");
     }
