@@ -1,5 +1,6 @@
 import { isList, isNumber, isText, isBoolean, isNull } from "./utils";
 import Decimal from "decimal.js";
+import * as unified from "string-unified";
 
 let records = new WeakMap();
 
@@ -223,8 +224,11 @@ function stone(object) {
 }
 
 function length(container) {
-    if (isList(container) || isText(container)) {
+    if (isList(container)) {
         return number(container.length);
+    }
+    if (isText(container)) {
+        return number(unified.length(container));
     }
     error(`Property 'length' does not exist!`);
 }
