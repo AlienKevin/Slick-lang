@@ -185,13 +185,7 @@ export class Scanner {
         }
 
         const text = this.source.substring(this.start, this.current);
-        if (text === "true") {
-            this.addToken(TokenType.TRUE, text);
-        } else if (text === "false") {
-            this.addToken(TokenType.FALSE, text);
-        } else {
-            this.addToken(TokenType.IDENTIFIER, text);
-        }
+        this.addToken(TokenType.IDENTIFIER, text);
     }
 
     private string() {
