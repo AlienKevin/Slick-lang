@@ -177,7 +177,7 @@ export class Scanner {
     }
 
     private identifier() {
-        while (isAlphaNumeric(this.peek()) || (isSingleSpace(this.peek()) && isAlphaNumeric(this.peekNext()))) {
+        while (isAlphaNumeric(this.peek()) || (isSingleSpace(this.peek()) && isAlpha(this.peekNext()))) {
             this.advance();
         }
         if (!isSingleSpace(this.previous()) && this.peek() === '?') {
