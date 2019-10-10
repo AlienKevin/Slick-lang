@@ -188,17 +188,20 @@ export class Parser {
         let indentStack = [INDENT]; // push the first indent
         while (indentStack.length > 0 && !this.isAtEnd()) {
             this.prelude();
+            let result;
             if (this.check(INDENT)) { // a nested block
-                statements.push(this.block());
+                result = this.block();
             } else if (this.check(DEDENT)) {
                 indentStack.pop();
             } else if (this.match(BREAK)) { // break statement
-                statements.push(this.breakStatement());
+                result = this.breakStatement();
             } else {
-                statements.push(this.declaration());
+                result = this.declaration();
+            }
+            if (result !== undefined) {
+                statements.push(result);
             }
         }
-        // console.log(statements);
         this.consume([DEDENT, EOF], "Expect dedentation or EOF after block!");
         return new Block(statements);
     }
