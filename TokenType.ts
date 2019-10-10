@@ -44,11 +44,9 @@ export enum TokenType {
     AND = "AND",
     ELSE = "ELSE",
     ELIF = "ELIF",
-    FALSE = "FALSE",
     IF = "IF",
     OR = "OR",
     RETURN = "RETURN",
-    TRUE = "TRUE",
     WHILE = "WHILE",
     BREAK = "BREAK",
     MUT = "MUT",
@@ -56,9 +54,6 @@ export enum TokenType {
     F = "F",
     CALL = "CALL",
     LET = "LET",
-
-    // bottom type
-    NULL = "NULL",
 
     // End of File
     EOF = "EOF"
