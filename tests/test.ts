@@ -11,43 +11,60 @@ const source = new Map([
 ],
 [
 `var exit: f (final value)
-    let element nr: 0
+    var element nr: 0
     return final value`,
     
 `var exit = $SLK.stone(function (final_value) {
-    element_nr = $SLK0;
+    var element_nr = $SLK0;
     return final_value;
 });`
 ],
 [
-`while element nr ≥ 0
+`var element nr: 10
+var callback function: f (reduction, element, element nr, exit)
+    # function details omitted
+    return null
+while element nr ≥ 0
     let element nr: element nr - 1
-    let reduction: callback function(
+    # fake some variables
+    var reduction: null
+    var array: null
+    var exit: null
+    call callback function(
         reduction
         array[element nr]
         element nr
         exit
     )`,
 
-`while ($SLK.ge(element_nr, $SLK0)){
+`var element_nr = $SLK10;
+var callback_function = $SLK.stone(function (reduction, element, element_nr, exit) {
+    return undefined;
+});
+while ($SLK.ge(element_nr, $SLK0)){
     element_nr = $SLK.sub(element_nr, $SLK1);
-    reduction = callback_function(reduction, $SLK.get(array, element_nr), element_nr, exit);
+    var reduction = undefined;
+    var array = undefined;
+    var exit = undefined;
+    callback_function(reduction, $SLK.get(array, element_nr), element_nr, exit);
 }`
 ],
 [
-`if my hero = 'monster'
-    call blood curdling scream()
+`var my hero: 'butterfly'
+if my hero = 'monster'
+    call print('blood curdling scream')
 elif my hero = 'butterfly'
-    call do not make a sound()
+    call print('do not make a sound')
 else
-    call sing like a rainbow()`,
+    call print('sing like a rainbow')`,
 
-`if ($SLK.eq(my_hero, "monster")){
-    blood_curdling_scream();
+`var my_hero = "butterfly";
+if ($SLK.eq(my_hero, "monster")){
+    $SLK.print("blood curdling scream");
 } else if ($SLK.eq(my_hero, "butterfly")){
-    do_not_make_a_sound();
+    $SLK.print("do not make a sound");
 } else {
-    sing_like_a_rainbow();
+    $SLK.print("sing like a rainbow");
 }`
 ],
 // records
@@ -70,16 +87,16 @@ else
 ],
 [
 
-`var a: {a: 32}`,
+`var a: {'one': 32}`,
 
 `var a = (function (o) {
-    $SLK.set(o, a, $SLK32);
+    $SLK.set(o, "one", $SLK32);
     return o;
 }(Object.create(null)));`
 ],
 [
 `var wala : {
-    some thing: true
+    'some thing': true
 }
 var three: {
     'a': 0.1
@@ -88,7 +105,7 @@ var three: {
 }`,
 
 `var wala = (function (o) {
-    $SLK.set(o, some_thing, true);
+    $SLK.set(o, "some thing", true);
     return o;
 }(Object.create(null)));
 var three = (function (o) {
@@ -99,9 +116,9 @@ var three = (function (o) {
 }(Object.create(null)));`
 ],
 [
-`var record: {}`,
+`var record1: {}`,
 
-`var record = (function (o) {
+`var record1 = (function (o) {
     return o;
 }(Object.create(null)));`
 ],
@@ -211,10 +228,14 @@ $SLK.print(a);`
 `var a = ((true && false) || (true && false));`
 ],
 [
-`if first boolean variable \\/ second boolean variable
+`var first boolean variable: true
+var second boolean variable: false
+if first boolean variable \\/ second boolean variable
     call print('Either the first or the second is true')`,
 
-`if (($SLK.assert_boolean(first_boolean_variable) || $SLK.assert_boolean(second_boolean_variable))){
+`var first_boolean_variable = true;
+var second_boolean_variable = false;
+if (($SLK.assert_boolean(first_boolean_variable) || $SLK.assert_boolean(second_boolean_variable))){
     $SLK.print("Either the first or the second is true");
 }`
 ],

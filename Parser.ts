@@ -4,6 +4,7 @@ import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, S
 import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
+import { Environment } from "./Environment";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -66,10 +67,36 @@ export const keywords = new Map([
 export class Parser {
     private loopDepth: number;
     private current: number;
+    private env: Environment;
 
     constructor(public tokens: Token[], private runner: Runner) {
         // stores the depth of loop and use it for break statements
         this.loopDepth = 0;
+        this.env = this.newEnv();
+        // declare primordials
+        const primordials = [
+            "abs",
+            "list",
+            "list?",
+            "boolean?",
+            "fraction",
+            "function?",
+            "integer",
+            "integer?",
+            "length",
+            "number",
+            "number?",
+            "print",
+            "record",
+            "record?",
+            "stone",
+            "stone?",
+            "text",
+            "text?",
+        ];
+        primordials.forEach((primordial) => {
+            this.env.declarePrimordial(primordial);
+        });
     }
 
     parse() {
@@ -90,6 +117,10 @@ export class Parser {
                 console.log(error);
             }
         }
+    }
+
+    newEnv(enclosing?: Environment) {
+        return new Environment(this.error.bind(this), enclosing);
     }
 
     prelude() {
@@ -145,7 +176,14 @@ export class Parser {
         let params = this.consumeParameters();
         this.consume(RIGHT_PAREN, `Expect ')' after function parameters!`);
         this.consume(NEWLINE, `Function body must be on a newline!`);
+        const enclosing = this.env;
+        // new function environment
+        this.env = this.newEnv(enclosing);
+        params.forEach((param) => {
+            this.env.declare(param.name, param.mutable);
+        })
         const body = this.block();
+        this.env = enclosing;
         return new Function(params, body);
     }
 
@@ -155,12 +193,12 @@ export class Parser {
             // arguments → expression ( "," expression )*
             do {
                 let mutable = true;
-            // get parameter name
+                // get parameter name
                 let name = this.consume(IDENTIFIER, "Expect a parameter name!");
-            params.push({
-                "mutable": mutable,
-                "name": name,
-            });
+                params.push({
+                    "mutable": mutable,
+                    "name": name,
+                });
             } while (
                 (
                     this.match(COMMA)
@@ -178,6 +216,8 @@ export class Parser {
         this.consume(COLON, `Variable '${nameToken.lexeme}' must be initialized when declared!`);
         const initializer: Expr = this.expression();
         this.endStmt("value");
+        const mutable = typeModifier === MUT;
+        this.env.declare(nameToken, mutable);
         return new VarDeclaration(nameToken, initializer, typeModifier);
     }
 
