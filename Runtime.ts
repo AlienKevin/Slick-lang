@@ -50,12 +50,14 @@ function checkNumber(n: any) {
     error(`List index must be a number!`)
 }
 
-function checkIndex(n: any, container: any[] | string) {
+function checkIndex(n: any, length: number) {
     let index = checkNumber(n);
-    const length = container.length;
+    if (!Number.isInteger(index)) {
+        error(`List index must be an integer!`);
+    }
     if (index >= length
         || index < -length) {
-        error(`List index ouside range from ${-length} to ${length - 1}!`)
+        error(`List index ouside range from ${-length} to ${length - 1}!`);
     } else {
         return (
             index >= 0
@@ -66,8 +68,12 @@ function checkIndex(n: any, container: any[] | string) {
 }
 
 function get(container, key) {
-    if (isList(container) || isText(container)) {
-        return checkIndex(key, container);
+    if (isList(container)) {
+        const index = checkIndex(key, container.length);
+        return container[index];
+    } else if (isText(container)) {
+        const index = checkIndex(key, unified.length(container));
+        return unified.charAt(container, index);
     }
     if (typeof container === "object") {
         if (isNumber(key)) {
@@ -92,7 +98,7 @@ function set(container, key, value) {
     }
     // set value of list
     if (isList(container)) {
-        container[checkIndex(key, container)] = value;
+        container[checkIndex(key, container.length)] = value;
     }
     // set key and value of record
     else if (typeof container === "object") {

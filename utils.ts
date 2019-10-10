@@ -18,7 +18,7 @@ export function isAlphaNumeric(char: string) {
     return isAlpha(char) || isDigit(char);
 }
 
-export function isList<T>(value: T[]): value is T[] {
+export function isList(value: any): value is any[] {
     return Array.isArray(value);
 }
 
