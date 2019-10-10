@@ -151,19 +151,23 @@ export class Parser {
 
     consumeParameters() {
         let params: Param[] = [];
-        while (!this.check(RIGHT_PAREN)) {
-            let mutable = false;
-            // optional mutable parameter
-            if (this.match(MUT)) {
-                mutable = true;
-            }
+        if (!this.check(RIGHT_PAREN)) { // has arguments
+            // arguments → expression ( "," expression )*
+            do {
+                let mutable = true;
             // get parameter name
-            let name: Token = null;
-            name = this.consume(IDENTIFIER, "Expect a parameter name!");
+                let name = this.consume(IDENTIFIER, "Expect a parameter name!");
             params.push({
                 "mutable": mutable,
                 "name": name,
             });
+            } while (
+                (
+                    this.match(COMMA)
+                    || this.match(SOFT_NEWLINE)
+                )
+                && !this.check(RIGHT_PAREN)
+            );
         }
         return params;
     }
