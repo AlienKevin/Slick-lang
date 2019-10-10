@@ -27,7 +27,6 @@ const primordial = $SLK.stone({
     "list": "$SLK.list",
     "list?": "Array.isArray",
     "boolean?": "$SLK.boolean_",
-    "false": "false",
     "fraction": "$SLK.fraction",
     "function?": "$SLK.function_",
     "integer": "$SLK.integer",
@@ -42,7 +41,6 @@ const primordial = $SLK.stone({
     "stone?": "Object.isFrozen",
     "text": "$SLK.text",
     "text?": "$SLK.text_",
-    "true": "true"
 });
 
 function makeSet(list: any[], value = true) {
