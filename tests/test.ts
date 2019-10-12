@@ -71,48 +71,48 @@ if ($SLK.eq(my_hero, "monster")){
 // records
 [
 `var obj: {
-    3: 3.230
-    'hello': {
-        'something': true
+    three: 3.230
+    hello: {
+        something: true
     }
 }`,
 
 `var obj = (function (o) {
-    $SLK.set(o, $SLK3, $SLK3_23);
-    $SLK.set(o, "hello", (function (o) {
-        $SLK.set(o, "something", true);
+    o["three"] = $SLK3_23;
+    o["hello"] = (function (o) {
+        o["something"] = true;
         return o;
-    }(Object.create(null))));
+    }(Object.create(null)));
     return o;
 }(Object.create(null)));`
 ],
 [
 
-`var a: {'one': 32}`,
+`var a: {one: 32}`,
 
 `var a = (function (o) {
-    $SLK.set(o, "one", $SLK32);
+    o["one"] = $SLK32;
     return o;
 }(Object.create(null)));`
 ],
 [
 `var wala : {
-    'some thing': true
+    some·thing: true
 }
 var three: {
-    'a': 0.1
-    'b': 'lala'
-    'a long var name': wala
+    a: 0.1
+    b: 'lala'
+    a·long·var·name: wala
 }`,
 
 `var wala = (function (o) {
-    $SLK.set(o, "some thing", true);
+    o["some·thing"] = true;
     return o;
 }(Object.create(null)));
 var three = (function (o) {
-    $SLK.set(o, "a", $SLK0_1);
-    $SLK.set(o, "b", "lala");
-    $SLK.set(o, "a long var name", wala);
+    o["a"] = $SLK0_1;
+    o["b"] = "lala";
+    o["a·long·var·name"] = wala;
     return o;
 }(Object.create(null)));`
 ],

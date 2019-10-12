@@ -70,7 +70,7 @@ export class ListLiteral extends Expr {
 	}
 }
 export class RecordLiteral extends Expr {
-	constructor(public keys: Expr[], public values: Expr[]) {
+	constructor(public keys: string[], public values: Expr[]) {
 		super();
 	}
 	accept(visitor: Visitor) {

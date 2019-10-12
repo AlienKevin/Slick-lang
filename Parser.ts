@@ -438,13 +438,13 @@ export class Parser {
             this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
             expr = new ListLiteral(list);
         } else if (this.match(LEFT_BRACE)) {
-            let keys: Expr[] = [];
+            let keys: string[] = [];
             let values: Expr[] = [];
             if (!this.check(RIGHT_BRACE)) { // has arguments
                 // arguments → expression ( "," expression )*
                 do {
-                    let key = this.expression();
-                    keys.push(key);
+                    let key = this.consume(IDENTIFIER, `Key must be a label, not an expression!`);
+                    keys.push(key.lexeme);
                     this.consume(COLON, `Expected ':' after map key!`);
                     const value = this.expression();
                     values.push(value);

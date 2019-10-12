@@ -334,23 +334,12 @@ export class CodeGenerator implements Visitor {
         + expr.keys.map((key, index) => {
             const value = expr.values[index];
             return padding + (
-                typeof key === "string"
-                ? (
-                    "o["
-                    + '"' + key + '"'
-                    + "] = "
-                    + this.expression(value)
-                    + ";"
-                )
-                : (
-                    "$SLK.set(o, "
-                    + this.expression(key)
-                    + ", "
-                    + this.expression(value)
-                    + ");"
-                    )
-                );
-            }).join("") + padding + "return o;";
+                "o["
+                + '"' + key + '"'
+                + "] = "
+                + this.expression(value)
+                + ";"
+            )}).join("") + padding + "return o;";
         this.outdent();
         return string + this.begin() + "}(Object.create(null)))";
     }

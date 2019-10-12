@@ -76,14 +76,7 @@ function get(container, key) {
         return unified.charAt(container, index);
     }
     if (typeof container === "object") {
-        if (isNumber(key)) {
-            key = key.toString();
-        }
-        const value = (
-            isText(key)
-            ? container[key]
-            : records.get(container).get(key)
-        );
+        const value = container[key];
         if (value === undefined) {
             error(`Record does not contain key ${key}!`);
         } else {
@@ -102,38 +95,7 @@ function set(container, key, value) {
     }
     // set key and value of record
     else if (typeof container === "object") {
-        // convert number key to string key for storage
-        if (isNumber(key)) {
-            key = key.toString();
-        }
-        // if key is null, delete the value in object
-        if (isNull(value)) {
-            delete container[key];
-        }
-        // if key is string, update object itself
-        else if (isText(key)) {
-            container[key] = value;
-        }
-        // otherwise update a weakmap associated with the key
-        else {
-            let record = records.get(container);
-            // create new record if not yet initialized
-            if (record === undefined) {
-                if (isNull(key)) {
-                    return;
-                }
-                record = new WeakMap();
-                records.set(container, record);
-            }
-            // update record
-            else {
-                if (isNull(key)) {
-                    record.delete(key);
-                } else {
-                    record.set(key, value);
-                }
-            }
-        }
+        container[key] = value;
     }
 }
 
