@@ -234,8 +234,17 @@ export class Parser {
             return this.whileStatement();
         } else if (this.match(RETURN)) {
             return this.returnStatement();
+        } else if (this.match(CALL)) {
+            return this.callStatement();
+        } else if (this.match(LET)) {
+            return this.assignStatement();
         }
-        return this.assignStatement();
+        // ignore blank lines
+        else if (this.match(NEWLINE)) {
+            return undefined;
+        } else {
+            throw this.error(this.peek(), `Expected a statement!`);
+        }
     }
 
     returnStatement() {
@@ -285,39 +294,31 @@ export class Parser {
         return new If(condition, thenBranch, undefined);
     }
 
-    assignStatement() {
-        // ignore blank lines or comment lines
-        if (this.match(NEWLINE)) {
-            return undefined;
-        }
+    callStatement() {
+        const keyword = this.previous();
+        const expr = this.expression();
         // call statement
-        if (this.match(CALL)) {
-            const keyword = this.previous();
-            const expr = this.expression();
-            // call statement
-            if (expr instanceof Call) {
-                this.endStmt("call");
-                return new CallStmt(expr);
-            } else {
-                throw this.error(keyword, `Expected a function call!`);
-            }
+        if (expr instanceof Call) {
+            this.endStmt("call");
+            return new CallStmt(expr);
+        } else {
+            throw this.error(keyword, `Expected a function call!`);
         }
-        // assignment statement
-        else if (this.match(LET)) {
-            const expr = this.expression();
-            const equal = this.consume(COLON, `Expected ':' after assignment target!`);
-            const value = this.expression();
-            this.endStmt("assignment");
-            if (expr instanceof Variable) {
-                const name = expr.name;
-                return new Assign(name, value);
-            } else if (expr instanceof Get) {
-                return new Set(expr.object, expr.name, value, expr.bracket);
-            } else {
-                throw this.error(equal, "Invalid assignment target!");
-            }
+    }
+
+    assignStatement() {
+        const expr = this.expression();
+        const equal = this.consume(COLON, `Expected ':' after assignment target!`);
+        const value = this.expression();
+        this.endStmt("assignment");
+        if (expr instanceof Variable) {
+            const name = expr.name;
+            return new Assign(name, value);
+        } else if (expr instanceof Get) {
+            return new Set(expr.object, expr.name, value, expr.bracket);
+        } else {
+            throw this.error(equal, "Invalid assignment target!");
         }
-        throw this.error(this.peek(), `Expected a statement!`);
     }
 
     // expression → assignment
