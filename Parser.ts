@@ -466,10 +466,6 @@ export class Parser {
             if (this.match(DOT)) {
                 const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
                 expr = new Get(expr, property);
-            } else if (this.match(LEFT_BRACKET)) {
-                const bracket = this.previous();
-                expr = new Get(expr, this.expression(), bracket);
-                this.consume(RIGHT_BRACKET, `Expect right ']' after arguments!`);
             } else if (this.groupMembers === 1) {
                 // maybe start of a function call
                 if (this.previous().type === IDENTIFIER) {

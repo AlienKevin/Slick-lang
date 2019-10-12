@@ -33,7 +33,7 @@ while element·nr ≥ 0
     call (
         callback·function
         reduction
-        array[element·nr]
+        array
         element·nr
         exit
     )`,
@@ -47,7 +47,7 @@ while ($SLK.ge(element_nr, $SLK0)){
     var reduction = undefined;
     var array = undefined;
     var exit = undefined;
-    callback_function(reduction, $SLK.get(array, element_nr), element_nr, exit);
+    callback_function(reduction, array, element_nr, exit);
 }`
 ],
 [
@@ -124,9 +124,9 @@ var three = (function (o) {
 }(Object.create(null)));`
 ],
 [
-`var a: [1, 2, '3'][0]`,
+`var a: [1, 2, '3']`,
 
-`var a = $SLK.get([$SLK1, $SLK2, "3"], $SLK0);`
+`var a = [$SLK1, $SLK2, "3"];`
 ],
 [
 `var a: []`,
