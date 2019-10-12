@@ -86,7 +86,7 @@ export class Function extends Expr {
 	}
 }
 export class Get extends Expr {
-	constructor(public object: Expr, public name: Token | Expr, public bracket?: Token) {
+	constructor(public object: Expr, public name: Token, public bracket?: Token) {
 		super();
 	}
 	accept(visitor: Visitor) {

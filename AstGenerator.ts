@@ -22,7 +22,7 @@ const exprDescriptions = {
     "ListLiteral": ["list: Expr[]"],
     "RecordLiteral": ["keys: string[]", "values: Expr[]"],
     "Function": ["params: Param[]", "body: Block"],
-    "Get": ["object: Expr", "name: Token | Expr", "bracket?: Token"],
+    "Get": ["object: Expr", "name: Token", "bracket?: Token"],
     "Set": ["object: Expr", "name: Token | Expr", "value: Expr", "bracket?: Token"],
 };
 

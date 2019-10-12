@@ -117,6 +117,20 @@ var three = (function (o) {
 }(Object.create(null)));`
 ],
 [
+`var three: {
+    a: 0.1
+    b: 'lala'
+}
+call print three.a`,
+
+`var three = (function (o) {
+    o["a"] = $SLK0_1;
+    o["b"] = "lala";
+    return o;
+}(Object.create(null)));
+$SLK.print($SLK.get(three, "a"));`
+],
+[
 `var record1: {}`,
 
 `var record1 = (function (o) {
