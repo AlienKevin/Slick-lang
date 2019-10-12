@@ -138,7 +138,7 @@ export class CodeGenerator implements Visitor {
         return (
             reserved[name] === true
             ? "$SLK" + name
-            : name.replace(/[\u0020?]/g, "_")
+            : name.replace(/[\u00B7?]/g, "_")
         );
     }
 

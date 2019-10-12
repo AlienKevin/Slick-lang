@@ -1,8 +1,15 @@
 import { Decimal } from "decimal.js";
 import { TokenType } from "./TokenType";
 import { Token } from "./Token";
-import { isDigit, isAlpha, isAlphaNumeric, isSpace as isSingleSpace } from "./utils";
+import { isDigit, isAlpha, isAlphaNumeric, isMiddot } from "./utils";
 import { Runner } from "./Runner";
+
+const reservedWords = new Map([
+    ["true", TokenType.TRUE],
+    ["false", TokenType.FALSE],
+    ["null", TokenType.NULL],
+    ["f", TokenType.F],
+])
 
 export class Scanner {
 
@@ -177,17 +184,23 @@ export class Scanner {
     }
 
     private identifier() {
-        while (isAlphaNumeric(this.peek()) || (isSingleSpace(this.peek()) && isAlpha(this.peekNext()))) {
+        while (isAlphaNumeric(this.peek())
+            || (isMiddot(this.peek()) && isAlpha(this.peekNext()))) {
             this.advance();
         }
-        if (!isSingleSpace(this.previous()) && this.peek() === '?') {
+        if (!isMiddot(this.previous()) && this.peek() === '?') {
             this.advance();
         }
 
         const text = this.source.substring(this.start, this.current);
-        this.addToken(TokenType.IDENTIFIER, text);
-    }
-
+        const type = reservedWords.get(text);
+        if (type !== undefined) {
+            this.addToken(type, text);
+        } else {
+            this.addToken(TokenType.IDENTIFIER, text);
+        }
+    } 
+    
     private string() {
         let foundDoubleSlash = false;
         let value = "";

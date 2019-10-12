@@ -5,10 +5,6 @@ export function isDigit(char: string) {
     return /^\d$/.test(char);
 }
 
-export function isSpace(char: string) {
-    return char === ' ';
-}
-
 // Based on: https://stackoverflow.com/a/4434100/6798201
 export function isAlpha(char: string) {
     return /^[a-z_]$/i.test(char);
@@ -16,6 +12,12 @@ export function isAlpha(char: string) {
 
 export function isAlphaNumeric(char: string) {
     return isAlpha(char) || isDigit(char);
+}
+
+export function isMiddot(char: string) {
+    // unicode mid point or interpunct character: "·"
+    // wikipedia: https://www.wikiwand.com/en/Interpunct
+    return char === "\u00B7";
 }
 
 export function isList(value: any): value is any[] {

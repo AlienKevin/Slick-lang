@@ -49,8 +49,11 @@ const LET = TokenType.LET;
 const EOF =TokenType.EOF;
 const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
+const TRUE = TokenType.TRUE;
+const FALSE = TokenType.FALSE;
+const NULL = TokenType.NULL;
 
-export const keywords = new Map([
+const keywords = new Map([
     ["if", TokenType.IF],
     ["elif", TokenType.ELIF],
     ["else", TokenType.ELSE],
@@ -59,7 +62,6 @@ export const keywords = new Map([
     ["return", TokenType.RETURN],
     ["mut", TokenType.MUT],
     ["var", TokenType.VAR],
-    ["f", TokenType.F],
     ["call", TokenType.CALL],
     ["let", TokenType.LET],
 ]);
@@ -125,29 +127,8 @@ export class Parser {
 
     prelude() {
         const text = this.peek().lexeme;
-        const spaceIndex = text.indexOf(" ");
-        // extract out the first keyword of words
-        if (spaceIndex > 0) {
-            const firstWord = text.slice(0, spaceIndex);
-            const type = keywords.get(firstWord);
-            // first word is a keyword
-            if (type !== undefined) {
-                this.peek().type = type;
-                this.peek().lexeme = firstWord;
-                const restWords = text.slice(spaceIndex + 1);
-                const restToken = new Token(
-                    TokenType.IDENTIFIER,
-                    restWords,
-                    undefined,
-                    this.peek().line,
-                    this.peek().index + spaceIndex + 1
-                    );
-                this.tokens.splice(this.current + 1, 0, restToken);
-            }
-        }
-        // single word keyword
-        else if (keywords.get(text) !== undefined) {
-            this.tokens[this.current].type = keywords.get(text);
+        if (this.peek().type === IDENTIFIER && keywords.get(text) !== undefined) {
+            this.peek().type = keywords.get(text);
         }
     }
 
@@ -345,11 +326,7 @@ export class Parser {
     }
 
     funcExpr() {
-        if (
-            this.peek().type === TokenType.IDENTIFIER
-            && this.peek().lexeme === "f"
-        ) {
-            this.advance();
+        if (this.match(F)) {
             return this.func();
         }
         return this.ternary();
@@ -530,6 +507,15 @@ export class Parser {
         if (this.match(NUMBER, STRING)) {
             return new Literal(this.previous().literal);
         }
+        if (this.match(TRUE)) {
+            return new Literal(true);
+        }
+        if (this.match(FALSE)) {
+            return new Literal(false);
+        }
+        if (this.match(NULL)) {
+            return new Literal(undefined);
+        }
         if (this.match(LEFT_PAREN)) {
             const expr = this.expression();
             this.consume(RIGHT_PAREN, "Expect ')' after expression!");
@@ -538,14 +524,6 @@ export class Parser {
         if (this.match(IDENTIFIER)) {
             const name = this.previous();
             if (!this.env.lookup(name)) {
-                switch (name.lexeme) {
-                    case "true":
-                        return new Literal(true);
-                    case "false":
-                        return new Literal(false);
-                    case "null":
-                        return new Literal(undefined);
-                }
                 throw this.error(name, `Variable '${name.lexeme}' is not declared!`);
             }
             return new Variable(name);

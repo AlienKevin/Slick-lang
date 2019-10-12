@@ -5,14 +5,14 @@ const source = new Map([
 `$SLK.print($SLK3e_10);`
 ],
 [
-`var my simple name of a variable: 'a string 📆🤞🌈'`,
+`var my·simple·name·of·a·variable: 'a string 📆🤞🌈'`,
 
 `var my_simple_name_of_a_variable = "a string 📆🤞🌈";`
 ],
 [
-`var exit: f (final value)
-    var element nr: 0
-    return final value`,
+`var exit: f (final·value)
+    var element·nr: 0
+    return final·value`,
     
 `var exit = $SLK.stone(function (final_value) {
     var element_nr = $SLK0;
@@ -20,20 +20,20 @@ const source = new Map([
 });`
 ],
 [
-`var element nr: 10
-var callback function: f (reduction, element, element nr, exit)
+`var element·nr: 10
+var callback·function: f (reduction, element, element·nr, exit)
     # function details omitted
     return null
-while element nr ≥ 0
-    let element nr: element nr - 1
+while element·nr ≥ 0
+    let element·nr: element·nr - 1
     # fake some variables
     var reduction: null
     var array: null
     var exit: null
-    call callback function(
+    call callback·function(
         reduction
-        array[element nr]
-        element nr
+        array[element·nr]
+        element·nr
         exit
     )`,
 
@@ -50,10 +50,10 @@ while ($SLK.ge(element_nr, $SLK0)){
 }`
 ],
 [
-`var my hero: 'butterfly'
-if my hero = 'monster'
+`var my·hero: 'butterfly'
+if my·hero = 'monster'
     call print('blood curdling scream')
-elif my hero = 'butterfly'
+elif my·hero = 'butterfly'
     call print('do not make a sound')
 else
     call print('sing like a rainbow')`,
@@ -228,9 +228,9 @@ $SLK.print(a);`
 `var a = ((true && false) || (true && false));`
 ],
 [
-`var first boolean variable: true
-var second boolean variable: false
-if first boolean variable \\/ second boolean variable
+`var first·boolean·variable: true
+var second·boolean·variable: false
+if first·boolean·variable \\/ second·boolean·variable
     call print('Either the first or the second is true')`,
 
 `var first_boolean_variable = true;
@@ -250,15 +250,6 @@ call print('a')`,
 $SLK.print("a");`
 ],
 // using keyword as identifier
-[
-`var let var if: 3
-let let var if: let var if + 1
-call print(let var if)`,
-
-`var let_var_if = $SLK3;
-let_var_if = $SLK.add(let_var_if, $SLK1);
-$SLK.print(let_var_if);`
-],
 [
 `var var: 3
 call print(var)`,
