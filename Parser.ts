@@ -70,6 +70,7 @@ export class Parser {
     private loopDepth: number;
     private current: number;
     private env: Environment;
+    private groupMembers = 0;
 
     constructor(public tokens: Token[], private runner: Runner) {
         // stores the depth of loop and use it for break statements
@@ -301,6 +302,9 @@ export class Parser {
         if (expr instanceof Call) {
             this.endStmt("call");
             return new CallStmt(expr);
+        } else if (expr instanceof Grouping && expr.expression instanceof Call) {
+            this.endStmt("call");
+            return new CallStmt(expr.expression);
         } else {
             throw this.error(keyword, `Expected a function call!`);
         }
@@ -425,12 +429,12 @@ export class Parser {
         return expr;
     }
 
-    // call  → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+    // call  → primary ( arguments? | "." IDENTIFIER )* ;
     //       → "[" arguments? "]"
     call(required = false) {
         let expr: Expr;
         if (this.match(LEFT_BRACKET)) {
-            const list = this.getCommaSeparatedList(TokenType.RIGHT_BRACKET);
+            const list = this.getList(TokenType.RIGHT_BRACKET, COMMA);
             this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
             expr = new ListLiteral(list);
         } else if (this.match(LEFT_BRACE)) {
@@ -456,48 +460,76 @@ export class Parser {
             expr = new RecordLiteral(keys, values);
         } else {
             expr = this.primary();
+            this.groupMembers ++;
         }
-        let invokations = 0;
         while (true) {
-            if (this.match(LEFT_PAREN)) {
-                expr = this.finishCall(expr);
-            } else if (this.match(DOT)) {
+            if (this.match(DOT)) {
                 const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
                 expr = new Get(expr, property);
             } else if (this.match(LEFT_BRACKET)) {
                 const bracket = this.previous();
                 expr = new Get(expr, this.expression(), bracket);
                 this.consume(RIGHT_BRACKET, `Expect right ']' after arguments!`);
-            } else {
-                if (required && invokations === 0) {
-                    throw this.error(this.peek(), `Expected invokation after callee!`);
+            } else if (this.groupMembers === 1) {
+                // maybe start of a function call
+                if (this.previous().type === IDENTIFIER) {
+                    const funcName: Token = this.previous();
+                    let argumentList = this.getArgumentList();
+                    if (argumentList.length === 0) {
+                        if (required) {
+                            throw this.error(this.peek(), `Expected invokation after callee!`);
+                        }
+                    } else {
+                        expr = new Call(expr, funcName, argumentList);
+                    }
+                // a normal expression
+                } else {
+                    this.groupMembers = 0;
                 }
                 break;
+            } else {
+                break;
             }
-            invokations ++;
         }
         return expr;
     }
 
-    finishCall(callee: Expr) {
-        const leftParen: Token = this.previous();
-        let argumentList = this.getCommaSeparatedList(TokenType.RIGHT_PAREN);
-        this.consume(TokenType.RIGHT_PAREN, `Expect ')' after arguments!`);
-        return new Call(callee, leftParen, argumentList);
+    checkLiteral() {
+        const literals = [
+            TRUE,
+            FALSE,
+            NULL,
+            STRING,
+            NUMBER,
+            IDENTIFIER,
+        ];
+        // check if current token is the begining
+        // of a literal value
+        return this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN);
     }
 
-    getCommaSeparatedList(endTokenType: TokenType) {
+    // argumentList → expression*
+    getArgumentList() {
         let list: Expr[] = [];
-        if (!this.check(endTokenType)) { // has arguments
-            // arguments → expression ( "," expression )*
+        while (this.checkLiteral()) {
+            list.push(this.expression());
+        }
+        this.groupMembers = 0;
+        return list;
+    }
+
+    getList(endTokenType: TokenType, separator: TokenType) {
+        let list: Expr[] = [];
+        if (!this.check(endTokenType, NEWLINE, EOF)) { // have list elements
+            // list → expression ( SEPARATOR expression )*
             do {
                 list.push(this.expression());
             } while (
                 (
-                    this.match(COMMA)
+                    this.match(separator)
                     || this.match(SOFT_NEWLINE)
                 )
-                && !this.check(endTokenType)
+                && !this.check(endTokenType, NEWLINE, EOF)
             );
         }
         return list;
@@ -518,8 +550,11 @@ export class Parser {
             return new Literal(undefined);
         }
         if (this.match(LEFT_PAREN)) {
+            const enclosingGroupMembers = this.groupMembers;
+            this.groupMembers = 0;
             const expr = this.expression();
             this.consume(RIGHT_PAREN, "Expect ')' after expression!");
+            this.groupMembers = enclosingGroupMembers;
             return new Grouping(expr);
         }
         if (this.match(IDENTIFIER)) {

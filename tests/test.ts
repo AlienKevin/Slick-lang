@@ -1,6 +1,6 @@
 const source = new Map([
 [
-`call print(3e-10)`,
+`call print 3e-10`,
 
 `$SLK.print($SLK3e_10);`
 ],
@@ -30,7 +30,8 @@ while element·nr ≥ 0
     var reduction: null
     var array: null
     var exit: null
-    call callback·function(
+    call (
+        callback·function
         reduction
         array[element·nr]
         element·nr
@@ -52,11 +53,11 @@ while ($SLK.ge(element_nr, $SLK0)){
 [
 `var my·hero: 'butterfly'
 if my·hero = 'monster'
-    call print('blood curdling scream')
+    call print 'blood curdling scream'
 elif my·hero = 'butterfly'
-    call print('do not make a sound')
+    call print 'do not make a sound'
 else
-    call print('sing like a rainbow')`,
+    call print 'sing like a rainbow'`,
 
 `var my_hero = "butterfly";
 if ($SLK.eq(my_hero, "monster")){
@@ -161,10 +162,10 @@ var three = (function (o) {
 [
 `var a: 3 #comment1
 #comment2
-call print(a)`,
+call print (a)`,
 
 `var a = $SLK3;
-$SLK.print(a);`
+$SLK.print((a));`
 ],
 [
 `
@@ -231,7 +232,7 @@ $SLK.print(a);`
 `var first·boolean·variable: true
 var second·boolean·variable: false
 if first·boolean·variable \\/ second·boolean·variable
-    call print('Either the first or the second is true')`,
+    call print 'Either the first or the second is true'`,
 
 `var first_boolean_variable = true;
 var second_boolean_variable = false;
@@ -241,8 +242,8 @@ if (($SLK.assert_boolean(first_boolean_variable) || $SLK.assert_boolean(second_b
 ],
 [
 `var a: f ()
-    call print('b')
-call print('a')`,
+    call print 'b'
+call print 'a'`,
 
 `var a = $SLK.stone(function () {
     $SLK.print("b");
@@ -252,7 +253,7 @@ $SLK.print("a");`
 // using keyword as identifier
 [
 `var var: 3
-call print(var)`,
+call print var`,
 
 `var $SLKvar = $SLK3;
 $SLK.print($SLKvar);`
