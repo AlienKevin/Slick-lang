@@ -85,33 +85,6 @@ function get(container, key) {
     }
 }
 
-function set(container, key, value) {
-    if (Object.isFrozen(container)) {
-        error(`Cannot set value of a stoned object!`);
-    }
-    // set value of list
-    if (isList(container)) {
-        container[checkIndex(key, container.length)] = value;
-    }
-    // set key and value of record
-    else if (typeof container === "object") {
-        container[key] = value;
-    }
-}
-
-function list(zeroth, oneth, ...rest) {
-    if (isList(zeroth)) {
-        return zeroth.slice(checkNumber(oneth), checkNumber(rest[0]));
-    }
-    if (typeof zeroth === "object") {
-        return Object.keys(zeroth);
-    }
-    if (isText(zeroth)) {
-        return zeroth.split(oneth || "");
-    }
-    error(`Invalid arguments for list()`);
-}
-
 function number(n) {
     if (isBoolean(n)) {
         return (
@@ -128,46 +101,9 @@ function number(n) {
     return number;
 }
 
-function record(zeroth, oneth) {
-    const newRecord = Object.create(null);
-    if (zeroth === undefined) {
-        return newRecord;
-    }
-    if (isList(zeroth)) {
-        if (oneth === undefined) {
-            oneth = true;
-        }
-        zeroth.forEach((element, index) => {
-            set(
-                newRecord,
-                element,
-                (
-                    isList(oneth)
-                    ? oneth[index]
-                    : oneth
-                )
-            )
-        });
-    }
-    return newRecord;
-}
-
-function text(zeroth, oneth, twoth) {
-    if (isText(zeroth)) {
-        return zeroth.slice(checkNumber(oneth), checkNumber(twoth));
-    }
+function text(zeroth) {
     if (isNumber(zeroth)) {
         return zeroth.toString();
-    }
-    if (isList(zeroth)) {
-        let separator = oneth;
-        if (!isText(oneth)) {
-            if (oneth !== undefined) {
-                error(`Separator must be a string!`);
-            }
-            separator = "";
-        }
-        return zeroth.join(separator);
     }
     if (isBoolean(zeroth)) {
         return String(zeroth);
@@ -369,7 +305,6 @@ export default stone({
     abs,
     add,
     and,
-    list,
     assert_boolean,
     boolean_,
     div,
@@ -394,9 +329,7 @@ export default stone({
     number_,
     or,
     print,
-    record,
     record_,
-    set,
     stone,
     sub,
     ternary,

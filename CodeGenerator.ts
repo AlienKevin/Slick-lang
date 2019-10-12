@@ -24,7 +24,6 @@ const reserved = makeSet([
 
 const primordial = $SLK.stone({
     "abs": "$SLK.abs",
-    "list": "$SLK.list",
     "list?": "Array.isArray",
     "boolean?": "$SLK.boolean_",
     "fraction": "$SLK.fraction",
@@ -35,10 +34,7 @@ const primordial = $SLK.stone({
     "number": "$SLK.make",
     "number?": "$SLK.is_decimal",
     "print": "$SLK.print",
-    "record": "$SLK.record",
     "record?": "$SLK.record_",
-    "stone": "$SLK.stone",
-    "stone?": "Object.isFrozen",
     "text": "$SLK.text",
     "text?": "$SLK.text_",
 });
