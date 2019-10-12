@@ -133,9 +133,7 @@ $SLK.print($SLK.get(three, "a"));`
 [
 `var record1: {}`,
 
-`var record1 = (function (o) {
-    return o;
-}(Object.create(null)));`
+`var record1 = Object.create(null);`
 ],
 [
 `var a: [1, 2, '3']`,

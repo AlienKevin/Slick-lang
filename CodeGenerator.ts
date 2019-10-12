@@ -324,20 +324,24 @@ export class CodeGenerator implements Visitor {
     }
 
     visitRecordLiteralExpr(expr: RecordLiteral) {
-        this.indent();
-        const padding = this.begin();
-        const string = "(function (o) {"
-        + expr.keys.map((key, index) => {
-            const value = expr.values[index];
-            return padding + (
-                "o["
-                + '"' + key + '"'
-                + "] = "
-                + this.expression(value)
-                + ";"
-            )}).join("") + padding + "return o;";
-        this.outdent();
-        return string + this.begin() + "}(Object.create(null)))";
+        if (expr.keys.length === 0) {
+            return "Object.create(null)";
+        } else {
+            this.indent();
+            const padding = this.begin();
+            const string = "(function (o) {"
+            + expr.keys.map((key, index) => {
+                const value = expr.values[index];
+                return padding + (
+                    "o["
+                    + '"' + key + '"'
+                    + "] = "
+                    + this.expression(value)
+                    + ";"
+                )}).join("") + padding + "return o;";
+            this.outdent();
+            return string + this.begin() + "}(Object.create(null)))";
+        }
     }
 
     visitFunctionExpr(expr: Function) {
