@@ -31,6 +31,7 @@ const primordial = $SLK.stone({
     "integer": "$SLK.integer",
     "integer?": "$SLK.integer_",
     "length": "$SLK.length",
+    "mod": "$SLK.mod",
     "number": "$SLK.make",
     "number?": "$SLK.is_decimal",
     "print": "$SLK.print",
@@ -98,6 +99,7 @@ export class CodeGenerator implements Visitor {
         "MINUS": "$SLK.sub",
         "STAR": "$SLK.mul",
         "SLASH": "$SLK.div",
+        "MODULO": "$SLK.mod",
     });
 
     public generateCode(stmts: Stmt[], generateFrontMatters = true) {

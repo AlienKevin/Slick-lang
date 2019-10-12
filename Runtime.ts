@@ -263,6 +263,10 @@ function div(a, b) {
     return calc("div", a, b);
 }
 
+function mod(a, b) {
+    return calc("mod", a, b);
+}
+
 function max(a, b) {
     return (
         lt(b, a)
@@ -321,6 +325,7 @@ export default stone({
     lt,
     max,
     min,
+    mod,
     mul,
     ne,
     neg,
