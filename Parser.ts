@@ -1,5 +1,4 @@
 import { TokenType } from "./TokenType";
-import { Param } from "./interfaces/Param";
 import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function, ListLiteral, RecordLiteral } from "./Expr";
 import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
@@ -150,44 +149,28 @@ export class Parser {
         }
     }
 
-    // sample partial function declaration:
-    // (m, n)       // parameters
-    //     print(n) // function body
     func() {
-        this.consume(LEFT_PAREN, `Expect '(' after 'f' keyword!`);
         let params = this.consumeParameters();
-        this.consume(RIGHT_PAREN, `Expect ')' after function parameters!`);
-        this.consume(NEWLINE, `Function body must be on a newline!`);
         const enclosing = this.env;
         // new function environment
         this.env = this.newEnv(enclosing);
+            const mutable = false;
         params.forEach((param) => {
-            this.env.declare(param.name, param.mutable);
+                this.env.declare(param, mutable);
         })
-        const body = this.block();
+        const body = (
+            this.match(NEWLINE)
+            ? this.block()
+            : this.expression()
+        );
         this.env = enclosing;
         return new Function(params, body);
     }
 
     consumeParameters() {
-        let params: Param[] = [];
-        if (!this.check(RIGHT_PAREN)) { // has arguments
-            // arguments → expression ( "," expression )*
-            do {
-                let mutable = true;
-                // get parameter name
-                let name = this.consume(IDENTIFIER, "Expect a parameter name!");
-                params.push({
-                    "mutable": mutable,
-                    "name": name,
-                });
-            } while (
-                (
-                    this.match(COMMA)
-                    || this.match(SOFT_NEWLINE)
-                )
-                && !this.check(RIGHT_PAREN)
-            );
+        let params: Token[] = [];
+        while (this.match(IDENTIFIER)) {
+            params.push(this.previous());
         }
         return params;
     }

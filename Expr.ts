@@ -1,6 +1,5 @@
 import {Visitor} from "./interfaces/Visitor";
 import {Token} from "./Token"
-import {Param} from "./interfaces/Param";
 import {Block} from "./Stmt";
 export abstract class Expr {
     abstract accept(visitor: Visitor): any;
@@ -78,7 +77,7 @@ export class RecordLiteral extends Expr {
 	}
 }
 export class Function extends Expr {
-	constructor(public params: Param[], public body: Block) {
+	constructor(public params: Token[], public body: Block | Expr) {
 		super();
 	}
 	accept(visitor: Visitor) {

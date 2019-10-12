@@ -21,7 +21,7 @@ const exprDescriptions = {
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
     "ListLiteral": ["list: Expr[]"],
     "RecordLiteral": ["keys: string[]", "values: Expr[]"],
-    "Function": ["params: Param[]", "body: Block"],
+    "Function": ["params: Token[]", "body: Block | Expr"],
     "Get": ["object: Expr", "name: Token", "bracket?: Token"],
     "Set": ["object: Expr", "name: Token | Expr", "value: Expr", "bracket?: Token"],
 };
@@ -33,7 +33,6 @@ function createExpr() {
     const parentClassName = "Expr";
     const imports = 
 `import {Token} from "./Token"
-import {Param} from "./interfaces/Param";
 import {Block} from "./Stmt";\n`;
     createAst(filePath, parentClassName, descriptions, imports);
 }

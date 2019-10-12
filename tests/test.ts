@@ -10,7 +10,7 @@ const source = new Map([
 `var my_simple_name_of_a_variable = "a string 📆🤞🌈";`
 ],
 [
-`var exit: f (final·value)
+`var exit: f final·value
     var element·nr: 0
     return final·value`,
     
@@ -21,7 +21,7 @@ const source = new Map([
 ],
 [
 `var element·nr: 10
-var callback·function: f (reduction, element, element·nr, exit)
+var callback·function: f reduction element element·nr exit
     # function details omitted
     return null
 while element·nr ≥ 0
@@ -252,16 +252,6 @@ if (($SLK.assert_boolean(first_boolean_variable) || $SLK.assert_boolean(second_b
     $SLK.print("Either the first or the second is true");
 }`
 ],
-[
-`var a: f ()
-    call print 'b'
-call print 'a'`,
-
-`var a = $SLK.stone(function () {
-    $SLK.print("b");
-});
-$SLK.print("a");`
-],
 // using keyword as identifier
 [
 `var var: 3
@@ -269,6 +259,26 @@ call print var`,
 
 `var $SLKvar = $SLK3;
 $SLK.print($SLKvar);`
+],
+// functions
+[
+`var foo: f a b
+    return a * b
+call print (foo 2 3)`,
+
+`var foo = $SLK.stone(function (a, b) {
+    return $SLK.mul(a, b);
+});
+$SLK.print((foo($SLK2, $SLK3)));`
+],
+[
+`var foo: f a b (
+    a * b
+)
+call print (foo 2 3)`,
+
+`var foo = $SLK.stone(function (a, b) {return ($SLK.mul(a, b))});
+$SLK.print((foo($SLK2, $SLK3)));`
 ]
 ]);
 import { test } from "./Tester";
