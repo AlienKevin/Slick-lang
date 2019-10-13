@@ -358,6 +358,12 @@ $SLK.print((foo($SLK2, $SLK3)));`
 `var a: 3 - 0.2e-10`,
 
 `var a = $SLK.sub($SLK3, $SLK2e_11);`
+],
+// pipe function
+[
+`var a: (pipe (f⋏ false) (f⋎ true) not) true`,
+
+`var a = ($SLK.pipe(($SLK.and(false)), ($SLK.or(true)), $SLK.not))(true);`
 ]
 ]);
 import { test } from "./Tester";

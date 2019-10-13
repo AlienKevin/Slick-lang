@@ -102,6 +102,7 @@ export class Parser {
 
             // modules
             "List",
+            "pipe"
         ];
         primordials.forEach((primordial) => {
             this.env.declarePrimordial(primordial);
@@ -438,7 +439,7 @@ export class Parser {
                 expr = new Get(expr, property);
             } else if (this.groupMembers === 1) {
                 // maybe start of a function call
-                if (expr instanceof Variable) {
+                if (this.maybeFunctionCall(expr)) {
                     const funcName: Token = this.previous();
                     let argumentList = this.getArgumentList();
                     if (argumentList.length === 0) {
@@ -458,6 +459,14 @@ export class Parser {
             }
         }
         return expr;
+    }
+
+    maybeFunctionCall(expr: Expr) {
+        return (
+            expr instanceof Variable
+            || (expr instanceof Function && expr.body instanceof Expr)
+            || expr instanceof Grouping
+        );
     }
 
     checkLiteral() {

@@ -39,6 +39,8 @@ function toString(any) {
     }
 }
 
+const pipe = R.pipe;
+
 function error(message: string) {
     throw new Error(message);
 }
@@ -176,13 +178,13 @@ function assert_boolean(boolean) {
     }
 }
 
-function and(zeroth, oneth) {
+const and = R.curry(function(zeroth, oneth) {
     return assert_boolean(zeroth) && assert_boolean(oneth);
-}
+});
 
-function or(zeroth, oneth) {
+const or = R.curry(function (zeroth, oneth) {
     return assert_boolean(zeroth) || assert_boolean(oneth);
-}
+});
 
 function not(boolean) {
     return !assert_boolean(boolean);
@@ -334,6 +336,7 @@ export default stone({
     number,
     number_,
     or,
+    pipe,
     print,
     record_,
     stone,
