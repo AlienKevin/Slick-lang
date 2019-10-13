@@ -180,7 +180,7 @@ export class Scanner {
 
     private identifier() {
         while (isAlphaNumeric(this.peek())
-            || (isMiddot(this.peek()) && isAlpha(this.peekNext()))) {
+            || (isMiddot(this.peek()) && isAlphaNumeric(this.peekNext()))) {
             this.advance();
         }
         if (!isMiddot(this.previous()) && this.previous() !== "f"
