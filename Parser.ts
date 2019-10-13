@@ -309,13 +309,6 @@ export class Parser {
 
     // expression → assignment
     expression() {
-        return this.funcExpr();
-    }
-
-    funcExpr() {
-        if (this.match(F)) {
-            return this.func();
-        }
         return this.ternary();
     }
 
@@ -441,7 +434,7 @@ export class Parser {
             this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
             expr = new RecordLiteral(keys, values);
         } else {
-            expr = this.primary();
+            expr = this.funcExpr();
             this.groupMembers ++;
         }
         while (true) {
@@ -450,7 +443,7 @@ export class Parser {
                 expr = new Get(expr, property);
             } else if (this.groupMembers === 1) {
                 // maybe start of a function call
-                if (this.previous().type === IDENTIFIER) {
+                if (expr instanceof Variable) {
                     const funcName: Token = this.previous();
                     let argumentList = this.getArgumentList();
                     if (argumentList.length === 0) {
@@ -483,7 +476,7 @@ export class Parser {
         ];
         // check if current token is the begining
         // of a literal value
-        return this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN);
+        return this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN, F);
     }
 
     // argumentList → expression*
@@ -511,6 +504,13 @@ export class Parser {
             );
         }
         return list;
+    }
+
+    funcExpr() {
+        if (this.match(F)) {
+                return this.func();
+        }
+        return this.primary();
     }
 
     // primary → NUMBER | STRING | "false" | "true" | "null" | "(" expression ")" | IDENTIFIER
