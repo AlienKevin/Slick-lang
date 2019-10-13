@@ -14,7 +14,7 @@ const RIGHT_BRACKET = TokenType.RIGHT_BRACKET;
 const BANG =TokenType.BANG;
 const QUESTION =TokenType.QUESTION;
 const COMMA =TokenType.COMMA;
-const DOT =TokenType.DOT;
+const TILDE =TokenType.TILDE;
 const MINUS =TokenType.MINUS;
 const PLUS =TokenType.PLUS;
 const SLASH =TokenType.SLASH;
@@ -436,7 +436,7 @@ export class Parser {
             this.groupMembers ++;
         }
         while (true) {
-            if (this.match(DOT)) {
+            if (this.match(TILDE)) {
                 const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
                 expr = new Get(expr, property);
             } else if (this.groupMembers === 1) {

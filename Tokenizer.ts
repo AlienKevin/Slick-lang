@@ -58,8 +58,8 @@ export class Scanner {
             case '{': this.addToken(TokenType.LEFT_BRACE); this.braceStack.push('{'); break;
             case '}': this.addToken(TokenType.RIGHT_BRACE); this.braceStack.pop(); break;
             case ',': this.addToken(TokenType.COMMA); break;
-            case '.': this.addToken(TokenType.DOT); break;
-            case '-': 
+            case '~': this.addToken(TokenType.TILDE); break;
+            case '-':
                 if (isDigit(this.peek())) {
                     this.advance();
                     this.number();
