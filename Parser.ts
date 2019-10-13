@@ -78,7 +78,6 @@ export class Parser {
         // declare primordials
         const primordials = [
             "abs",
-            "list",
             "list?",
             "boolean?",
             "fraction",
@@ -89,12 +88,12 @@ export class Parser {
             "number",
             "number?",
             "print",
-            "record",
             "record?",
-            "stone",
-            "stone?",
             "text",
             "text?",
+
+            // modules
+            "List",
         ];
         primordials.forEach((primordial) => {
             this.env.declarePrimordial(primordial);
@@ -152,12 +151,12 @@ export class Parser {
     func() {
         let params = this.consumeParameters();
         const enclosing = this.env;
-        // new function environment
-        this.env = this.newEnv(enclosing);
+            // new function environment
+            this.env = this.newEnv(enclosing);
             const mutable = false;
-        params.forEach((param) => {
+            params.forEach((param) => {
                 this.env.declare(param, mutable);
-        })
+            })
         const body = (
             this.match(NEWLINE)
             ? this.block()

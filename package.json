@@ -9,8 +9,10 @@
   },
   "dependencies": {
     "@types/node": "^12.7.8",
+    "@types/ramda": "^0.26.29",
     "decimal.js": "^10.2.0",
     "esm": "^3.2.25",
+    "ramda": "^0.26.1",
     "string-unified": "^2.0.0"
   },
   "author": "Kevin Li",

@@ -1,8 +1,7 @@
 import { isList, isNumber, isText, isBoolean, isNull } from "./utils";
 import Decimal from "decimal.js";
 import * as unified from "string-unified";
-
-let records = new WeakMap();
+import List from "./List";
 
 function print(any) {
     console.log(toString(any));
@@ -323,6 +322,7 @@ export default stone({
     le,
     length,
     lt,
+    List,
     max,
     min,
     mod,

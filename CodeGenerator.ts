@@ -38,6 +38,9 @@ const primordial = $SLK.stone({
     "record?": "$SLK.record_",
     "text": "$SLK.text",
     "text?": "$SLK.text_",
+
+    // modules
+    "List": "$SLK.List",
 });
 
 function makeSet(list: any[], value = true) {
