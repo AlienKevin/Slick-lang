@@ -7,7 +7,7 @@ const filter = R.filter;
 const reject = R.reject;
 const find = R.find;
 const reduce = R.reduce;
-const reduce_right = R.reduceRight;
+const reduce_last = R.reduceRight;
 const all = R.all;
 const any = R.any;
 const first = R.head;
@@ -37,7 +37,7 @@ export default {
     reject,
     find,
     reduce,
-    "reduce·right": reduce_right,
+    "reduce·last": reduce_last,
     all,
     any,
     first,
