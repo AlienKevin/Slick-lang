@@ -36,14 +36,6 @@ export class Literal extends Expr {
 		return visitor.visitLiteralExpr(this);
 	}
 }
-export class Unary extends Expr {
-	constructor(public operator: Token, public right: Expr) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitUnaryExpr(this);
-	}
-}
 export class Variable extends Expr {
 	constructor(public name: Token) {
 		super();

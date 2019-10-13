@@ -16,7 +16,6 @@ const exprDescriptions = {
     "Binary": ["left: Expr", "operator: Token", "right: Expr"],
     "Grouping": ["expression: Expr"],
     "Literal": ["value: any"],
-    "Unary": ["operator: Token", "right: Expr"],
     "Variable": ["name: Token"],
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
     "ListLiteral": ["list: Expr[]"],

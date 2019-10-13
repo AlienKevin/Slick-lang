@@ -5,7 +5,6 @@ export interface Visitor {
 	visitBinaryExpr(expr: Expr): any;
 	visitGroupingExpr(expr: Expr): any;
 	visitLiteralExpr(expr: Expr): any;
-	visitUnaryExpr(expr: Expr): any;
 	visitVariableExpr(expr: Expr): any;
 	visitCallExpr(expr: Expr): any;
 	visitListLiteralExpr(expr: Expr): any;

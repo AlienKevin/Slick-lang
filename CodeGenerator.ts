@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
-import { Ternary, Binary, Expr, Set, Get, Call, Unary, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "./Expr";
+import { Ternary, Binary, Expr, Set, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "./Expr";
 import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
@@ -31,6 +31,7 @@ const primordial = $SLK.stone({
     "integer": "$SLK.integer",
     "integer?": "$SLK.integer_",
     "length": "$SLK.length",
+    "neg": "$SLK.neg",
     "not": "$SLK.not",
     "number": "$SLK.make",
     "number?": "$SLK.is_decimal",
@@ -81,8 +82,6 @@ function isBooleanOperator(op) {
         return (
             op instanceof Binary
                 && booleanBinaryOperators[op.operator.lexeme] === true
-            // '!' logical negation
-            || op instanceof Unary && op.operator.lexeme === "!"
             // 'true' and 'false'
             || op instanceof Literal && typeof op.value === "boolean"
         );
@@ -305,10 +304,6 @@ export class CodeGenerator implements Visitor {
         }
     }
 
-    visitUnaryExpr(expr: Unary) {
-        return "$SLK.neg(" + this.expression(expr.right) + ")"
-    }
-    
     visitGetExpr(expr: Get) {
         return (
             "$SLK.get(" + this.expression(expr.object)

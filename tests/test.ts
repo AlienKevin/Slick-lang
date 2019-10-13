@@ -346,6 +346,18 @@ $SLK.print((foo($SLK2, $SLK3)));`
 `var a: not true`,
 
 `var a = $SLK.not(true);`
+],
+// negation function
+[
+`var a: neg -3`,
+
+`var a = $SLK.neg($SLK_3);`
+],
+// minus operator
+[
+`var a: 3 - 0.2e-10`,
+
+`var a = $SLK.sub($SLK3, $SLK2e_11);`
 ]
 ]);
 import { test } from "./Tester";

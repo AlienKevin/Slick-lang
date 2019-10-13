@@ -1,5 +1,5 @@
 import { TokenType } from "./TokenType";
-import { Expr, Binary, Grouping, Literal, Unary, Variable, Call, Ternary, Get, Set, Function, ListLiteral, RecordLiteral } from "./Expr";
+import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Set, Function, ListLiteral, RecordLiteral } from "./Expr";
 import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
@@ -91,6 +91,7 @@ export class Parser {
             "integer",
             "integer?",
             "length",
+            "neg",
             "not",
             "number",
             "number?",
@@ -389,24 +390,11 @@ export class Parser {
 
     // multiplication → unary(("/" | "*" | "%") unary) * ;
     multiplication() {
-        let expr = this.unary();
+        let expr = this.call();
         while (this.match(SLASH, STAR, MODULO)) {
             const operator = this.previous();
-            const right = this.unary();
+            const right = this.call();
             expr = new Binary(expr, operator, right);
-        }
-        return expr;
-    }
-
-    // unary → ("-") unary | primary;
-    unary() {
-        let expr: Expr;
-        if (this.match(MINUS)) {
-            const operator = this.previous();
-            const right = this.unary();
-            expr = new Unary(operator, right);
-        } else {
-            expr = this.call();
         }
         return expr;
     }
