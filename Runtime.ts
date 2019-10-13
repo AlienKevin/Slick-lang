@@ -42,7 +42,7 @@ function toString(any) {
 const pipe = R.pipe;
 
 function error(message: string) {
-    throw new Error(message);
+    throw message;
 }
 
 function checkNumber(n: any) {
