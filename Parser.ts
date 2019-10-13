@@ -466,6 +466,7 @@ export class Parser {
     maybeFunctionCall(expr: Expr) {
         return (
             expr instanceof Variable
+            || expr instanceof Get
             || (expr instanceof Function && expr.body instanceof Expr)
             || expr instanceof Grouping
         );
