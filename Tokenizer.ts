@@ -176,7 +176,8 @@ export class Scanner {
             || (isMiddot(this.peek()) && isAlpha(this.peekNext()))) {
             this.advance();
         }
-        if (!isMiddot(this.previous()) && this.peek() === '?') {
+        if (!isMiddot(this.previous()) && this.previous() !== "f"
+        && this.peek() === '?') {
             this.advance();
         }
 

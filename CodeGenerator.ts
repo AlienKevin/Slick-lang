@@ -39,6 +39,22 @@ const primordial = $SLK.stone({
     "text": "$SLK.text",
     "text?": "$SLK.text_",
 
+    // functinos
+    "f?!": "$SLK.ternary",
+    "f⋏": "$SLK.and",
+    "f⋎": "$SLK.or",
+    "f=": "$SLK.eq",
+    "f≠": "$SLK.ne",
+    "f<": "$SLK.lt",
+    "f≥": "$SLK.ge",
+    "f>": "$SLK.gt",
+    "f≤": "$SLK.le",
+    "f+": "$SLK.add",
+    "f-": "$SLK.sub",
+    "f*": "$SLK.mul",
+    "f/": "$SLK.div",
+    "f%": "$SLK.mod",
+
     // modules
     "List": "$SLK.List",
 });

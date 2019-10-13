@@ -65,6 +65,12 @@ const keywords = new Map([
     ["let", TokenType.LET],
 ]);
 
+const functinos = [
+    QUESTION, AND, OR, EQUAL, NOT_EQUAL,
+    LESS, GREATER_EQUAL, GREATER, LESS_EQUAL,
+    PLUS, MINUS, STAR, SLASH, MODULO
+];
+
 export class Parser {
     private loopDepth: number;
     private current: number;
@@ -508,7 +514,24 @@ export class Parser {
 
     funcExpr() {
         if (this.match(F)) {
+            // functinos
+            if (this.check(...functinos)) {
+                let start = this.previous();
+                let symbol = this.advance().lexeme;
+                if (symbol === "?") {
+                    if (this.match(BANG)) {
+                        symbol = "?!";
+                    } else {
+                        throw this.error(this.peek(), `Expected '!' after '?'!`);
+                    }
+                }
+                return new Variable(new Token(
+                    IDENTIFIER, "f" + symbol, undefined, start.line, start.index
+                ));
+            // function expression
+            } else {
                 return this.func();
+            }
         }
         return this.primary();
     }

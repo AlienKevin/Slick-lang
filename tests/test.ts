@@ -279,6 +279,67 @@ call print (foo 2 3)`,
 
 `var foo = $SLK.stone(function (a, b) {return ($SLK.mul(a, b))});
 $SLK.print((foo($SLK2, $SLK3)));`
+],
+// functinos
+[
+`var bool: f⋏ true false`,
+
+`var bool = $SLK.and(true, false);`
+],
+[
+`var bool: f⋎ false false`,
+
+`var bool = $SLK.or(false, false);`
+],
+[
+`var a: f+ 0.1 0.2`,
+
+`var a = $SLK.add($SLK0_1, $SLK0_2);`
+],
+[
+`var a: f- 0.1 0.2`,
+
+`var a = $SLK.sub($SLK0_1, $SLK0_2);`
+],
+[
+`var a: f* 0.1 0.2`,
+
+`var a = $SLK.mul($SLK0_1, $SLK0_2);`
+],
+[
+`var a: f/ 0.1 0.2`,
+
+`var a = $SLK.div($SLK0_1, $SLK0_2);`
+],
+[
+`var a: f% 0.1 0.2`,
+
+`var a = $SLK.mod($SLK0_1, $SLK0_2);`
+],
+[
+`var a: f= 'a' 'b'`,
+
+`var a = $SLK.eq("a", "b");`
+],
+[
+`var a: f≠ 'a' 'b'`,
+
+`var a = $SLK.ne("a", "b");`
+],
+[
+`var a: f< 'a' 'b'`,
+
+`var a = $SLK.lt("a", "b");`
+],
+[
+`var a: f≥ 'a' 'b'`,
+
+`var a = $SLK.ge("a", "b");`
+],
+[
+`var a: f> 'a' 'b'`,
+
+`var a = $SLK.gt("a", "b");`
 ]
 ]);
 import { test } from "./Tester";
