@@ -223,19 +223,19 @@ $SLK.print((a));`
 ],
 // logical connectives
 [
-`var a: true \\/ false`,
+`var a: true ⋎ false`,
 
 `var a = (true || false);`
 ],
 [
-`var a: true /\\ false`,
+`var a: true ⋏ false`,
 
 `var a = (true && false);`
 ],
 [
 `var a: (
-    true /\\ false \\/ true
-    /\\ false
+    true ⋏ false ⋎ true
+    ⋏ false
 )`,
 
 `var a = ((true && false) || (true && false));`
@@ -243,7 +243,7 @@ $SLK.print((a));`
 [
 `var first·boolean·variable: true
 var second·boolean·variable: false
-if first·boolean·variable \\/ second·boolean·variable
+if first·boolean·variable ⋎ second·boolean·variable
     call print 'Either the first or the second is true'`,
 
 `var first_boolean_variable = true;

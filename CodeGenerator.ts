@@ -60,7 +60,7 @@ function isBooleanOperator(op) {
     } else {
         const booleanBinaryOperators = makeSet([
             "=", "≠", "<", ">", "≤", "≥",
-            "/\\", "\\/",
+            "⋏", "⋎",
         ]);
         return (
             op instanceof Binary

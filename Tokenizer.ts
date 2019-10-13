@@ -62,31 +62,19 @@ export class Scanner {
             case '-': this.addToken(TokenType.MINUS); break;
             case '+': this.addToken(TokenType.PLUS); break;
             case '*': this.addToken(TokenType.STAR); break;
-            case '/':
-                this.addToken(
-                    this.match('\\')
-                    ? TokenType.AND
-                    : TokenType.SLASH
-                );
-                break;
-            case '\\':
-                if (this.match('/')) {
-                    this.addToken(TokenType.OR);
-                } else {
-                    this.error(`Invalid token: '\\'`, -1);
-                }
-                break;
+            case '/': this.addToken(TokenType.SLASH); break;
             case '%': this.addToken(TokenType.MODULO); break;
             case ':': this.addToken(TokenType.COLON); break;
             case '?': this.addToken(TokenType.QUESTION); break;
             case '!': this.addToken(TokenType.BANG); break;
-            case '|': this.addToken(TokenType.OR); break;
             case '=': this.addToken(TokenType.EQUAL); break;
             case '<': this.addToken(TokenType.LESS); break;
             case '>': this.addToken(TokenType.GREATER); break;
             case '≥': this.addToken(TokenType.GREATER_EQUAL); break;
             case '≤': this.addToken(TokenType.LESS_EQUAL); break;
             case '≠': this.addToken(TokenType.NOT_EQUAL); break;
+            case '⋎': this.addToken(TokenType.OR); break;
+            case '⋏': this.addToken(TokenType.AND); break;
 
             case '#':
                 // skip the whole comment line
