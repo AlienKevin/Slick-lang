@@ -2,6 +2,7 @@ import { isList, isNumber, isText, isBoolean, isNull } from "./utils";
 import Decimal from "decimal.js";
 import * as unified from "string-unified";
 import List from "./List";
+import R from "ramda"
 
 function print(any) {
     console.log(toString(any));
@@ -196,7 +197,7 @@ function ternary(zeroth, oneth, twoth) {
 }
 
 function eq(zeroth, oneth) {
-    return zeroth === oneth || (
+    return R.equals(zeroth, oneth) || (
         isNumber(zeroth)
         && isNumber(oneth)
         && zeroth.equals(oneth)
