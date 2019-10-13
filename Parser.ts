@@ -91,6 +91,7 @@ export class Parser {
             "integer",
             "integer?",
             "length",
+            "not",
             "number",
             "number?",
             "print",
@@ -397,10 +398,10 @@ export class Parser {
         return expr;
     }
 
-    // unary → ("!" | "-") unary | primary;
+    // unary → ("-") unary | primary;
     unary() {
         let expr: Expr;
-        if (this.match(BANG, MINUS)) {
+        if (this.match(MINUS)) {
             const operator = this.previous();
             const right = this.unary();
             expr = new Unary(operator, right);

@@ -340,6 +340,12 @@ $SLK.print((foo($SLK2, $SLK3)));`
 `var a: f> 'a' 'b'`,
 
 `var a = $SLK.gt("a", "b");`
+],
+// logical not function
+[
+`var a: not true`,
+
+`var a = $SLK.not(true);`
 ]
 ]);
 import { test } from "./Tester";

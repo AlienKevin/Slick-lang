@@ -31,6 +31,7 @@ const primordial = $SLK.stone({
     "integer": "$SLK.integer",
     "integer?": "$SLK.integer_",
     "length": "$SLK.length",
+    "not": "$SLK.not",
     "number": "$SLK.make",
     "number?": "$SLK.is_decimal",
     "print": "$SLK.print",
@@ -305,12 +306,7 @@ export class CodeGenerator implements Visitor {
     }
 
     visitUnaryExpr(expr: Unary) {
-        const op = expr.operator.lexeme;
-        if (op === "!") {
-            return "!" + this.assertBoolean(expr.right)
-        } else if (op === "-") {
-            return "$SLK.neg(" + this.expression(expr.right) + ")"
-        }
+        return "$SLK.neg(" + this.expression(expr.right) + ")"
     }
     
     visitGetExpr(expr: Get) {
