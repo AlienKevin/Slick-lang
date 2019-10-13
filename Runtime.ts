@@ -15,7 +15,7 @@ function toString(any) {
         return "null";
     }
     if (isList(any)) {
-        return "[" + any.join(", ") + "]";
+        return "[" + any.map(toString).join(", ") + "]";
     }
     if (typeof any === "object") {
         let linebreak = "";
