@@ -91,6 +91,8 @@ export class Parser {
             "integer",
             "integer?",
             "length",
+            "max",
+            "min",
             "neg",
             "not",
             "number",

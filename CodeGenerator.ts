@@ -31,6 +31,8 @@ const primordial = $SLK.stone({
     "integer": "$SLK.integer",
     "integer?": "$SLK.integer_",
     "length": "$SLK.length",
+    "max": "$SLK.max",
+    "min": "$SLK.min",
     "neg": "$SLK.neg",
     "not": "$SLK.not",
     "number": "$SLK.make",
