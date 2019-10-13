@@ -246,44 +246,44 @@ function calc(name, a, b?) {
     error(`Invalid arguments for ${name}()`);
 }
 
-function add(a, b) {
+const add = R.curry(function (a, b) {
     return calc("add", a, b);
-}
+});
 
-function sub(a, b) {
+const sub = R.curry(function (a, b) {
     return calc("sub", a, b);
-}
+});
 
-function mul(a, b) {
+const mul = R.curry(function (a, b) {
     return calc("mul", a, b);
-}
+});
 
-function div(a, b) {
+const div = R.curry(function (a, b) {
     if (isNumber(a) && isNumber(b) && b.isZero()) {
         error(`Cannot divide by zero!`);
     }
     return calc("div", a, b);
-}
+});
 
-function mod(a, b) {
+const mod = R.curry(function (a, b) {
     return calc("mod", a, b);
-}
+});
 
-function max(a, b) {
+const max = R.curry(function (a, b) {
     return (
         lt(b, a)
         ? a
         : b
     );
-}
+});
 
-function min(a, b) {
+const min = R.curry(function (a, b) {
     return (
         lt(a, b)
         ? a
         : b
     );
-}
+});
 
 function abs(a) {
     return calc("abs", a);
