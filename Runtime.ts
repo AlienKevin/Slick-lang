@@ -198,15 +198,15 @@ function ternary(zeroth, oneth, twoth) {
     );
 }
 
-function eq(zeroth, oneth) {
+const eq = R.curry(function (zeroth, oneth) {
     return R.equals(zeroth, oneth) || (
         isNumber(zeroth)
         && isNumber(oneth)
         && zeroth.equals(oneth)
     );
-}
+});
 
-function lt(zeroth, oneth) {
+const lt = R.curry(function (zeroth, oneth) {
     if (isNumber(zeroth) && isNumber(oneth)) {
         return zeroth.lt(oneth);
     } else if (typeof zeroth === typeof oneth && (
@@ -216,23 +216,23 @@ function lt(zeroth, oneth) {
         return zeroth < oneth;
     }
     error(`Invalid arguments for lt()`);
-}
+});
 
-function ge(zeroth, wunth) {
+const ge = R.curry(function (zeroth, wunth) {
     return !lt(zeroth, wunth);
-}
+});
 
-function gt(zeroth, wunth) {
+const gt = R.curry(function (zeroth, wunth) {
     return lt(wunth, zeroth);
-}
+});
 
-function le(zeroth, wunth) {
+const le = R.curry(function (zeroth, wunth) {
     return !lt(wunth, zeroth);
-}
+});
 
-function ne(zeroth, wunth) {
+const ne = R.curry(function (zeroth, wunth) {
     return !eq(wunth, zeroth);
-}
+});
 
 function calc(name, a, b?) {
     if (isNumber(a)) {
