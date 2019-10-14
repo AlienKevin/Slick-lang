@@ -364,6 +364,12 @@ $SLK.print((foo($SLK2, $SLK3)));`
 `var a: (pipe (f⋏ false) (f⋎ true) not) true`,
 
 `var a = ($SLK.pipe(($SLK.and(false)), ($SLK.or(true)), $SLK.not))(true);`
+],
+// string concatenation
+[
+`call print ('abcd' & 'a' & 0.3e-10)`,
+
+`$SLK.print(($SLK.cat($SLK.cat("abcd", "a"), $SLK3e_11)));`
 ]
 ]);
 import { test } from "./Tester";

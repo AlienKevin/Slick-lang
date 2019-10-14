@@ -17,6 +17,7 @@ export enum TokenType {
     STAR = "STAR",
     MODULO = "MODULO",
     COLON = "COLON",
+    AMPERSAND = "AMPERSAND",
 
     // Newline (implicit statement terminator)
     NEWLINE = "NEWLINE",

@@ -117,6 +117,7 @@ export class CodeGenerator implements Visitor {
         "GREATER": "$SLK.gt",
         "LESS_EQUAL": "$SLK.le",
         "PLUS": "$SLK.add",
+        "AMPERSAND": "$SLK.cat",
         "MINUS": "$SLK.sub",
         "STAR": "$SLK.mul",
         "SLASH": "$SLK.div",

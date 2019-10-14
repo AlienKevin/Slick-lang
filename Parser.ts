@@ -17,6 +17,7 @@ const COMMA =TokenType.COMMA;
 const TILDE =TokenType.TILDE;
 const MINUS =TokenType.MINUS;
 const PLUS =TokenType.PLUS;
+const AMPERSAND = TokenType.AMPERSAND;
 const SLASH =TokenType.SLASH;
 const STAR =TokenType.STAR;
 const MODULO =TokenType.MODULO;
@@ -380,10 +381,10 @@ export class Parser {
         return expr;
     }
 
-    // addition → multiplication(("-" | "+") multiplication) * ;
+    // addition → multiplication(("-" | "+" | "&") multiplication) * ;
     addition() {
         let expr = this.multiplication();
-        while (this.match(MINUS, PLUS)) {
+        while (this.match(MINUS, PLUS, AMPERSAND)) {
             const operator = this.previous();
             const right = this.multiplication();
             expr = new Binary(expr, operator, right);

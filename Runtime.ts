@@ -69,6 +69,14 @@ function checkIndex(n: any, length: number) {
     }
 }
 
+function cat(zeroth, wunth) {
+    zeroth = text(zeroth);
+    wunth = text(wunth);
+    if (typeof zeroth === "string" && typeof wunth === "string") {
+        return zeroth + wunth;
+    }
+}
+
 function get(container, key) {
     if (isList(container)) {
         const index = checkIndex(key, container.length);
@@ -109,6 +117,9 @@ function text(zeroth) {
     }
     if (isBoolean(zeroth)) {
         return String(zeroth);
+    }
+    if (isText(zeroth)) {
+        return zeroth;
     }
 }
 
@@ -313,6 +324,7 @@ export default stone({
     and,
     assert_boolean,
     boolean_,
+    cat,
     div,
     eq,
     fraction,
