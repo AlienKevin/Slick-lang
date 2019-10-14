@@ -22,7 +22,6 @@ const exprDescriptions = {
     "RecordLiteral": ["keys: string[]", "values: Expr[]"],
     "Function": ["params: Token[]", "body: Block | Expr"],
     "Get": ["object: Expr", "name: Token", "bracket?: Token"],
-    "Set": ["object: Expr", "name: Token | Expr", "value: Expr", "bracket?: Token"],
 };
 
 function createExpr() {

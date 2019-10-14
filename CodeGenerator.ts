@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
-import { Ternary, Binary, Expr, Set, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "./Expr";
+import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "./Expr";
 import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
@@ -263,22 +263,6 @@ export class CodeGenerator implements Visitor {
         return (
             CodeGenerator.mangle(stmt.name.lexeme) + " = " + this.expression(stmt.value) + ";"
         );
-    }
-
-    visitSetExpr(expr: Set) {
-        return (
-            "$SLK.set("
-            + this.expression(expr.object)
-            + ", " 
-            + (
-                expr.name instanceof Token
-                    ? CodeGenerator.mangle(expr.name.lexeme)
-                    : this.expression(expr.name)
-            )
-            + ", "
-            + this.expression(expr.value)
-            + ")"
-        )
     }
 
     visitTernaryExpr(expr: Ternary) {

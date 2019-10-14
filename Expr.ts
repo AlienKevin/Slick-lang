@@ -84,11 +84,3 @@ export class Get extends Expr {
 		return visitor.visitGetExpr(this);
 	}
 }
-export class Set extends Expr {
-	constructor(public object: Expr, public name: Token | Expr, public value: Expr, public bracket?: Token) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitSetExpr(this);
-	}
-}

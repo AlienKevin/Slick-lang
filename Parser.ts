@@ -1,5 +1,5 @@
 import { TokenType } from "./TokenType";
-import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Set, Function, ListLiteral, RecordLiteral } from "./Expr";
+import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Function, ListLiteral, RecordLiteral } from "./Expr";
 import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
@@ -309,7 +309,7 @@ export class Parser {
             const name = expr.name;
             return new Assign(name, value);
         } else if (expr instanceof Get) {
-            return new Set(expr.object, expr.name, value, expr.bracket);
+            throw this.error(expr.name, "Cannot modify an immutable property!");
         } else {
             throw this.error(equal, "Invalid assignment target!");
         }
