@@ -85,7 +85,7 @@ export class Scanner {
             case '⋏': this.addToken(TokenType.AND); break;
 
             case '#':
-                // skip the whole comment line
+                // skip the whole comment section of the line
                 while (!this.isAtEnd() && this.peek() !== '\n') {
                     this.advance();
                 }
@@ -103,14 +103,20 @@ export class Scanner {
 
             // newlines
             case '\n':
+                const line = this.source.substring(this.lineStart, this.current).trim();
+                const addLinebreak = !line.startsWith("#") && line !== "";
                 if (this.braceStack.length > 0) { // newlines inside braces found
                     // generate a soft newline used specifically inside braces
-                    this.addToken(TokenType.SOFT_NEWLINE);
+                    if (addLinebreak) {
+                        this.addToken(TokenType.SOFT_NEWLINE);
+                    }
                     this.incrementLineCount();
                 } else {
                     // this newline token is on the current line, not the next
                     // so this.line++ need to be after addToken(TokenType.NEWLINE)
-                    this.addToken(TokenType.NEWLINE);
+                    if (addLinebreak) {
+                        this.addToken(TokenType.NEWLINE);
+                    }
                     this.incrementLineCount();
                     // all the rest token peeks are at the next line
 

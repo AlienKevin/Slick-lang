@@ -233,10 +233,6 @@ export class Parser {
             return this.callStatement();
         } else if (this.match(LET)) {
             return this.assignStatement();
-        }
-        // ignore blank lines
-        else if (this.match(NEWLINE)) {
-            return undefined;
         } else {
             throw this.error(this.peek(), `Expected a statement!`);
         }
