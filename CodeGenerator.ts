@@ -57,6 +57,7 @@ const primordial = $SLK.stone({
     "f*": "$SLK.mul",
     "f/": "$SLK.div",
     "f%": "$SLK.mod",
+    "f&": "$SLK.cat",
 
     // modules
     "List": "$SLK.List",

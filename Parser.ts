@@ -69,7 +69,7 @@ const keywords = new Map([
 const functinos = [
     QUESTION, AND, OR, EQUAL, NOT_EQUAL,
     LESS, GREATER_EQUAL, GREATER, LESS_EQUAL,
-    PLUS, MINUS, STAR, SLASH, MODULO
+    PLUS, MINUS, STAR, SLASH, MODULO, AMPERSAND
 ];
 
 export class Parser {

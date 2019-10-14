@@ -341,6 +341,11 @@ $SLK.print((foo($SLK2, $SLK3)));`
 
 `var a = $SLK.gt("a", "b");`
 ],
+[
+`var a: f& 'abcd' 0.3e-10`,
+
+`var a = $SLK.cat("abcd", $SLK3e_11);`
+],
 // logical not function
 [
 `var a: not true`,
