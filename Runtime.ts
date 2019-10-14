@@ -69,13 +69,13 @@ function checkIndex(n: any, length: number) {
     }
 }
 
-function cat(zeroth, wunth) {
+const cat = R.curry(function (zeroth, wunth) {
     zeroth = text(zeroth);
     wunth = text(wunth);
     if (typeof zeroth === "string" && typeof wunth === "string") {
         return zeroth + wunth;
     }
-}
+});
 
 function get(container, key) {
     if (isList(container)) {
