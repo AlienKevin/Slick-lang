@@ -15,16 +15,38 @@ const tail = R.tail;
 const head = R.init;
 const last = R.last;
 const nth = R.curry(function<T>(n: Decimal, list: readonly T[]) {
-    return R.nth(checkNumber(n), list);
+    return R.nth(number(n), list);
 });
 const take = R.curry(function<T>(n: Decimal, list: readonly T[]) {
-    return R.take(checkNumber(n), list);
+    return R.take(number(n), list);
 });
 const take_last = R.curry(function<T>(n: Decimal, list: readonly T[]) {
-    return R.takeLast(checkNumber(n), list);
+    return R.takeLast(number(n), list);
+});
+const slice = R.curry(function<T>(a: Decimal, b: Decimal, list: readonly T[]) {
+    return R.slice(number(a), number(b), list);
+});
+const member = R.includes;
+const insert = R.curry(function<T>(index: Decimal, elt: T, list: readonly T[]) {
+    return R.insert(number(index), elt, list);
+});
+const append = R.append;
+const prepend = R.prepend;
+const update = R.curry(function<T>(index: Decimal, value: T, list: readonly T[]) {
+    return R.update(number(index), value, list);
+});
+const drop = R.curry(function<T>(index: Decimal, list: readonly T[]) {
+    return R.drop(number(index), list);
+});
+const drop_last = R.curry(function<T>(index: Decimal, list: readonly T[]) {
+    return R.dropLast(number(index), list);
+});
+const concat = R.concat;
+const adjust = R.curry(function<T>(index: Decimal, fn: (a: T) => T, list: readonly T[]) {
+    return R.adjust(number(index), fn, list);
 });
 
-function checkNumber(n: any) {
+function number(n: any) {
     if (isNumber(n)) {
         return n.toNumber()
     }
@@ -46,5 +68,15 @@ export default {
     last,
     nth,
     take,
-    "take·last": take_last
+    "take·last": take_last,
+    slice,
+    member,
+    insert,
+    append,
+    prepend,
+    update,
+    drop,
+    "drop·last": drop_last,
+    concat,
+    adjust
 };
