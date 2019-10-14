@@ -6,7 +6,7 @@ const stmtDescriptions = {
     "Call": ["call: CallExpr"],
     "While": ["condition: Expr", "body: Block"],
     "Break": [],
-    "Return": ["keyword: Token", "value: any"],
+    "Return": ["keyword: Token", "value: Expr"],
     "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType"],
     "Assign": ["name: Token", "value: Expr"],
 };

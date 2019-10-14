@@ -240,10 +240,7 @@ export class Parser {
 
     returnStatement() {
         const returnToken = this.previous();
-        let value = null;
-        if (!this.check(NEWLINE, EOF)) {
-            value = this.expression();
-        }
+        const value = this.expression();
         this.endStmt("return");
         return new Return(returnToken, value);
     }

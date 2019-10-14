@@ -46,7 +46,7 @@ export class Break extends Stmt {
 	}
 }
 export class Return extends Stmt {
-	constructor(public keyword: Token, public value: any) {
+	constructor(public keyword: Token, public value: Expr) {
 		super();
 	}
 	accept(visitor: Visitor) {
