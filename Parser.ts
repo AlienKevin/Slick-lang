@@ -161,6 +161,7 @@ export class Parser {
     }
 
     func() {
+        const first = this.previous();
         let params = this.consumeParameters();
         const enclosing = this.env;
             // new function environment
@@ -175,7 +176,7 @@ export class Parser {
             : this.expression()
         );
         this.env = enclosing;
-        return new Function(params, body);
+        return new Function(first, params, body);
     }
 
     consumeParameters() {
@@ -401,10 +402,12 @@ export class Parser {
     call(required = false) {
         let expr: Expr;
         if (this.match(LEFT_BRACKET)) {
+            const first = this.previous();
             const list = this.getList(TokenType.RIGHT_BRACKET, COMMA);
             this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
-            expr = new ListLiteral(list);
+            expr = new ListLiteral(first, list);
         } else if (this.match(LEFT_BRACE)) {
+            const first = this.previous();
             let keys: string[] = [];
             let values: Expr[] = [];
             if (!this.check(RIGHT_BRACE)) { // has arguments
@@ -424,7 +427,7 @@ export class Parser {
                 && this.peek().type !== RIGHT_BRACE);
             }
             this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
-            expr = new RecordLiteral(keys, values);
+            expr = new RecordLiteral(first, keys, values);
         } else {
             expr = this.funcExpr();
             this.groupMembers ++;
@@ -520,9 +523,10 @@ export class Parser {
                         throw this.error(this.peek(), `Expected '!' after '?'!`);
                     }
                 }
-                return new Variable(new Token(
+                const name = new Token(
                     IDENTIFIER, "f" + symbol, undefined, start.line, start.index
-                ));
+                );
+                return new Variable(name);
             // function expression
             } else {
                 return this.func();
@@ -534,24 +538,26 @@ export class Parser {
     // primary → NUMBER | STRING | "false" | "true" | "null" | "(" expression ")" | IDENTIFIER
     primary() {
         if (this.match(NUMBER, STRING)) {
-            return new Literal(this.previous().literal);
+            const token = this.previous();
+            return new Literal(token, token.literal);
         }
         if (this.match(TRUE)) {
-            return new Literal(true);
+            return new Literal(this.previous(), true);
         }
         if (this.match(FALSE)) {
-            return new Literal(false);
+            return new Literal(this.previous(), false);
         }
         if (this.match(NULL)) {
-            return new Literal(undefined);
+            return new Literal(this.previous(), undefined);
         }
         if (this.match(LEFT_PAREN)) {
+            const first = this.previous();
             const enclosingGroupMembers = this.groupMembers;
             this.groupMembers = 0;
             const expr = this.expression();
             this.consume(RIGHT_PAREN, "Expect ')' after expression!");
             this.groupMembers = enclosingGroupMembers;
-            return new Grouping(expr);
+            return new Grouping(first, expr);
         }
         if (this.match(IDENTIFIER)) {
             const name = this.previous();

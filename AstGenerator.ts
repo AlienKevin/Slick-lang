@@ -14,13 +14,13 @@ const stmtDescriptions = {
 const exprDescriptions = {
     "Ternary": ["condition: Expr", "questionMark: Token", "trueBranch: Expr", "falseBranch: Expr"],
     "Binary": ["left: Expr", "operator: Token", "right: Expr"],
-    "Grouping": ["expression: Expr"],
-    "Literal": ["value: any"],
+    "Grouping": ["first: Token", "expression: Expr"],
+    "Literal": ["first: Token", "value: any"],
     "Variable": ["name: Token"],
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
-    "ListLiteral": ["list: Expr[]"],
-    "RecordLiteral": ["keys: string[]", "values: Expr[]"],
-    "Function": ["params: Token[]", "body: Block | Expr"],
+    "ListLiteral": ["first: Token", "list: Expr[]"],
+    "RecordLiteral": ["first: Token", "keys: string[]", "values: Expr[]"],
+    "Function": ["first: Token", "params: Token[]", "body: Block | Expr"],
     "Get": ["object: Expr", "name: Token", "bracket?: Token"],
 };
 
@@ -56,14 +56,43 @@ function createAst(filePath: string, parentClassName: string, descriptions: {[st
     // add parent class
     astClasses += 
 `export abstract class ${parentClassName} {
-    abstract accept(visitor: Visitor): any;
-}\n`;
+    abstract accept(visitor: Visitor): any;\n`
+    + (
+        parentClassName === "Expr"
+        ? "\tconstructor (readonly first: Token) {}\n"
+        : ""
+    )
+    + `}\n`;
 
     // add inherited classes
     Object.entries(descriptions).forEach(([type, operands]) => {
         astClasses += `export class ${type} extends ${parentClassName} {\n`
-        + `\tconstructor(${operands.map((operand) => `public ${operand}`).join(", ")}) {\n`
-        + `\t\tsuper();\n`
+        + `\tconstructor(`
+        + operands.map((operand) => {
+            const modifier = (
+                operand.startsWith("first")
+                ? ""
+                : "public "
+            );
+            return modifier + operand;
+        }).join(", ")
+        + `) {\n`
+        + `\t\tsuper(`
+        + (
+            parentClassName === "Expr"
+            ? (
+                // special case 'name' property is the first token
+                type === "Variable"
+                ? "name"
+                : (
+                    operands[0].startsWith("first")
+                    ? "first"
+                    : operands[0].substring(0, operands[0].indexOf(":")) + ".first"
+                )
+            )
+            : ""
+        )
+        + `);\n`
         + `\t}\n`
         + `\taccept(visitor: Visitor) {\n`
         + `\t\treturn visitor.visit${type}${parentClassName}(this);\n`
