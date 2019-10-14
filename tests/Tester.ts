@@ -9,43 +9,45 @@ export function test(source: Map<string, string>, runner: Runner) {
     const total = source.size;
     let passedAllTests = true;
     try {
-        source.forEach((answer, source) => {
+    source.forEach((answer, source) => {
+        try {
             runner.run(source, {
                 printTokenList: false,
                 printGeneratedCode: true,
                 genereateFrontMatters: false,
             });
-            if (trimNewlines(outputs) !== answer) {
-                console.warn(`Source:\n${source}`);
-                const diff = differ.diffLines(answer, outputs, { newlineIsToken: true });
-                let diffString = "";
-                diff.forEach((part) => {
-                    // green for additions, red for deletions
-                    // grey for common parts
-                    part.value = trimNewlines(part.value);
-                    const color = part.added ? 'red' :
-                        part.removed ? 'green' : 'grey';
-                    const prefix = part.added ? ' + ' :
-                        part.removed ? ' - ' : '   ';
-                    if (part.value !== "") {
-                        if (!part.value.startsWith("\n")) {
-                            part.value = "\n" + part.value;
-                        }
-                        diffString += ((part.value).replace(/\n/g, `\n${prefix}`)[color]);
+        } catch (ignore) {
+            passedAllTests = false;
+        };
+        if (trimNewlines(outputs) !== answer) {
+            console.warn(`Source:\n${source}`);
+            const diff = differ.diffLines(answer, outputs, { newlineIsToken: true });
+            let diffString = "";
+            diff.forEach((part) => {
+                // green for additions, red for deletions
+                // grey for common parts
+                part.value = trimNewlines(part.value);
+                const color = part.added ? 'red' :
+                    part.removed ? 'green' : 'grey';
+                const prefix = part.added ? ' + ' :
+                    part.removed ? ' - ' : '   ';
+                if (part.value !== "") {
+                    if (!part.value.startsWith("\n")) {
+                        part.value = "\n" + part.value;
                     }
-                });
-                console.warn(diffString);
-                console.warn(`Passed ${numOfTestsPassed}/${total} (${Math.round(numOfTestsPassed / total * 100)}%) tests.`.yellow);
-                throw "Incorrect result!";
-            }
-            numOfTestsPassed++;
-            outputs = "";
-        });
-    } catch (error) {
-        // do not print the error, relevant info already printed
-        console.warn(outputs);
-        passedAllTests = false;
-    }
+                    diffString += ((part.value).replace(/\n/g, `\n${prefix}`)[color]);
+                }
+            });
+            console.warn(diffString);
+            console.warn(`Passed ${numOfTestsPassed}/${total} (${Math.round(numOfTestsPassed / total * 100)}%) tests.`.yellow);
+            console.warn("Incorrect result!");
+            throw "Break out of forEach loop";
+        }
+        numOfTestsPassed++;
+        outputs = "";
+    });
+    } catch(ignore) {};
+   
     if (passedAllTests) {
         console.warn(`Passed all ${total} tests!`.yellow);
     }
