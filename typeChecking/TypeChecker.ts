@@ -146,6 +146,11 @@ export class Checker implements Visitor {
                 this.number(left, expr.left);
                 this.number(right, expr.right);
                 return NUMBER;
+            
+            case TokenType.AMPERSAND:
+                this.text(left, expr.left);
+                this.text(right, expr.right);
+                return TEXT;
 
             // comparison operators
             case TokenType.GREATER:
