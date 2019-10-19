@@ -150,37 +150,6 @@ function length(container) {
     error(`Property 'length' does not exist!`);
 }
 
-function boolean_(any) {
-    return isBoolean(any);
-}
-
-function function_(any) {
-    return typeof any === "function";
-}
-
-function integer_(any) {
-    return (
-        isNumber(any)
-        && any.isInteger()
-    );
-}
-
-function number_(any) {
-    return isNumber(any);
-}
-
-function record_(any) {
-    return (
-        typeof any === "object"
-        && !isList(any)
-        && !isNumber(any)
-    );
-}
-
-function text_(any) {
-    return isText(any);
-}
-
 function assert_boolean(boolean) {
     if (isBoolean(boolean)) {
         return boolean
@@ -323,17 +292,14 @@ export default stone({
     add,
     and,
     assert_boolean,
-    boolean_,
     cat,
     div,
     eq,
     fraction,
-    function_,
     ge,
     get,
     gt,
     integer,
-    integer_,
     le,
     length,
     lt,
@@ -346,14 +312,11 @@ export default stone({
     neg,
     not,
     number,
-    number_,
     or,
     pipe,
     print,
-    record_,
     stone,
     sub,
     ternary,
     text,
-    text_
 });

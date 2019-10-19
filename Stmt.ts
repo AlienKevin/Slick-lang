@@ -54,7 +54,7 @@ export class Return extends Stmt {
 	}
 }
 export class VarDeclaration extends Stmt {
-	constructor(public name: Token, public initializer: Expr, public typeModifier: TokenType) {
+	constructor(public name: Token, public initializer: Expr, public typeModifier: TokenType, public typeDeclaration?: Type) {
 		super();
 	}
 	accept(visitor: Visitor) {

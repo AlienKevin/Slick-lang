@@ -4,6 +4,10 @@ import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallSt
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
+import { Type } from "./typeChecking/Type";
+import { ListType } from "./typeChecking/ListType";
+import { PrimitiveType } from "./typeChecking/PrimitiveType";
+import { FunctionType } from "./typeChecking/FunctionType";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -52,6 +56,7 @@ const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
 const TRUE = TokenType.TRUE;
 const FALSE = TokenType.FALSE;
 const NULL = TokenType.NULL;
+const ARROW = TokenType.ARROW;
 
 const keywords = new Map([
     ["if", TokenType.IF],
@@ -85,23 +90,11 @@ export class Parser {
         // declare primordials
         const primordials = [
             "abs",
-            "list?",
-            "boolean?",
-            "fraction",
-            "function?",
-            "integer",
-            "integer?",
-            "length",
             "max",
             "min",
             "neg",
             "not",
-            "number",
-            "number?",
             "print",
-            "record?",
-            "text",
-            "text?",
 
             // modules
             "List",
@@ -187,15 +180,58 @@ export class Parser {
         return params;
     }
 
-    varDeclaration() {
+    varDeclaration(declaredTypeModifier?: TokenType, declaredName?: string, declaredType?: Type) {
         const typeModifier: TokenType = this.consume([VAR, MUT], `Variable declaration must begin with the 'var' or 'mut' keyword!`).type;
+        if (declaredTypeModifier !== undefined
+            && typeModifier !== declaredTypeModifier) {
+            throw this.error(this.previous(), `Type modifiers do not match between type declaration and actual declaration!`);
+        }
         const nameToken: Token = this.consume(IDENTIFIER, `Variable must have a valid name!`);
-        this.consume(COLON, `Variable '${nameToken.lexeme}' must be initialized when declared!`);
-        const initializer: Expr = this.expression();
-        this.endStmt("value");
-        const mutable = typeModifier === MUT;
-        this.env.declare(nameToken, mutable);
-        return new VarDeclaration(nameToken, initializer, typeModifier);
+        const name: string = nameToken.lexeme;
+        if (declaredName !== undefined
+            && name !== declaredName) {
+            throw this.error(this.previous(), `Variable name do not match between type declaration and actual declaration!`);
+        }
+        const operator = this.consume([EQUAL, COLON], `Variable '${name}' must be initialized when declared!`);
+        if (operator.type === COLON) {
+            const initializer: Expr = this.expression();
+            this.endStmt("value");
+            const mutable = typeModifier === MUT;
+            this.env.declare(nameToken, mutable);
+            return new VarDeclaration(nameToken, initializer, typeModifier, declaredType);
+        } else if (operator.type === EQUAL) {
+            const type: Type = this.typeDeclaration();
+            this.endStmt("type declaration");
+            this.prelude();
+            return this.varDeclaration(typeModifier, name, type);
+        }
+    }
+
+    typeDeclaration(): Type {
+        const first = this.consume([IDENTIFIER, LEFT_PAREN], `Expected a type!`);
+        let type: Type;
+        switch (first.lexeme) {
+            case "(":
+                type = this.typeDeclaration();
+                this.consume(RIGHT_PAREN, `Expected a ')'!`);
+                break;
+            case "List":
+                type = new ListType(this.typeDeclaration());
+                break;
+            case "Bool":
+                type = PrimitiveType.Bool;
+                break;
+            case "Text":
+                type = PrimitiveType.Text;
+                break;
+            case "Num":
+                type = PrimitiveType.Num;
+                break;
+        }
+        while (this.match(ARROW)) {
+            type = new FunctionType([type, this.typeDeclaration()]);
+        }
+        return type;
     }
 
     // block → INDENT (declaration* block? declaration*) (DEDENT | EOF)

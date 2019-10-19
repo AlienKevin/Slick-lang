@@ -7,7 +7,7 @@ const stmtDescriptions = {
     "While": ["condition: Expr", "body: Block"],
     "Break": [],
     "Return": ["keyword: Token", "value: Expr"],
-    "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType"],
+    "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType", "typeDeclaration?: Type"],
     "Assign": ["name: Token", "value: Expr"],
 };
 
