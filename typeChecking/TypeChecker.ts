@@ -14,6 +14,7 @@ import { ListType } from "./ListType";
 import { FunctionType } from "./FunctionType";
 import { AnyType } from "./AnyType";
 import clone from "lodash.clone";
+import { NilType } from "./NilType";
 
 const NUMBER = PrimitiveType.Num;
 const TEXT = PrimitiveType.Text;
@@ -81,6 +82,9 @@ export class Checker implements Visitor {
     public static sameTypes(a: Type, b: Type, message: string, location: Expr | Token) {
         let hasError = false;
         if (a instanceof AnyType || b instanceof AnyType) {
+            return;
+        }
+        if (a instanceof NilType && b instanceof NilType) {
             return;
         }
         if (a instanceof ListType && b instanceof ListType) {

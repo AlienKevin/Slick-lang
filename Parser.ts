@@ -9,6 +9,7 @@ import { ListType } from "./typeChecking/ListType";
 import { PrimitiveType } from "./typeChecking/PrimitiveType";
 import { FunctionType } from "./typeChecking/FunctionType";
 import { AnyType } from "./typeChecking/AnyType";
+import { NilType } from "./typeChecking/NilType";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -209,7 +210,7 @@ export class Parser {
     }
 
     typeDeclaration(allowFunctionType = true): Type {
-        const first = this.consume([IDENTIFIER, LEFT_PAREN], `Expected a type!`);
+        const first = this.consume([NIL, IDENTIFIER, LEFT_PAREN], `Expected a type!`);
         let type: Type;
         switch (first.lexeme) {
             case "(":
@@ -227,6 +228,9 @@ export class Parser {
                 break;
             case "Num":
                 type = PrimitiveType.Num;
+                break;
+            case "Nil":
+                type = new NilType();
                 break;
             default:
                 type = new AnyType(first.lexeme);
