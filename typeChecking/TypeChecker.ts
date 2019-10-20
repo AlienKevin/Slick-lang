@@ -263,6 +263,13 @@ export class Checker implements Visitor {
         const argTypes = expr.argumentList.map(arg => this.expression(arg));
         argTypes.forEach((argType, index) => {
             const arg = expr.argumentList[index];
+            if (!(callee instanceof FunctionType)) {
+                const funcName = expr.callee.first.lexeme;
+                throw this.error(
+                    arg.first,
+                    `Function '${funcName}' expects ${index} arguments but got ${argTypes.length} instead!`
+                );
+            }
             if (argType instanceof AnyType && arg instanceof Variable) {
                 this.env.define(arg.name, paramType);
             } else {
