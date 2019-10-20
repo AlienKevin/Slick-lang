@@ -1,8 +1,8 @@
-import { isList, isNumber, isText, isBoolean, isNull } from "./utils";
-import Decimal from "decimal.js";
+import { isList, isNumber, isText, isBoolean, isNil } from "./utils";
 import * as unified from "string-unified";
 import List from "./List";
 import R from "ramda"
+import Decimal from "decimal.js";
 
 function print(any) {
     console.log(toString(any));
@@ -52,75 +52,12 @@ function checkNumber(n: any) {
     error(`List index must be a number!`)
 }
 
-function checkIndex(n: any, length: number) {
-    let index = checkNumber(n);
-    if (!Number.isInteger(index)) {
-        error(`List index must be an integer!`);
-    }
-    if (index >= length
-        || index < -length) {
-        error(`List index ouside range from ${-length} to ${length - 1}!`);
-    } else {
-        return (
-            index >= 0
-            ? index
-            : length + index
-        );
-    }
-}
-
 const cat = R.curry(function (zeroth, wunth) {
-    zeroth = text(zeroth);
-    wunth = text(wunth);
-    if (typeof zeroth === "string" && typeof wunth === "string") {
-        return zeroth + wunth;
-    }
+    return zeroth + wunth;
 });
 
-function get(container, key) {
-    if (isList(container)) {
-        const index = checkIndex(key, container.length);
-        return container[index];
-    } else if (isText(container)) {
-        const index = checkIndex(key, unified.length(container));
-        return unified.charAt(container, index);
-    }
-    if (typeof container === "object") {
-        const value = container[key];
-        if (value === undefined) {
-            error(`Record does not contain key ${key}!`);
-        } else {
-            return value;
-        }
-    }
-}
-
-function number(n) {
-    if (isBoolean(n)) {
-        return (
-            n === true
-            ? new Decimal(1)
-            : new Decimal(0)
-        );
-    }
-    // else n is a string or number
-    const number = new Decimal(n);
-    if (number.isNaN()) {
-        error(`Invalid number literal!`);
-    }
-    return number;
-}
-
-function text(zeroth) {
-    if (isNumber(zeroth)) {
-        return zeroth.toString();
-    }
-    if (isBoolean(zeroth)) {
-        return String(zeroth);
-    }
-    if (isText(zeroth)) {
-        return zeroth;
-    }
+function number(n: string) {
+    return new Decimal(n);
 }
 
 // 'stone' is a deep freeze.
@@ -138,16 +75,6 @@ function stone(object) {
         }
     }
     return object;
-}
-
-function length(container) {
-    if (isList(container)) {
-        return number(container.length);
-    }
-    if (isText(container)) {
-        return number(unified.length(container));
-    }
-    error(`Property 'length' does not exist!`);
 }
 
 function assert_boolean(boolean) {
@@ -297,11 +224,9 @@ export default stone({
     eq,
     fraction,
     ge,
-    get,
     gt,
     integer,
     le,
-    length,
     lt,
     List,
     max,
@@ -318,5 +243,4 @@ export default stone({
     stone,
     sub,
     ternary,
-    text,
-});
+}); 
