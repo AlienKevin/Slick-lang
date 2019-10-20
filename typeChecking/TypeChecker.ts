@@ -126,7 +126,7 @@ export class Checker implements Visitor {
             Checker.sameTypes(
                 target,
                 value,
-                `${capitalize(name)} must be a ${target}!`,
+                `${capitalize(name)} must be a ${target}, not ${value}!`,
                 operand
             );
         }
