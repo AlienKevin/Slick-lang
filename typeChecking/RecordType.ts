@@ -3,7 +3,7 @@ import { Type } from "./Type";
 import { CError } from "./CompileError";
 
 export class RecordType {
-    private record: {[name: string]: Type};
+    readonly record: {[name: string]: Type};
     constructor(keys: string[], values: Type[]) {
         this.record = Object.create(null);
         if (keys !== undefined) {
@@ -19,5 +19,18 @@ export class RecordType {
         } else {
             return this.record[name.lexeme];
         }
+    }
+
+    toString() {
+        let linebreak = "";
+        let padding = "";
+        return (
+            "{" + linebreak
+            + Object.entries(this.record).map(([key, value]) => 
+                padding + key + ": " + value
+            ).join(linebreak)
+            + linebreak
+            + "}"
+        );
     }
 }
