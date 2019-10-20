@@ -8,10 +8,12 @@ import { TokenType } from "../TokenType";
 import { Token } from "../Token";
 import { Type } from "./Type";
 import { RecordType } from "./RecordType";
-import { isList, capitalize, isNumber, isBoolean, isText } from "../utils";
+import { isList, capitalize, isNumber, isBoolean, isText, nextChar } from "../utils";
 import { Env } from "./Environment";
 import { ListType } from "./ListType";
 import { FunctionType } from "./FunctionType";
+import { AnyType } from "./AnyType";
+import clone from "lodash.clone";
 
 const NUMBER = PrimitiveType.Num;
 const TEXT = PrimitiveType.Text;
@@ -78,7 +80,7 @@ export class Checker implements Visitor {
 
     public static sameTypes(a: Type, b: Type, message: string, location: Expr | Token) {
         let hasError = false;
-        if (a === undefined || b === undefined) {
+        if (a instanceof AnyType || b instanceof AnyType) {
             return;
         }
         if (a instanceof ListType && b instanceof ListType) {
@@ -120,7 +122,7 @@ export class Checker implements Visitor {
     }
 
     matchType(target: Type, value: Type, operand: Expr, name = "operand") {
-        if (value === undefined && operand instanceof Variable) {
+        if (value instanceof AnyType && operand instanceof Variable) {
             this.env.define(operand.name, target);
         } else {
             Checker.sameTypes(
@@ -243,7 +245,7 @@ export class Checker implements Visitor {
         const argTypes = expr.argumentList.map(arg => this.expression(arg));
         argTypes.forEach((argType, index) => {
             const arg = expr.argumentList[index];
-            if (argType === undefined && arg instanceof Variable) {
+            if (argType instanceof AnyType && arg instanceof Variable) {
                 this.env.define(arg.name, paramType);
             } else {
                 Checker.sameTypes(
@@ -265,8 +267,15 @@ export class Checker implements Visitor {
     visitFunctionExpr(expr: Function) {
         const enclosing = this.env;
         this.env = new Env(this.env);
+        let char = "a";
+        function generateAnyType() {
+            const curr = char;
+            const next = nextChar(curr);
+            char = next;
+            return new AnyType(curr);
+        }
         expr.params.forEach((param) => {
-            this.env.declare(param, undefined, false);
+            this.env.declare(param, generateAnyType(), false);
         });
         let outputType: Type;
         if (expr.body instanceof Expr) {
@@ -339,16 +348,78 @@ export class Checker implements Visitor {
     visitVarDeclarationStmt(stmt: VarDeclaration) {
         const mutable = stmt.typeModifier === TokenType.MUT;
         let type = this.expression(stmt.initializer);
-        const declaredType = stmt.typeDeclaration;
-        if (declaredType !== undefined) {
-            Checker.sameTypes(
-                type, declaredType,
-                `Declared type ${declaredType} and actual type ${type} do not match!`,
-                stmt.initializer
-            );
-        }
+        const declaredType = Checker.substituteAnyTypes(stmt.typeDeclaration, type);
+        Checker.sameTypes(
+            type, declaredType,
+            `Declared type ${declaredType} and actual type ${type} do not match!`,
+            stmt.initializer
+        );
         this.env.declare(stmt.name, type, mutable);
     }
+
+    private static substituteAnyTypes(declaredType: Type, actualType: Type) {
+        if (declaredType instanceof FunctionType && actualType instanceof FunctionType) {
+            if (declaredType.inputType instanceof AnyType) {
+                return Object.assign(
+                    clone(declaredType),
+                    {
+                        inputType: actualType.inputType
+                    },
+                    {
+                        outputType: this.substituteAnyTypes(
+                            declaredType.outputType,
+                            actualType.outputType
+                        )
+                    }
+                );
+            } else if (declaredType.inputType instanceof ListType
+                && actualType.inputType instanceof ListType) {
+                return Object.assign(
+                    clone(declaredType),
+                    {
+                        inputType: Object.assign(
+                            clone(declaredType.inputType),
+                            {
+                                type: this.substituteAnyTypes(
+                                    declaredType.inputType.type,
+                                    actualType.inputType.type
+                                )
+                            }
+                        )
+                    },
+                    {
+                        outputType: this.substituteAnyTypes(
+                            declaredType.outputType,
+                            actualType.outputType
+                        )
+                    }
+                );
+            } else if (declaredType.inputType instanceof FunctionType) {
+                return this.substituteAnyTypes(
+                    Object.assign(
+                        clone(declaredType),
+                        {
+                            inputType: this.substituteAnyTypes(
+                                declaredType.inputType,
+                                actualType.inputType
+                            )
+                        },
+                        {
+                            outputType: this.substituteAnyTypes(
+                                declaredType.outputType,
+                                actualType.outputType
+                            )
+                        }
+                    ),
+                    actualType.outputType
+                );
+            }
+        } else if (declaredType instanceof AnyType) {
+            return actualType;
+        }
+        return declaredType;
+    }
+
     visitAssignStmt(stmt: Assign) {
         let type = this.expression(stmt.value);
         this.env.define(stmt.name, type, stmt.value);
