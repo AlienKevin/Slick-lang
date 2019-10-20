@@ -120,12 +120,16 @@ export class Checker implements Visitor {
     }
 
     matchType(target: Type, value: Type, operand: Expr, name = "operand") {
-        Checker.sameTypes(
-            target,
-            value,
-            `${capitalize(name)} must be a ${target}!`,
-            operand
-        )
+        if (value === undefined && operand instanceof Variable) {
+            this.env.define(operand.name, target);
+        } else {
+            Checker.sameTypes(
+                target,
+                value,
+                `${capitalize(name)} must be a ${target}!`,
+                operand
+            );
+        }
     }
 
     error(token: Token, message: string) {
@@ -237,13 +241,18 @@ export class Checker implements Visitor {
         }
         let paramType = callee.inputType;
         const argTypes = expr.argumentList.map(arg => this.expression(arg));
-        argTypes.forEach((argType) => {
-            Checker.sameTypes(
-                paramType,
-                argType,
-                `Argument type ${callee.inputType} does not match paramter type ${paramType}!`,
-                expr.argumentList[0]
-            );
+        argTypes.forEach((argType, index) => {
+            const arg = expr.argumentList[index];
+            if (argType === undefined && arg instanceof Variable) {
+                this.env.define(arg.name, paramType);
+            } else {
+                Checker.sameTypes(
+                    paramType,
+                    argType,
+                    `Argument type ${callee.inputType} does not match paramter type ${paramType}!`,
+                    expr.argumentList[0]
+                );
+            }
             callee = callee.outputType;
             if (callee instanceof FunctionType) {
                 paramType = callee.inputType;
@@ -279,7 +288,7 @@ export class Checker implements Visitor {
     createFunctionType(types: Type[]) {
         if (types.length === 1) {
             return types[0];
-    }
+        }
         return new FunctionType(types[0], this.createFunctionType(types.slice(1)));
     }
 
@@ -342,7 +351,7 @@ export class Checker implements Visitor {
     }
     visitAssignStmt(stmt: Assign) {
         let type = this.expression(stmt.value);
-        this.env.define(stmt.name, stmt.value, type);
+        this.env.define(stmt.name, type, stmt.value);
     }
 
 }

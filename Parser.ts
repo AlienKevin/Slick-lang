@@ -229,7 +229,7 @@ export class Parser {
                 break;
         }
         while (this.match(ARROW)) {
-            type = new FunctionType([type, this.typeDeclaration()]);
+            type = new FunctionType(type, this.typeDeclaration());
         }
         return type;
     }

@@ -36,15 +36,17 @@ export class Env {
         return this.values[name] !== undefined;
     }
 
-    define(nameToken: Token, value: Expr, type: Type) {
+    define(nameToken: Token, type: Type, value?: Expr) {
         const name = nameToken.lexeme;
         if (this.isDeclared(name)) {
-            if (this.values[name].mutable) {
+            if (value === undefined) {
+                this.values[name].type = type;
+            } else if (this.values[name].mutable) {
                 const declaredType = this.values[name].type;
                 Checker.sameTypes(
                     declaredType,
                     type,
-                    `${type} does not match declared type ${declaredType}`,
+                    `Value of type ${type} does not match declared type ${declaredType}`,
                     value
                 );
             } else {
@@ -52,7 +54,7 @@ export class Env {
             }
         }
         if (this.enclosing !== undefined) {
-            this.enclosing.define(nameToken, value, type);
+            this.enclosing.define(nameToken, type, value);
             return;
         }
     }
