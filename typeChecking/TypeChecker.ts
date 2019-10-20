@@ -251,7 +251,7 @@ export class Checker implements Visitor {
                 Checker.sameTypes(
                     paramType,
                     argType,
-                    `Argument type ${callee.inputType} does not match paramter type ${paramType}!`,
+                    `Argument type ${argType} does not match paramter type ${paramType}!`,
                     expr.argumentList[0]
                 );
             }
