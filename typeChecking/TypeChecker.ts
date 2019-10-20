@@ -179,7 +179,7 @@ export class Checker implements Visitor {
         }
     }
     visitGroupingExpr(expr: Grouping) {
-        return this.type(expr.expression);
+        return this.expression(expr.expression);
     }
     visitLiteralExpr(expr: Literal) {
         return this.type(expr.value);
