@@ -4,7 +4,7 @@ import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function
 import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
-import { isNumber, isText, isBoolean, isNull } from "./utils";
+import { isNumber, isText, isBoolean, isNil } from "./utils";
 
 Decimal.set({
     toExpPos: 5,
@@ -375,7 +375,7 @@ export class CodeGenerator implements Visitor {
         if (isNumber(expr.value)) {
             return this.numgle(expr.value);
         }
-        if (isNull(expr.value)) {
+        if (isNil(expr.value)) {
             return "undefined";
         }
     }

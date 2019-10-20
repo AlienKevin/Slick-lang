@@ -56,7 +56,7 @@ const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
 const TRUE = TokenType.TRUE;
 const FALSE = TokenType.FALSE;
-const NULL = TokenType.NULL;
+const NIL = TokenType.NIL;
 const ARROW = TokenType.ARROW;
 
 const keywords = new Map([
@@ -513,7 +513,7 @@ export class Parser {
         const literals = [
             TRUE,
             FALSE,
-            NULL,
+            NIL,
             STRING,
             NUMBER,
             IDENTIFIER,
@@ -575,7 +575,7 @@ export class Parser {
         return this.primary();
     }
 
-    // primary → NUMBER | STRING | "false" | "true" | "null" | "(" expression ")" | IDENTIFIER
+    // primary → NUMBER | STRING | "false" | "true" | "Nil" | "(" expression ")" | IDENTIFIER
     primary() {
         if (this.match(NUMBER, STRING)) {
             const token = this.previous();
@@ -587,7 +587,7 @@ export class Parser {
         if (this.match(FALSE)) {
             return new Literal(this.previous(), false);
         }
-        if (this.match(NULL)) {
+        if (this.match(NIL)) {
             return new Literal(this.previous(), undefined);
         }
         if (this.match(LEFT_PAREN)) {

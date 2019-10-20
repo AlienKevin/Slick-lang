@@ -12,8 +12,8 @@ function toString(any) {
     if (isNumber(any) || isText(any) || isBoolean(any)) {
         return any.toString();
     }
-    if (isNull(any)) {
-        return "null";
+    if (isNil(any)) {
+        return "Nil";
     }
     if (isList(any)) {
         return "[" + any.map(toString).join(", ") + "]";

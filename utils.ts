@@ -36,7 +36,7 @@ export function isBoolean(value: any): value is boolean {
     return typeof value === "boolean";
 }
 
-export function isNull(value: any): value is undefined {
+export function isNil(value: any): value is undefined {
     return value === undefined;
 }
 

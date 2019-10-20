@@ -7,7 +7,7 @@ import { Runner } from "./Runner";
 const reservedWords = new Map([
     ["true", TokenType.TRUE],
     ["false", TokenType.FALSE],
-    ["null", TokenType.NULL],
+    ["Nil", TokenType.NIL],
     ["f", TokenType.F],
 ])
 
