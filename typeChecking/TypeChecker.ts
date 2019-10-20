@@ -231,31 +231,58 @@ export class Checker implements Visitor {
         return this.env.get(expr.name);
     }
     visitCallExpr(expr: Call) {
-        const callee = this.expression(expr.callee);
-        if (!(callee instanceof Function)) {
+        let callee = this.expression(expr.callee);
+        if (!(callee instanceof FunctionType)) {
             throw this.error(expr.paren, `Callee must be a function!`);
         }
-        // create a temporary function environment for this call
-        const enclosing = this.env;
-        this.env = new Env(this.env);
-        expr.argumentList.forEach((arg, index) => {
-            const param = callee.params[index];
-            const name = param;
-            const mutable = false;
-            const type = this.expression(arg);
-            this.env.declare(name, type, mutable);
+        let paramType = callee.inputType;
+        const argTypes = expr.argumentList.map(arg => this.expression(arg));
+        argTypes.forEach((argType) => {
+            Checker.sameTypes(
+                paramType,
+                argType,
+                `Argument type ${callee.inputType} does not match paramter type ${paramType}!`,
+                expr.argumentList[0]
+            );
+            callee = callee.outputType;
+            if (callee instanceof FunctionType) {
+                paramType = callee.inputType;
+            } else {
+                paramType = callee;
+            }
         });
-
-        // execute function body
-        this.statement(callee.body);
-
-        // pop off function call environment
-        this.env = enclosing;
-        return this.env.returnType;
+        return callee;
     }
     visitFunctionExpr(expr: Function) {
-        return expr;
+        const enclosing = this.env;
+        this.env = new Env(this.env);
+        expr.params.forEach((param) => {
+            this.env.declare(param, undefined, false);
+        });
+        let outputType: Type;
+        if (expr.body instanceof Expr) {
+            outputType = this.expression(expr.body);
+        } else if (expr.body instanceof Block) {
+            this.visitBlockStmt(expr.body);
+            outputType = this.env.returnType;
+        }
+        const returnType = this.createFunctionType(
+            [
+                ...expr.params.map(param => this.env.get(param)),
+                outputType
+            ]
+        );
+        this.env = enclosing;
+        return returnType;
     }
+
+    createFunctionType(types: Type[]) {
+        if (types.length === 1) {
+            return types[0];
+    }
+        return new FunctionType(types[0], this.createFunctionType(types.slice(1)));
+    }
+
     visitGetExpr(expr: Get) {
         const object = this.expression(expr.object);
         const name = expr.name;
