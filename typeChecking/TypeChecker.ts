@@ -11,6 +11,7 @@ import { RecordType } from "./RecordType";
 import { isList, capitalize, isNumber, isBoolean, isText } from "../utils";
 import { Env } from "./Environment";
 import { ListType } from "./ListType";
+import { FunctionType } from "./FunctionType";
 
 const NUMBER = PrimitiveType.Num;
 const TEXT = PrimitiveType.Text;
@@ -76,7 +77,26 @@ export class Checker implements Visitor {
     }
 
     public static sameTypes(a: Type, b: Type, message: string, location: Expr | Token) {
-        if (a !== b) {
+        let hasError = false;
+        if (a === undefined || b === undefined) {
+            return;
+        }
+        if (a instanceof ListType && b instanceof ListType) {
+            Checker.sameTypes(a.type, b.type, message, location);
+        } else if (a instanceof RecordType && b instanceof RecordType) {
+            if (Object.keys(a).length === Object.keys(b).length) {
+                hasError = true;
+            }
+            Object.keys(a).every((key) =>
+                Checker.sameTypes(a[key], b[key], message, location)
+            )
+        } else if (a instanceof FunctionType && b instanceof FunctionType) {
+            Checker.sameTypes(a.inputType, b.inputType, message, location);
+            Checker.sameTypes(a.outputType, b.outputType, message, location);
+        } else if (a !== b) {
+            hasError = true;
+        }
+        if (hasError) {
             throw new CError(
                 (
                     location instanceof Expr
