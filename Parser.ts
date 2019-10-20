@@ -233,6 +233,10 @@ export class Parser {
                 type = new NilType();
                 break;
             default:
+                // is uppercase
+                if (first.lexeme[0].toUpperCase() === first.lexeme[0]) {
+                    throw this.error(first, `Cannot find type ${first.lexeme}!\nUse lowercase names for generic types!`);
+                }
                 type = new AnyType(first.lexeme);
                 break;
         }
