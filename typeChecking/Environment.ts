@@ -32,6 +32,13 @@ export class Env {
         }
     }
 
+    declarePrimordial(name: string, type: Type) {
+        this.values[name] = {
+            "mutable": false,
+            "type": type
+        }
+    }
+
     isDeclared(name: string) {
         return this.values[name] !== undefined;
     }

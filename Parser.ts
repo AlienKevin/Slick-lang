@@ -81,7 +81,7 @@ const functinos = [
 
 export class Parser {
     private loopDepth: number;
-    private current: number;
+    public current: number;
     private env: Environment;
     private groupMembers = 0;
 

@@ -14,6 +14,8 @@ import { ListType } from "./ListType";
 import { FunctionType } from "./FunctionType";
 import { AnyType } from "./AnyType";
 import clone from "lodash.clone";
+import { Scanner } from "../Tokenizer";
+import { Parser } from "../Parser";
 import { NilType } from "./NilType";
 
 const NUMBER = PrimitiveType.Num;
@@ -26,21 +28,33 @@ export class Checker implements Visitor {
         // global environment
         const globals = new Env();
         this.env = globals;
-
+        this.declarePrimordials(globals);
     }
 
-    private primordialGenerator() {
+    private declarePrimordials(globals: Env) {
         const primordials = 
         `abs=      Num → Num
         fraction=  Num → Num
         integer=   Num → Num
-        print=     a → Nil`;
-        const regex = /([a-zA-Z]+\??)\=\s*(.*)→(.+)/g;
+        max=       Num → Num → Num
+        min=       Num → Num → Num
+        neg=       Num → Num
+        not=       Bool → Bool
+        print=     a → Nil
+        `;
+        const regex = /([a-zA-Z]+\??)\=\s*(.*)/g;
         let match: string[];
         while ((match = regex.exec(primordials)) !== null) {
             const name = match[1];
-            const params = match[2].split("→").map((param) => param.trim());
-            const result = match[3];
+            const typeString = match[2];
+            const runner = new Runner();
+            runner.lineStarts = [];
+            const scanner = new Scanner(typeString, runner);
+            scanner.scan();
+            const parser = new Parser(scanner.tokens, runner);
+            parser.current = 0;
+            const type = parser.typeDeclaration();
+            globals.declarePrimordial(name, type);
         }
     }
 
@@ -353,12 +367,12 @@ export class Checker implements Visitor {
         const mutable = stmt.typeModifier === TokenType.MUT;
         let type = this.expression(stmt.initializer);
         if (stmt.typeDeclaration !== undefined) {
-        const declaredType = Checker.substituteAnyTypes(stmt.typeDeclaration, type);
-        Checker.sameTypes(
-            type, declaredType,
-            `Declared type ${declaredType} and actual type ${type} do not match!`,
-            stmt.initializer
-        );
+            const declaredType = Checker.substituteAnyTypes(stmt.typeDeclaration, type);
+            Checker.sameTypes(
+                type, declaredType,
+                `Declared type ${declaredType} and actual type ${type} do not match!`,
+                stmt.initializer
+            );
         }
         this.env.declare(stmt.name, type, mutable);
     }
