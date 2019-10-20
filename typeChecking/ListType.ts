@@ -1,5 +1,9 @@
 import { Type } from "./Type";
 
 export class ListType {
-    constructor(public type: Type) {}
+    constructor(readonly type: Type) {}
+
+    toString() {
+        return "List " + this.type;
+    }
 }
