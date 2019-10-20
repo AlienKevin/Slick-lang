@@ -8,6 +8,7 @@ import { Type } from "./typeChecking/Type";
 import { ListType } from "./typeChecking/ListType";
 import { PrimitiveType } from "./typeChecking/PrimitiveType";
 import { FunctionType } from "./typeChecking/FunctionType";
+import { AnyType } from "./typeChecking/AnyType";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -207,7 +208,7 @@ export class Parser {
         }
     }
 
-    typeDeclaration(): Type {
+    typeDeclaration(allowFunctionType = true): Type {
         const first = this.consume([IDENTIFIER, LEFT_PAREN], `Expected a type!`);
         let type: Type;
         switch (first.lexeme) {
@@ -216,7 +217,7 @@ export class Parser {
                 this.consume(RIGHT_PAREN, `Expected a ')'!`);
                 break;
             case "List":
-                type = new ListType(this.typeDeclaration());
+                type = new ListType(this.typeDeclaration(false));
                 break;
             case "Bool":
                 type = PrimitiveType.Bool;
@@ -227,8 +228,11 @@ export class Parser {
             case "Num":
                 type = PrimitiveType.Num;
                 break;
+            default:
+                type = new AnyType(first.lexeme);
+                break;
         }
-        while (this.match(ARROW)) {
+        while (allowFunctionType && this.match(ARROW)) {
             type = new FunctionType(type, this.typeDeclaration());
         }
         return type;
