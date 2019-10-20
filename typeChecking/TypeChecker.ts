@@ -348,12 +348,14 @@ export class Checker implements Visitor {
     visitVarDeclarationStmt(stmt: VarDeclaration) {
         const mutable = stmt.typeModifier === TokenType.MUT;
         let type = this.expression(stmt.initializer);
+        if (stmt.typeDeclaration !== undefined) {
         const declaredType = Checker.substituteAnyTypes(stmt.typeDeclaration, type);
         Checker.sameTypes(
             type, declaredType,
             `Declared type ${declaredType} and actual type ${type} do not match!`,
             stmt.initializer
         );
+        }
         this.env.declare(stmt.name, type, mutable);
     }
 
