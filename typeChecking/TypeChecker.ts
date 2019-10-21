@@ -352,9 +352,14 @@ export class Checker implements Visitor {
             this.visitBlockStmt(expr.body);
             outputType = this.env.returnType;
         }
+        const paramTypes = (
+            expr.params.length > 0
+            ? (expr.params.map(param => this.env.get(param)))
+            : [new AnyType("a")]
+        );
         const returnType = Checker.createFunctionType(
             [
-                ...expr.params.map(param => this.env.get(param)),
+                ...paramTypes,
                 outputType
             ]
         );
