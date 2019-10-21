@@ -10,6 +10,7 @@ import { PrimitiveType } from "./typeChecking/PrimitiveType";
 import { FunctionType } from "./typeChecking/FunctionType";
 import { AnyType } from "./typeChecking/AnyType";
 import { NilType } from "./typeChecking/NilType";
+import { MaybeType } from "./typeChecking/MaybeType";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -220,6 +221,9 @@ export class Parser {
             case "List":
                 type = new ListType(this.typeDeclaration(false));
                 break;
+            case "Maybe":
+                type = new MaybeType(this.typeDeclaration(false));
+                break;
             case "Bool":
                 type = PrimitiveType.Bool;
                 break;
@@ -228,9 +232,6 @@ export class Parser {
                 break;
             case "Num":
                 type = PrimitiveType.Num;
-                break;
-            case "Nil":
-                type = new NilType();
                 break;
             default:
                 // is uppercase

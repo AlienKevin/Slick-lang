@@ -91,6 +91,9 @@ export class Checker implements Visitor {
         if (isNumber(expr)) {
             return NUMBER;
         }
+        if (isNil(expr)) {
+            return NIL;
+    }
     }
 
     public static sameTypes(a: Type, b: Type, message: string, location: Expr | Token) {
