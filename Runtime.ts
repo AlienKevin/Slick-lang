@@ -5,7 +5,9 @@ import R from "ramda"
 import Decimal from "decimal.js";
 
 function print(any) {
-    console.log(toString(any));
+    const string = toString(any);
+    console.log(string);
+    return string;
 }
 
 function toString(any) {

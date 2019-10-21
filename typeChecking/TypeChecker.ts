@@ -56,7 +56,7 @@ export class Checker implements Visitor {
         min=       Num → Num → Num
         neg=       Num → Num
         not=       Bool → Bool
-        print=     a → Nil
+        print=     a → Text
         `;
         const types = Checker.parseTypeDeclarations(primordials);
         Object.entries(types).forEach(([name, type]) => 
