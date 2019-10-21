@@ -283,10 +283,10 @@ export class CodeGenerator implements Visitor {
 
     visitGetExpr(expr: Get) {
         return (
-            "$SLK.get(" + this.expression(expr.object)
-            + ", \"" 
+            this.expression(expr.object)
+            + "[\"" 
             + expr.name.lexeme
-            + "\")"
+            + "\"]"
         )
     }
 
