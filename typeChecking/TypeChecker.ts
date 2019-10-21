@@ -253,8 +253,6 @@ export class Checker implements Visitor {
             // equality operators
             case TokenType.EQUAL:
             case TokenType.NOT_EQUAL:
-                this.boolean(left, expr.left);
-                this.boolean(right, expr.right);
                 return BOOLEAN;
         }
     }
