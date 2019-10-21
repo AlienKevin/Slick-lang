@@ -8,7 +8,7 @@ import { TokenType } from "../TokenType";
 import { Token } from "../Token";
 import { Type } from "./Type";
 import { RecordType } from "./RecordType";
-import { isList, capitalize, isNumber, isBoolean, isText, nextChar } from "../utils";
+import { isList, capitalize, isNumber, isBoolean, isText, nextChar, isNil } from "../utils";
 import { Env } from "./Environment";
 import { ListType } from "./ListType";
 import { FunctionType } from "./FunctionType";
@@ -17,18 +17,34 @@ import clone from "lodash.clone";
 import { Scanner } from "../Tokenizer";
 import { Parser } from "../Parser";
 import { NilType } from "./NilType";
+import { MaybeType } from "./MaybeType";
 
 const NUMBER = PrimitiveType.Num;
 const TEXT = PrimitiveType.Text;
 const BOOLEAN = PrimitiveType.Bool;
+const NIL = new NilType();
+
+type Location = Token | Expr;
 
 export class Checker implements Visitor {
     private env: Env;
     constructor(private runner: Runner) {
         // global environment
-        const globals = new Env();
+        const globals = this.newEnv();
         this.env = globals;
         this.declarePrimordials(globals);
+        this.importModules(["List"], globals);
+    }
+
+    newEnv(enclosing?: Env) {
+        return new Env(this, enclosing);
+    }
+
+    private importModules(moduleNames: string[], globals: Env) {
+        moduleNames.forEach(name => {
+            const moduleDeclaration = require("./" + name).default;
+            globals.declarePrimordial(name, moduleDeclaration);
+        });
     }
 
     private declarePrimordials(globals: Env) {
@@ -42,10 +58,18 @@ export class Checker implements Visitor {
         not=       Bool → Bool
         print=     a → Nil
         `;
-        const regex = /([a-zA-Z]+\??)\=\s*(.*)/g;
+        const types = Checker.parseTypeDeclarations(primordials);
+        Object.entries(types).forEach(([name, type]) => 
+            globals.declarePrimordial(name, type)
+        );
+    }
+
+    public static parseTypeDeclarations(declarations) {
+        const regex = /(.*)\s*\=\s*(.*)/g;
         let match: string[];
-        while ((match = regex.exec(primordials)) !== null) {
-            const name = match[1];
+        let types: {name: string, type: Type} = Object.create(null);
+        while ((match = regex.exec(declarations)) !== null) {
+            const name = match[1].trim();
             const typeString = match[2];
             const runner = new Runner();
             runner.lineStarts = [];
@@ -53,9 +77,9 @@ export class Checker implements Visitor {
             scanner.scan();
             const parser = new Parser(scanner.tokens, runner);
             parser.current = 0;
-            const type = parser.typeDeclaration();
-            globals.declarePrimordial(name, type);
+            types[name] = parser.typeDeclaration();
         }
+        return types;
     }
 
     checkType(stmts: Stmt[]) {
@@ -93,41 +117,45 @@ export class Checker implements Visitor {
         }
         if (isNil(expr)) {
             return NIL;
-    }
+        }
     }
 
-    public static sameTypes(a: Type, b: Type, message: string, location: Expr | Token) {
-        let hasError = false;
-        if (a instanceof AnyType || b instanceof AnyType) {
-            return;
+    public matchTypes(a: Type, b: Type, message: string, location: Location) {
+        if (!Checker.sameTypes(a, b)) {
+            throw this.error(location, message);
+        }
+    }
+
+    public static sameTypes(a: Type, b: Type): boolean {
+        if (a === undefined || b === undefined) {
+            return true;
+        }
+        if (a instanceof AnyType && b instanceof AnyType) {
+            return a.name === b.name;
         }
         if (a instanceof NilType && b instanceof NilType) {
-            return;
+            return true;
         }
-        if (a instanceof ListType && b instanceof ListType) {
-            Checker.sameTypes(a.type, b.type, message, location);
+        if (a instanceof MaybeType && b instanceof MaybeType) {
+            return Checker.sameTypes(a.type, b.type);
+        } else if (a instanceof ListType && b instanceof ListType) {
+            return Checker.sameTypes(a.type, b.type);
         } else if (a instanceof RecordType && b instanceof RecordType) {
-            if (Object.keys(a).length === Object.keys(b).length) {
-                hasError = true;
+            if (Object.keys(a).length !== Object.keys(b).length) {
+                return false;
             }
-            Object.keys(a).every((key) =>
-                Checker.sameTypes(a[key], b[key], message, location)
+            return Object.keys(a).every((key) =>
+                Checker.sameTypes(a[key], b[key])
             )
         } else if (a instanceof FunctionType && b instanceof FunctionType) {
-            Checker.sameTypes(a.inputType, b.inputType, message, location);
-            Checker.sameTypes(a.outputType, b.outputType, message, location);
-        } else if (a !== b) {
-            hasError = true;
+            return (
+                Checker.sameTypes(a.inputType, b.inputType)
+                && Checker.sameTypes(a.outputType, b.outputType)
+            )
+        } else if (a === b) {
+            return true;
         }
-        if (hasError) {
-            throw new CError(
-                (
-                    location instanceof Expr
-                    ? location.first
-                    : location
-                ), message
-            );
-        }
+        return false;
     }
 
     number(valueType: any, operand: Expr, name?: string) {
@@ -146,7 +174,7 @@ export class Checker implements Visitor {
         if (value instanceof AnyType && operand instanceof Variable) {
             this.env.define(operand.name, target);
         } else {
-            Checker.sameTypes(
+            this.matchTypes(
                 target,
                 value,
                 `${capitalize(name)} must be a ${target}, not ${value}!`,
@@ -155,15 +183,20 @@ export class Checker implements Visitor {
         }
     }
 
-    error(token: Token, message: string) {
-        return new CError(token, message);
+    error(location: Location, message: string) {
+        return new CError(
+            location instanceof Expr
+                ? location.first
+                : location
+            , message
+        );
     }
 
     visitTernaryExpr(expr: Ternary) {
         this.boolean(this.expression(expr.condition), expr.condition, "condition");
         const trueBranch = this.expression(expr.trueBranch);
         const falseBranch = this.expression(expr.falseBranch);
-        Checker.sameTypes(
+        this.matchTypes(
             trueBranch, falseBranch,
             "Types in then and else branch do not match!",
             expr
@@ -238,7 +271,7 @@ export class Checker implements Visitor {
             if (type === undefined) {
                 type = elementType;
             } else {
-                Checker.sameTypes(
+                this.matchTypes(
                     type,
                     elementType,
                     `List elements must be the same types!\n${elementType} does not match ${type}!`,
@@ -269,10 +302,14 @@ export class Checker implements Visitor {
         }
         let paramType = callee.inputType;
         const argTypes = expr.argumentList.map(arg => this.expression(arg));
+        let anyTypes = {};
         argTypes.forEach((argType, index) => {
+            paramType = this.substituteAnyTypes(paramType, argType, anyTypes);
             const arg = expr.argumentList[index];
             if (!(callee instanceof FunctionType)) {
-                const funcName = expr.callee.first.lexeme;
+                const funcName = expr.callee instanceof Get
+                    ? expr.callee.object.first.lexeme + "~" + expr.callee.name.lexeme
+                    : expr.callee.first.lexeme;
                 throw this.error(
                     arg.first,
                     `Function '${funcName}' expects ${index} arguments but got ${argTypes.length} instead!`
@@ -281,11 +318,11 @@ export class Checker implements Visitor {
             if (argType instanceof AnyType && arg instanceof Variable) {
                 this.env.define(arg.name, paramType);
             } else {
-                Checker.sameTypes(
+                this.matchTypes(
                     paramType,
                     argType,
                     `Argument type ${argType} does not match paramter type ${paramType}!`,
-                    expr.argumentList[0]
+                    arg
                 );
             }
             callee = callee.outputType;
@@ -299,7 +336,7 @@ export class Checker implements Visitor {
     }
     visitFunctionExpr(expr: Function) {
         const enclosing = this.env;
-        this.env = new Env(this.env);
+        this.env = this.newEnv(enclosing);
         let char = "a";
         function generateAnyType() {
             const curr = char;
@@ -317,7 +354,7 @@ export class Checker implements Visitor {
             this.visitBlockStmt(expr.body);
             outputType = this.env.returnType;
         }
-        const returnType = this.createFunctionType(
+        const returnType = Checker.createFunctionType(
             [
                 ...expr.params.map(param => this.env.get(param)),
                 outputType
@@ -327,7 +364,7 @@ export class Checker implements Visitor {
         return returnType;
     }
 
-    createFunctionType(types: Type[]) {
+    private static createFunctionType(types: Type[]) {
         if (types.length === 1) {
             return types[0];
         }
@@ -340,7 +377,7 @@ export class Checker implements Visitor {
         if (object instanceof RecordType) {
             return object.get(name);
         } else {
-            throw new CError(name, `${object} does not have property ${name.lexeme}!`);
+            throw this.error(name, `${object} does not have property ${name.lexeme}!`);
         }
     }
 
@@ -370,7 +407,7 @@ export class Checker implements Visitor {
         if (this.env.returnType === undefined) {
             this.env.returnType = returnType;
         } else {
-            Checker.sameTypes(
+            this.matchTypes(
                 this.env.returnType,
                 returnType,
                 `Return type ${returnType} differs from previous type ${this.env.returnType}!`,
@@ -382,8 +419,8 @@ export class Checker implements Visitor {
         const mutable = stmt.typeModifier === TokenType.MUT;
         let type = this.expression(stmt.initializer);
         if (stmt.typeDeclaration !== undefined) {
-            const declaredType = Checker.substituteAnyTypes(stmt.typeDeclaration, type);
-            Checker.sameTypes(
+            const declaredType = this.substituteAnyTypes(stmt.typeDeclaration, type, {});
+            this.matchTypes(
                 type, declaredType,
                 `Declared type ${declaredType} and actual type ${type} do not match!`,
                 stmt.initializer
@@ -392,64 +429,54 @@ export class Checker implements Visitor {
         this.env.declare(stmt.name, type, mutable);
     }
 
-    private static substituteAnyTypes(declaredType: Type, actualType: Type) {
-        if (declaredType instanceof FunctionType && actualType instanceof FunctionType) {
-            if (declaredType.inputType instanceof AnyType) {
-                return Object.assign(
-                    clone(declaredType),
-                    {
-                        inputType: actualType.inputType
-                    },
-                    {
-                        outputType: this.substituteAnyTypes(
-                            declaredType.outputType,
-                            actualType.outputType
-                        )
-                    }
-                );
-            } else if (declaredType.inputType instanceof ListType
-                && actualType.inputType instanceof ListType) {
-                return Object.assign(
-                    clone(declaredType),
-                    {
-                        inputType: Object.assign(
-                            clone(declaredType.inputType),
-                            {
-                                type: this.substituteAnyTypes(
-                                    declaredType.inputType.type,
-                                    actualType.inputType.type
-                                )
-                            }
-                        )
-                    },
-                    {
-                        outputType: this.substituteAnyTypes(
-                            declaredType.outputType,
-                            actualType.outputType
-                        )
-                    }
-                );
-            } else if (declaredType.inputType instanceof FunctionType) {
-                return this.substituteAnyTypes(
-                    Object.assign(
-                        clone(declaredType),
-                        {
-                            inputType: this.substituteAnyTypes(
-                                declaredType.inputType,
-                                actualType.inputType
-                            )
-                        },
-                        {
-                            outputType: this.substituteAnyTypes(
-                                declaredType.outputType,
-                                actualType.outputType
-                            )
-                        }
+    private substituteAnyTypes(declaredType: Type, actualType: Type, anyTypes: {[name: string]: Type}): Type {
+        if (declaredType instanceof FunctionType
+            && actualType instanceof FunctionType) {
+            return Object.assign(
+                clone(declaredType),
+                {
+                    inputType: this.substituteAnyTypes(
+                        declaredType.inputType,
+                        actualType.inputType,
+                        anyTypes
                     ),
-                    actualType.outputType
+                    outputType: this.substituteAnyTypes(
+                        declaredType.outputType,
+                        actualType.outputType,
+                        anyTypes
+                    )
+                }
+            );
+        } else if (declaredType instanceof ListType
+                && actualType instanceof ListType) {
+            return Object.assign(
+                    clone(declaredType),
+                    {
+                        type: this.substituteAnyTypes(
+                            declaredType.type,
+                            actualType.type,
+                            anyTypes
+                        )
+                    }
                 );
-            }
         } else if (declaredType instanceof AnyType) {
+            const storedType = anyTypes[declaredType.name];
+            if (storedType !== undefined) {
+                // declared type does not match actual type
+                if (
+                    !(
+                        (
+                            storedType instanceof AnyType
+                            && !(actualType instanceof AnyType)
+                        )
+                        || Checker.sameTypes(storedType, actualType)
+                    )
+                ) {
+                    return storedType;
+                }
+            }
+            // add new type mapping
+            anyTypes[declaredType.name] = actualType;
             return actualType;
         }
         return declaredType;

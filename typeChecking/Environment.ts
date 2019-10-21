@@ -12,7 +12,7 @@ interface Value {
 export class Env {
     private values: { [name: string]: Value } = Object.create(null);
     public returnType: Type;
-    constructor(public enclosing?: Env) {}
+    constructor(readonly checker: Checker, readonly enclosing?: Env) {}
 
     get(nameToken: Token) {
         const name = nameToken.lexeme;
@@ -50,7 +50,7 @@ export class Env {
                 this.values[name].type = type;
             } else if (this.values[name].mutable) {
                 const declaredType = this.values[name].type;
-                Checker.sameTypes(
+                this.checker.matchTypes(
                     declaredType,
                     type,
                     `Value of type ${type} does not match declared type ${declaredType}`,
