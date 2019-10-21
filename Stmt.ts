@@ -2,6 +2,7 @@ import {Visitor} from "./interfaces/Visitor";
 import {Expr, Variable, Call as CallExpr} from "./Expr";
 import { TokenType } from "./TokenType";
 import { Token } from "./Token";
+import { Type } from "./typeChecking/Type";
 export abstract class Stmt {
     abstract accept(visitor: Visitor): any;
 }
