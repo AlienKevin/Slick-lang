@@ -475,7 +475,12 @@ export class Parser {
                 && this.peek().type !== RIGHT_BRACE);
             }
             this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
-            expr = new RecordLiteral(first, keys, values);
+            expr = new RecordLiteral(
+                first,
+                keys.reduce((record, key, index) => 
+                    ({...record, [key]: values[index]}),
+                Object.create(null))
+            );
         } else {
             expr = this.funcExpr();
             this.groupMembers ++;

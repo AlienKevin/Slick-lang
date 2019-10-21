@@ -3,15 +3,7 @@ import { Type } from "./Type";
 import { CError } from "./CompileError";
 
 export class RecordType {
-    readonly record: {[name: string]: Type};
-    constructor(keys: string[], values: Type[]) {
-        this.record = Object.create(null);
-        if (keys !== undefined) {
-            keys.forEach((key, index) => 
-                this.record[key] = values[index]
-            );
-        }
-    }
+    constructor(readonly record: {[name: string]: Type}) {}
 
     get(name: Token) {
         if (this.record[name.lexeme] === undefined) {

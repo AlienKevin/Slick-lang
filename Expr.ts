@@ -62,7 +62,7 @@ export class ListLiteral extends Expr {
 	}
 }
 export class RecordLiteral extends Expr {
-	constructor(first: Token, public keys: string[], public values: Expr[]) {
+	constructor(first: Token, public record: {[name: string]: Expr}) {
 		super(first);
 	}
 	accept(visitor: Visitor) {

@@ -247,8 +247,13 @@ export class Checker implements Visitor {
     }
     visitRecordLiteralExpr(expr: RecordLiteral) {
         return new RecordType(
-            expr.keys,
-            expr.values.map((value) => this.expression(value))
+            Object.keys(expr.record).reduce(
+                (record, key) => ({
+                    ...record, 
+                    [key]: this.expression(expr.record[key])
+                }),
+                Object.create(null)
+            )
         );
     }
     visitVariableExpr(expr: Variable) {

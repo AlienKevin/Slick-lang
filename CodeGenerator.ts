@@ -308,14 +308,13 @@ export class CodeGenerator implements Visitor {
     }
 
     visitRecordLiteralExpr(expr: RecordLiteral) {
-        if (expr.keys.length === 0) {
+        if (Object.keys(expr.record).length === 0) {
             return "Object.create(null)";
         } else {
             this.indent();
             const padding = this.begin();
             const string = "(function (o) {"
-            + expr.keys.map((key, index) => {
-                const value = expr.values[index];
+            + Object.entries(expr.record).map(([key, value]) => {
                 return padding + (
                     "o["
                     + '"' + key + '"'
