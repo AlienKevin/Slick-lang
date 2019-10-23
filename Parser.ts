@@ -437,11 +437,27 @@ export class Parser {
 
     // multiplication → unary(("/" | "*" | "%") unary) * ;
     multiplication() {
-        let expr = this.call();
+        let expr = this.negation();
         while (this.match(SLASH, STAR, MODULO)) {
             const operator = this.previous();
-            const right = this.call();
+            const right = this.negation();
             expr = new Binary(expr, operator, right);
+        }
+        return expr;
+    }
+
+    // only matches negative numbers
+    negation() {
+        let expr;
+        if (this.match(MINUS)) {
+            expr = this.primary();
+            if (expr instanceof Literal && isNumber(expr.value)) {
+                expr = new Literal(expr.first, expr.value.neg());
+            } else {
+                throw this.error(expr.first, `Expected a number after '-'!`);
+            }
+        } else {
+            expr = this.call();
         }
         return expr;
     }
@@ -531,6 +547,7 @@ export class Parser {
             STRING,
             NUMBER,
             IDENTIFIER,
+            MINUS // negative number
         ];
         // check if current token is the begining
         // of a literal value
