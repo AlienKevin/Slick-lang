@@ -335,6 +335,7 @@ export class Checker implements Visitor {
     visitFunctionExpr(expr: Function) {
         const enclosing = this.env;
         this.env = this.newEnv(enclosing);
+        this.env.functionName = enclosing.functionName;
         let char = "a";
         function generateAnyType() {
             const curr = char;
@@ -343,14 +344,16 @@ export class Checker implements Visitor {
             return new AnyType(curr);
         }
         expr.params.forEach((param) => {
-            this.env.declare(param, generateAnyType(), false);
+            const paramType = generateAnyType();
+            this.env.declare(param, paramType, false);
         });
-        let outputType: Type;
+        this.env.functionParams = expr.params;
+        let outputType: Type = generateAnyType();
         if (expr.body instanceof Expr) {
             outputType = this.expression(expr.body);
         } else if (expr.body instanceof Block) {
             this.visitBlockStmt(expr.body);
-            outputType = this.env.returnType;
+            outputType = this.env.functionReturnType;
         }
         const paramTypes = (
             expr.params.length > 0
@@ -363,11 +366,15 @@ export class Checker implements Visitor {
                 outputType
             ]
         );
+        // reset to defaults
         this.env = enclosing;
+        this.env.functionParams = undefined;
+        this.env.functionReturnType = undefined;
+        this.env.functionName = undefined;
         return returnType;
     }
 
-    private static createFunctionType(types: Type[]) {
+    public static createFunctionType(types: Type[]) {
         if (types.length === 1) {
             return types[0];
         }
@@ -409,29 +416,40 @@ export class Checker implements Visitor {
     }
     visitReturnStmt(stmt: Return) {
         const returnType = this.expression(stmt.value);
-        if (this.env.returnType === undefined) {
-            this.env.returnType = returnType;
+        if (this.env.functionReturnType === undefined) {
+            this.env.functionReturnType = returnType;
         } else {
             this.matchTypes(
-                this.env.returnType,
+                this.env.functionReturnType,
                 returnType,
-                `Return type ${returnType} differs from previous type ${this.env.returnType}!`,
+                `Return type ${returnType} differs from previous type ${this.env.functionReturnType}!`,
                 stmt.value
             );
         }
     }
     visitVarDeclarationStmt(stmt: VarDeclaration) {
         const mutable = stmt.typeModifier === TokenType.MUT;
+        if (stmt.initializer instanceof Function) {
+            this.env.functionName = stmt.name.lexeme;
+        }
         let type = this.expression(stmt.initializer);
+        const declaredType = stmt.typeDeclaration;
         if (stmt.typeDeclaration !== undefined) {
-            const declaredType = this.substituteAnyTypes(stmt.typeDeclaration, type, {});
             this.matchTypes(
-                type, declaredType,
+                declaredType, this.substituteAnyTypes(type, declaredType, {}),
                 `Declared type ${declaredType} and actual type ${type} do not match!`,
                 stmt.initializer
             );
         }
-        this.env.declare(stmt.name, type, mutable);
+        if (stmt.initializer instanceof Function) {
+            this.env.functionName = undefined;
+        }
+        this.env.declare(
+            stmt.name,
+            declaredType === undefined
+                ? type
+                : declaredType,
+            mutable);
     }
 
     private substituteAnyTypes(declaredType: Type, actualType: Type, anyTypes: {[name: string]: Type}): Type {

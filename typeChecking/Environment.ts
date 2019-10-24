@@ -11,11 +11,26 @@ interface Value {
 
 export class Env {
     private values: { [name: string]: Value } = Object.create(null);
-    public returnType: Type;
+    // current function
+    public functionParams: Token[];
+    public functionReturnType: Type;
+    public functionName: string;
     constructor(readonly checker: Checker, readonly enclosing?: Env) {}
 
-    get(nameToken: Token) {
+    get(nameToken: Token): Type {
         const name = nameToken.lexeme;
+        if (name === this.functionName) {
+            if (this.functionReturnType === undefined) {
+                throw new CError(nameToken, `Cannot make recursive calls to function '${name}' before returning concrete values!`);
+            }
+            const functionParamTypes = this.functionParams.map((param) =>
+                this.get(param)
+            );
+            return Checker.createFunctionType([
+                ...functionParamTypes,
+                this.functionReturnType
+            ]);
+        }
         if (this.isDeclared(name)) {
             return this.values[name].type;
         }
