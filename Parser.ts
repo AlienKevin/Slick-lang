@@ -11,6 +11,7 @@ import { FunctionType } from "./typeChecking/FunctionType";
 import { AnyType } from "./typeChecking/AnyType";
 import { NilType } from "./typeChecking/NilType";
 import { MaybeType } from "./typeChecking/MaybeType";
+import { isNumber } from "./utils";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -160,12 +161,12 @@ export class Parser {
         const first = this.previous();
         let params = this.consumeParameters();
         const enclosing = this.env;
-            // new function environment
-            this.env = this.newEnv(enclosing);
-            const mutable = false;
-            params.forEach((param) => {
-                this.env.declare(param, mutable);
-            })
+        // new function environment
+        this.env = this.newEnv(enclosing);
+        const mutable = false;
+        params.forEach((param) => {
+            this.env.declare(param, mutable);
+        });
         const body = (
             this.match(NEWLINE)
             ? this.block()
@@ -197,10 +198,10 @@ export class Parser {
         }
         const operator = this.consume([EQUAL, COLON], `Variable '${name}' must be initialized when declared!`);
         if (operator.type === COLON) {
-            const initializer: Expr = this.expression();
-            this.endStmt("value");
             const mutable = typeModifier === MUT;
             this.env.declare(nameToken, mutable);
+            const initializer: Expr = this.expression();
+            this.endStmt("value");
             return new VarDeclaration(nameToken, initializer, typeModifier, declaredType);
         } else if (operator.type === EQUAL) {
             const type: Type = this.typeDeclaration();
