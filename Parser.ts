@@ -479,8 +479,12 @@ export class Parser {
             if (!this.check(RIGHT_BRACE)) { // has arguments
                 // arguments → expression ( "," expression )*
                 do {
-                    let key = this.consume(IDENTIFIER, `Key must be a label, not an expression!`);
-                    keys.push(key.lexeme);
+                    const keyToken = this.consume(IDENTIFIER, `Key must be a label, not an expression!`);
+                    const key = keyToken.lexeme;
+                    if (keys.includes(key)) {
+                        throw this.error(keyToken, `Duplicated key ${key} in record!`);
+                    }
+                    keys.push(key);
                     this.consume(COLON, `Expected ':' after map key!`);
                     const value = this.expression();
                     values.push(value);
