@@ -13,8 +13,7 @@ export function test(source: Map<string, string>, runner: Runner) {
         try {
             runner.run(source, {
                 printTokenList: false,
-                printGeneratedCode: true,
-                genereateFrontMatters: false,
+                runCode: false
             });
         } catch (ignore) {
             passedAllTests = false;

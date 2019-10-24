@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "s": "node dist/tests/simple.js && node -r esm tests/dist.js",
+    "s": "node dist/tests/simple.js",
     "t": "node dist/tests/test.js"
   },
   "dependencies": {

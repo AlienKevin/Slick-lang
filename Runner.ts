@@ -3,7 +3,6 @@ import {CodeGenerator} from "./CodeGenerator";
 import { Token } from "./Token";
 import AsciiTable from "ascii-table";
 import { Parser } from "./Parser";
-import * as fs from 'fs';
 import { Checker } from "./typeChecking/TypeChecker";
 
 export class Runner {
@@ -15,8 +14,7 @@ export class Runner {
 
     run(source: string, options = {
         printTokenList: false,
-        printGeneratedCode: false,
-        genereateFrontMatters: true,
+        runCode: true
         }) {
         this.source = source;
         this.lineStarts = [];
@@ -60,11 +58,12 @@ export class Runner {
         }
 
         // generate code
-        const code = new CodeGenerator().generateCode(statements, options.genereateFrontMatters);
-        if (options.printGeneratedCode) {
-            this.output(code);
+        const code = new CodeGenerator().generateCode(statements, options.runCode);
+        if (options.runCode) {
+            // fs.writeFileSync("./tests/dist.js", code);
+            eval(code);
         } else {
-            fs.writeFileSync("./tests/dist.js", code);
+            this.output(code);
         }
     }
 

@@ -82,7 +82,7 @@ function isBooleanOperator(op) {
 
 export class CodeGenerator implements Visitor {
     private indentation: number = 0;
-    private frontMatter: string[] = [`import $SLK from "../dist/Runtime";\n`];
+    private frontMatter: string[] = [`const $SLK = require("./Runtime").default;\n`];
     private uniqueNumbers: {[name: string]: true} = {};
     private operatorTransform = $SLK.stone({
         "AND": (expr: Binary) => {
