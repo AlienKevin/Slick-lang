@@ -392,7 +392,9 @@ export class Checker implements Visitor {
     visitIfStmt(stmt: If) {
         this.boolean(this.expression(stmt.condition), stmt.condition);
         this.statement(stmt.thenBranch);
-        this.statement(stmt.elseBranch);
+        if (stmt.elseBranch !== undefined) {
+            this.statement(stmt.elseBranch);
+        }
     }
     visitCallStmt(stmt: CallStmt) {
         this.expression(stmt.call);
