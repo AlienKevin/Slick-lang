@@ -7,7 +7,7 @@ export function isDigit(char: string) {
 
 // Based on: https://stackoverflow.com/a/4434100/6798201
 export function isAlpha(char: string) {
-    return /^[a-z_]$/i.test(char);
+    return /^[a-z]$/i.test(char);
 }
 
 export function isAlphaNumeric(char: string) {
