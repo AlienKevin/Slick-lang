@@ -253,6 +253,9 @@ export class Checker implements Visitor {
             // equality operators
             case TokenType.EQUAL:
             case TokenType.NOT_EQUAL:
+                if (!Checker.sameTypes(left, right)) {
+                    throw this.error(expr.right, `Right operand typed ${right} does not match left operand typed ${left}!`);
+                }
                 return BOOLEAN;
         }
     }
