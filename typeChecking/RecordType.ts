@@ -14,14 +14,11 @@ export class RecordType {
     }
 
     toString() {
-        let linebreak = "";
-        let padding = "";
         return (
-            "{" + linebreak
+            "{"
             + Object.entries(this.record).map(([key, value]) => 
-                padding + key + ": " + value
-            ).join(linebreak)
-            + linebreak
+                key + ": " + value
+            ).join(", ")
             + "}"
         );
     }
