@@ -141,12 +141,15 @@ export class Checker implements Visitor {
         } else if (a instanceof ListType && b instanceof ListType) {
             return Checker.sameTypes(a.type, b.type);
         } else if (a instanceof RecordType && b instanceof RecordType) {
-            if (Object.keys(a).length !== Object.keys(b).length) {
+            if (Object.keys(a.record).length !== Object.keys(b.record).length) {
                 return false;
             }
-            return Object.keys(a).every((key) =>
-                Checker.sameTypes(a[key], b[key])
-            )
+            return Object.keys(a.record).every((key) => {
+                if (b.record[key] === undefined) {
+                    return false;
+                }
+                return Checker.sameTypes(a.record[key], b.record[key])
+            });
         } else if (a instanceof FunctionType && b instanceof FunctionType) {
             return (
                 Checker.sameTypes(a.inputType, b.inputType)
