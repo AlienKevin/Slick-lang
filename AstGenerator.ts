@@ -98,6 +98,13 @@ function createAst(filePath: string, parentClassName: string, descriptions: {[st
         + `\taccept(visitor: Visitor) {\n`
         + `\t\treturn visitor.visit${type}${parentClassName}(this);\n`
         + `\t}\n`
+        + (
+            parentClassName === "Expr"
+            ? `\ttoString() {\n`
+                + `\t\treturn "${type} expression"\n`
+                + `\t}\n`
+            : ""
+        )
         + `}\n`;
     });
 

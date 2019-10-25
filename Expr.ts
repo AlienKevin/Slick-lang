@@ -12,6 +12,9 @@ export class Ternary extends Expr {
 	accept(visitor: Visitor) {
 		return visitor.visitTernaryExpr(this);
 	}
+	toString() {
+		return "Ternary expression"
+	}
 }
 export class Binary extends Expr {
 	constructor(public left: Expr, public operator: Token, public right: Expr) {
@@ -19,6 +22,9 @@ export class Binary extends Expr {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitBinaryExpr(this);
+	}
+	toString() {
+		return "Binary expression"
 	}
 }
 export class Grouping extends Expr {
@@ -28,6 +34,9 @@ export class Grouping extends Expr {
 	accept(visitor: Visitor) {
 		return visitor.visitGroupingExpr(this);
 	}
+	toString() {
+		return "Grouping expression"
+	}
 }
 export class Literal extends Expr {
 	constructor(first: Token, public value: any) {
@@ -35,6 +44,9 @@ export class Literal extends Expr {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitLiteralExpr(this);
+	}
+	toString() {
+		return "Literal expression"
 	}
 }
 export class Variable extends Expr {
@@ -44,6 +56,9 @@ export class Variable extends Expr {
 	accept(visitor: Visitor) {
 		return visitor.visitVariableExpr(this);
 	}
+	toString() {
+		return "Variable expression"
+	}
 }
 export class Call extends Expr {
 	constructor(public callee: Expr, public paren: Token, public argumentList: Expr[]) {
@@ -51,6 +66,9 @@ export class Call extends Expr {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitCallExpr(this);
+	}
+	toString() {
+		return "Call expression"
 	}
 }
 export class ListLiteral extends Expr {
@@ -60,6 +78,9 @@ export class ListLiteral extends Expr {
 	accept(visitor: Visitor) {
 		return visitor.visitListLiteralExpr(this);
 	}
+	toString() {
+		return "ListLiteral expression"
+	}
 }
 export class RecordLiteral extends Expr {
 	constructor(first: Token, public record: {[name: string]: Expr}) {
@@ -67,6 +88,9 @@ export class RecordLiteral extends Expr {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitRecordLiteralExpr(this);
+	}
+	toString() {
+		return "RecordLiteral expression"
 	}
 }
 export class Function extends Expr {
@@ -76,6 +100,9 @@ export class Function extends Expr {
 	accept(visitor: Visitor) {
 		return visitor.visitFunctionExpr(this);
 	}
+	toString() {
+		return "Function expression"
+	}
 }
 export class Get extends Expr {
 	constructor(public object: Expr, public name: Token, public bracket?: Token) {
@@ -83,5 +110,8 @@ export class Get extends Expr {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitGetExpr(this);
+	}
+	toString() {
+		return "Get expression"
 	}
 }
