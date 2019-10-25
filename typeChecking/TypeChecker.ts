@@ -186,6 +186,21 @@ export class Checker implements Visitor {
         }
     }
 
+    matchLeftRightTypes(leftType: Type, rightType: Type, leftOperand: Expr, rightOperand: Expr) {
+        if (leftType instanceof AnyType && leftOperand instanceof Variable) {
+            this.env.define(leftOperand.name, rightType);
+        } else if (rightType instanceof AnyType && rightOperand instanceof Variable) {
+            this.env.define(rightOperand.name, leftType);
+        } else {
+            this.matchTypes(
+                leftType,
+                rightType,
+                `Right operand typed ${rightType} does not match left operand typed ${leftType}!`,
+                rightOperand
+            );
+        }
+    }
+
     error(location: Location, message: string) {
         return new CError(
             location instanceof Expr
@@ -207,14 +222,14 @@ export class Checker implements Visitor {
         return trueBranch;
     }
     visitBinaryExpr(expr: Binary) {
-        const left = this.expression(expr.left);
-        const right = this.expression(expr.right);
+        const leftType = this.expression(expr.left);
+        const rightType = this.expression(expr.right);
 
         // logical operators
         if (expr.operator.type === TokenType.AND ||
             expr.operator.type === TokenType.OR) {
-            this.boolean(left, expr.left);
-            this.boolean(right, expr.right);
+            this.boolean(leftType, expr.left);
+            this.boolean(rightType, expr.right);
             return BOOLEAN;
         }
 
@@ -226,13 +241,13 @@ export class Checker implements Visitor {
             case TokenType.SLASH:
             case TokenType.STAR:
             case TokenType.MODULO:
-                this.number(left, expr.left);
-                this.number(right, expr.right);
+                this.number(leftType, expr.left);
+                this.number(rightType, expr.right);
                 return NUMBER;
             
             case TokenType.AMPERSAND:
-                this.text(left, expr.left);
-                this.text(right, expr.right);
+                this.text(leftType, expr.left);
+                this.text(rightType, expr.right);
                 return TEXT;
 
             // comparison operators
@@ -241,12 +256,12 @@ export class Checker implements Visitor {
             case TokenType.LESS:
             case TokenType.LESS_EQUAL:
                 try {
-                    this.number(left, expr.left);
-                    this.number(right, expr.right);
+                    this.number(leftType, expr.left);
+                    this.number(rightType, expr.right);
                 } catch(ignore) {
                     try {
-                        this.text(left, expr.left);
-                        this.text(right, expr.left);
+                        this.text(leftType, expr.left);
+                        this.text(rightType, expr.left);
                     } catch(ignore) {
                         throw this.error(expr.operator, "Operands must be two numbers or two strings!");
                     }
@@ -256,9 +271,7 @@ export class Checker implements Visitor {
             // equality operators
             case TokenType.EQUAL:
             case TokenType.NOT_EQUAL:
-                if (!Checker.sameTypes(left, right)) {
-                    throw this.error(expr.right, `Right operand typed ${right} does not match left operand typed ${left}!`);
-                }
+                this.matchLeftRightTypes(leftType, rightType, expr.left, expr.right);
                 return BOOLEAN;
         }
     }
