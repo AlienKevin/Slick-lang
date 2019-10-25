@@ -344,7 +344,7 @@ export class Parser {
             this.endStmt("call");
             return new CallStmt(expr.expression);
         } else {
-            throw this.error(keyword, `Expected a function call!`);
+            throw this.error(expr.first, `Expected a function call, not a ${expr}!`);
         }
     }
 
@@ -364,7 +364,7 @@ export class Parser {
     }
 
     // expression → assignment
-    expression() {
+    expression(): Expr {
         return this.ternary();
     }
 
@@ -438,27 +438,11 @@ export class Parser {
 
     // multiplication → unary(("/" | "*" | "%") unary) * ;
     multiplication() {
-        let expr = this.negation();
+        let expr = this.call();
         while (this.match(SLASH, STAR, MODULO)) {
             const operator = this.previous();
-            const right = this.negation();
+            const right = this.call();
             expr = new Binary(expr, operator, right);
-        }
-        return expr;
-    }
-
-    // only matches negative numbers
-    negation() {
-        let expr;
-        if (this.match(MINUS)) {
-            expr = this.primary();
-            if (expr instanceof Literal && isNumber(expr.value)) {
-                expr = new Literal(expr.first, expr.value.neg());
-            } else {
-                throw this.error(expr.first, `Expected a number after '-'!`);
-            }
-        } else {
-            expr = this.call();
         }
         return expr;
     }
@@ -466,47 +450,8 @@ export class Parser {
     // call  → primary ( arguments? | "." IDENTIFIER )* ;
     //       → "[" arguments? "]"
     call(required = false) {
-        let expr: Expr;
-        if (this.match(LEFT_BRACKET)) {
-            const first = this.previous();
-            const list = this.getList(TokenType.RIGHT_BRACKET, COMMA);
-            this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
-            expr = new ListLiteral(first, list);
-        } else if (this.match(LEFT_BRACE)) {
-            const first = this.previous();
-            let keys: string[] = [];
-            let values: Expr[] = [];
-            if (!this.check(RIGHT_BRACE)) { // has arguments
-                // arguments → expression ( "," expression )*
-                do {
-                    const keyToken = this.consume(IDENTIFIER, `Key must be a label, not an expression!`);
-                    const key = keyToken.lexeme;
-                    if (keys.includes(key)) {
-                        throw this.error(keyToken, `Duplicated key ${key} in record!`);
-                    }
-                    keys.push(key);
-                    this.consume(COLON, `Expected ':' after map key!`);
-                    const value = this.expression();
-                    values.push(value);
-                    
-                } while (
-                    (
-                        this.match(COMMA)
-                        || this.match(SOFT_NEWLINE)
-                    )
-                && this.peek().type !== RIGHT_BRACE);
-            }
-            this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
-            expr = new RecordLiteral(
-                first,
-                keys.reduce((record, key, index) => 
-                    ({...record, [key]: values[index]}),
-                Object.create(null))
-            );
-        } else {
-            expr = this.funcExpr();
-            this.groupMembers ++;
-        }
+        let expr: Expr = this.funcExpr();
+        this.groupMembers ++;
         while (true) {
             if (this.match(TILDE)) {
                 const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
@@ -552,18 +497,25 @@ export class Parser {
             STRING,
             NUMBER,
             IDENTIFIER,
-            MINUS // negative number
         ];
+        const isNumberLiteral = (
+            this.previous().type !== RIGHT_PAREN
+            && this.previous().type !== IDENTIFIER
+            && this.check(MINUS)
+        );
         // check if current token is the begining
         // of a literal value
-        return this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN, F);
+        return (
+            this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN, F)
+            || isNumberLiteral
+        );
     }
 
     // argumentList → expression*
     getArgumentList() {
         let list: Expr[] = [];
         while (this.checkLiteral()) {
-            list.push(this.expression());
+            list.push(this.primary());
         }
         this.groupMembers = 0;
         return list;
@@ -611,8 +563,62 @@ export class Parser {
         return this.primary();
     }
 
-    // primary → NUMBER | STRING | "false" | "true" | "Nil" | "(" expression ")" | IDENTIFIER
     primary() {
+        // only matches negative numbers
+        if (this.match(MINUS)) {
+            let expr = this.primaryHelper();
+            if (expr instanceof Literal && isNumber(expr.value)) {
+                expr = new Literal(expr.first, expr.value.neg());
+            } else {
+                throw this.error(expr.first, `Expected a number after '-'!`);
+            }
+            return expr;
+        }
+        return this.primaryHelper();
+    }
+
+    // primary → NUMBER | STRING | "false" | "true" | "Nil" | "(" expression ")" | IDENTIFIER
+    primaryHelper() {
+        // record literal
+        if (this.match(LEFT_BRACE)) {
+            const first = this.previous();
+            let keys: string[] = [];
+            let values: Expr[] = [];
+            if (!this.check(RIGHT_BRACE)) { // has arguments
+                // arguments → expression ( "," expression )*
+                do {
+                    const keyToken = this.consume(IDENTIFIER, `Key must be a label, not an expression!`);
+                    const key = keyToken.lexeme;
+                    if (keys.includes(key)) {
+                        throw this.error(keyToken, `Duplicated key ${key} in record!`);
+                    }
+                    keys.push(key);
+                    this.consume(COLON, `Expected ':' after map key!`);
+                    const value = this.expression();
+                    values.push(value);
+                    
+                } while (
+                    (
+                        this.match(COMMA)
+                        || this.match(SOFT_NEWLINE)
+                    )
+                && this.peek().type !== RIGHT_BRACE);
+            }
+            this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
+            return new RecordLiteral(
+                first,
+                keys.reduce((record, key, index) => 
+                    ({...record, [key]: values[index]}),
+                Object.create(null))
+            );
+        }
+        // list literal
+        if (this.match(LEFT_BRACKET)) {
+            const first = this.previous();
+            const list = this.getList(TokenType.RIGHT_BRACKET, COMMA);
+            this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
+            return new ListLiteral(first, list);
+        }
         if (this.match(NUMBER, STRING)) {
             const token = this.previous();
             return new Literal(token, token.literal);
