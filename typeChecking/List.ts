@@ -1,7 +1,4 @@
-import { Checker } from "./TypeChecker";
-import { RecordType } from "./RecordType";
-
-const declarations = 
+const declaration  = 
 `map=        (a → b) → List a → List b
 filter=      (a → Bool) → List a → List a
 reject=      (a → Bool) → List a → List a
@@ -28,5 +25,4 @@ drop·last=   Num → List a → List a
 concat=      List a → List a → List a
 adjust=      Num → (a → a) → List a → List a`;
 
-const types = Checker.parseTypeDeclarations(declarations);
-export default new RecordType(types);
+export default declaration;

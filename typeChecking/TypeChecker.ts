@@ -43,7 +43,8 @@ export class Checker implements Visitor {
     private importModules(moduleNames: string[], globals: Env) {
         moduleNames.forEach(name => {
             const moduleDeclaration = require("./" + name).default;
-            globals.declarePrimordial(name, moduleDeclaration);
+            const types = Checker.parseTypeDeclarations(moduleDeclaration);
+            globals.declarePrimordial(name, new RecordType(types));
         });
     }
 
