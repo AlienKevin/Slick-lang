@@ -48,6 +48,7 @@ export class Scanner {
     }
 
     scanToken() {
+        const prev = this.previous();
         const c = this.advance();
         switch (c) {
             // single symbols
@@ -61,7 +62,24 @@ export class Scanner {
             case '~': this.addToken(TokenType.TILDE); break;
             case '→': this.addToken(TokenType.ARROW); break;
             case '&': this.addToken(TokenType.AMPERSAND); break;
-            case '-': this.addToken(TokenType.MINUS); break;
+            case '-':
+                if (
+                    prev !== ' '
+                    && this.tokens.length > 0
+                    && (
+                        this.tokens[this.tokens.length - 1].type === TokenType.NUMBER
+                        || this.tokens[this.tokens.length - 1].type === TokenType.IDENTIFIER
+                )) {
+                    this.addToken(TokenType.MINUS)
+                } else {
+                    if (isDigit(this.peek())) {
+                        this.advance();
+                        this.number();
+                    } else {
+                        this.addToken(TokenType.MINUS)
+                    }
+                }
+                break;
             case '+': this.addToken(TokenType.PLUS); break;
             case '*': this.addToken(TokenType.STAR); break;
             case '/': this.addToken(TokenType.SLASH); break;
@@ -276,6 +294,9 @@ export class Scanner {
             // consume the exponential part
             if (this.peek() === '-') {
                 this.advance();
+            }
+            if (!isDigit(this.peek())) {
+                this.error("Illegal number format: numbers must have exponent after 'e'!")
             }
             while (isDigit(this.peek())) {
                 this.advance();

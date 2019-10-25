@@ -453,10 +453,7 @@ export class Parser {
         let expr: Expr = this.funcExpr();
         this.groupMembers ++;
         while (true) {
-            if (this.match(TILDE)) {
-                const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
-                expr = new Get(expr, property);
-            } else if (this.groupMembers === 1) {
+            if (this.groupMembers === 1) {
                 // maybe start of a function call
                 if (this.maybeFunctionCall(expr)) {
                     const funcName: Token = this.previous();
@@ -498,16 +495,8 @@ export class Parser {
             NUMBER,
             IDENTIFIER,
         ];
-        const isNumberLiteral = (
-            this.previous().type !== RIGHT_PAREN
-            && this.previous().type !== IDENTIFIER
-            && this.check(MINUS)
-        );
-        // check if current token is the begining
-        // of a literal value
         return (
             this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN, F)
-            || isNumberLiteral
         );
     }
 
@@ -564,17 +553,13 @@ export class Parser {
     }
 
     primary() {
-        // only matches negative numbers
-        if (this.match(MINUS)) {
-            let expr = this.primaryHelper();
-            if (expr instanceof Literal && isNumber(expr.value)) {
-                expr = new Literal(expr.first, expr.value.neg());
-            } else {
-                throw this.error(expr.first, `Expected a number after '-'!`);
-            }
-            return expr;
+        let expr = this.primaryHelper();
+        // get expression
+        while (this.match(TILDE)) {
+            const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
+            expr = new Get(expr, property);
         }
-        return this.primaryHelper();
+        return expr;
     }
 
     // primary → NUMBER | STRING | "false" | "true" | "Nil" | "(" expression ")" | IDENTIFIER
