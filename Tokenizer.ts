@@ -87,7 +87,6 @@ export class Scanner {
 
             // whitespace
             case ' ':
-            case '\t':
                 // ignore whitespace not at the start of a line (not indentation)
                 break;
 
