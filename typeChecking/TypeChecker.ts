@@ -33,7 +33,7 @@ export class Checker implements Visitor {
         const globals = this.newEnv();
         this.env = globals;
         this.declarePrimordials(globals);
-        this.importModules(["List"], globals);
+        this.importModules(["List", "Text"], globals);
     }
 
     newEnv(enclosing?: Env) {

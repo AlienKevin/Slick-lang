@@ -102,6 +102,7 @@ export class Parser {
 
             // modules
             "List",
+            "Text",
             "pipe"
         ];
         primordials.forEach((primordial) => {

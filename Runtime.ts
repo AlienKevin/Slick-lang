@@ -1,6 +1,6 @@
 import { isList, isNumber, isText, isBoolean, isNil } from "./utils";
-import * as unified from "string-unified";
 import List from "./List";
+import Text from "./Text";
 import R from "ramda"
 import Decimal from "decimal.js";
 
@@ -248,4 +248,5 @@ export default stone({
     stone,
     sub,
     ternary,
+    Text,
 }); 

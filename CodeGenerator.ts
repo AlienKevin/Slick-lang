@@ -49,6 +49,7 @@ const primordial = $SLK.stone({
 
     // modules
     "List": "$SLK.List",
+    "Text": "$SLK.Text",
     "pipe": "$SLK.pipe"
 });
 
