@@ -11,8 +11,11 @@ function print(any) {
 }
 
 function toString(any) {
-    if (isNumber(any) || isText(any) || isBoolean(any)) {
+    if (isNumber(any) || isBoolean(any)) {
         return any.toString();
+    }
+    if (isText(any)) {
+        return "'" + any + "'";
     }
     if (isNil(any)) {
         return "Nil";
