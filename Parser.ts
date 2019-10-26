@@ -12,6 +12,7 @@ import { AnyType } from "./typeChecking/AnyType";
 import { NilType } from "./typeChecking/NilType";
 import { MaybeType } from "./typeChecking/MaybeType";
 import { isNumber } from "./utils";
+import { RecordType } from "./typeChecking/RecordType";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -218,12 +219,25 @@ export class Parser {
     }
 
     typeDeclaration(allowFunctionType = true): Type {
-        const first = this.consume([NIL, IDENTIFIER, LEFT_PAREN], `Expected a type!`);
+        const first = this.consume([NIL, IDENTIFIER, LEFT_PAREN, LEFT_BRACE], `Expected a type!`);
         let type: Type;
         switch (first.lexeme) {
             case "(":
                 type = this.typeDeclaration();
                 this.consume(RIGHT_PAREN, `Expected a ')'!`);
+                break;
+            case "{":
+                let recordType = Object.create(null);
+                if (this.check(IDENTIFIER)) {
+                    do {
+                        const keyName = this.consume(IDENTIFIER, `Expected a key name!`).lexeme;
+                        this.consume(EQUAL, `Expected a '=' after key name!`);
+                        const valueType = this.typeDeclaration();
+                        recordType[keyName] = valueType;
+                    } while (this.match(COMMA, SOFT_NEWLINE));
+                }
+                type = new RecordType(recordType);
+                this.consume(RIGHT_BRACE, `Expected a closing '}'!`);
                 break;
             case "List":
                 type = new ListType(this.typeDeclaration(false));
@@ -458,18 +472,18 @@ export class Parser {
     call(required = false) {
         let expr: Expr = this.funcExpr();
         this.groupMembers ++;
-            if (this.groupMembers === 1) {
-                // maybe start of a function call
-                if (this.maybeFunctionCall(expr)) {
-                    const funcName: Token = this.previous();
-                    let argumentList = this.getArgumentList();
-                    if (argumentList.length === 0) {
-                        if (required) {
-                            throw this.error(this.peek(), `Expected invokation after callee!`);
-                        }
-                    } else {
-                        expr = new Call(expr, funcName, argumentList);
+        if (this.groupMembers === 1) {
+            // maybe start of a function call
+            if (this.maybeFunctionCall(expr)) {
+                const funcName: Token = this.previous();
+                let argumentList = this.getArgumentList();
+                if (argumentList.length === 0) {
+                    if (required) {
+                        throw this.error(this.peek(), `Expected invokation after callee!`);
                     }
+                } else {
+                    expr = new Call(expr, funcName, argumentList);
+                }
             }
         }
         this.groupMembers = 0;
