@@ -171,7 +171,12 @@ export class Parser {
         const body = (
             this.match(NEWLINE)
             ? this.block()
-            : this.expression()
+            : (() => {
+                this.consume(LEFT_PAREN, `Expected '(' before function body!`);
+                const expr = this.expression();
+                this.consume(RIGHT_PAREN, `Expected ')' after function body!`);
+                return expr;
+            })()
         );
         this.env = enclosing;
         return new Function(first, params, body);
