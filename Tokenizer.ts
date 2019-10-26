@@ -5,8 +5,8 @@ import { isDigit, isAlpha, isAlphaNumeric, isMiddot } from "./utils";
 import { Runner } from "./Runner";
 
 const reservedWords = new Map([
-    ["true", TokenType.TRUE],
-    ["false", TokenType.FALSE],
+    ["True", TokenType.TRUE],
+    ["False", TokenType.FALSE],
     ["Nil", TokenType.NIL],
     ["f", TokenType.F],
 ])
