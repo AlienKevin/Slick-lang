@@ -17,7 +17,7 @@ export class RecordType {
         return (
             "{"
             + Object.entries(this.record).map(([key, value]) => 
-                key + ": " + value
+                key + " = " + value
             ).join(", ")
             + "}"
         );
