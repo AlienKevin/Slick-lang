@@ -357,8 +357,37 @@ export class Checker implements Visitor {
                 paramType = callee;
             }
         });
-        return callee;
+        return this.substituteReturnType(callee, anyTypes);
     }
+
+    // substitute AnyTypes in return type with concrete types extracted from argument types
+    substituteReturnType(returnType: Type, anyTypes: {[name: string]: Type}) {
+        if (returnType instanceof FunctionType) {
+            return Object.assign(
+                clone(returnType),
+                {
+                    inputType: this.substituteReturnType(returnType.inputType, anyTypes),
+                    outputType: this.substituteReturnType(returnType.outputType, anyTypes)
+                }
+            )
+        } else if (
+            returnType instanceof ListType
+            || returnType instanceof MaybeType
+        ) {
+            return Object.assign(
+                clone(returnType),
+                {
+                    type: this.substituteReturnType(returnType.type, anyTypes)
+                }
+            )
+        }
+         else if (returnType instanceof AnyType) {
+            return anyTypes[returnType.name];
+        } else {
+            return returnType;
+        }
+    }
+
     visitFunctionExpr(expr: Function) {
         const enclosing = this.env;
         this.env = this.newEnv(enclosing);
