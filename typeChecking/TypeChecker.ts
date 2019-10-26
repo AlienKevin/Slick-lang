@@ -364,6 +364,9 @@ export class Checker implements Visitor {
             return new AnyType(curr);
         }
         expr.params.forEach((param) => {
+            if (param.lexeme === this.env.functionName) {
+                throw this.error(param, `Parameter '${param.lexeme}' cannot have the same name as the function!`);
+            }
             const paramType = generateAnyType();
             this.env.declare(param, paramType, false);
         });
