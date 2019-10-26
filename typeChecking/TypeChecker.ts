@@ -315,6 +315,7 @@ export class Checker implements Visitor {
     }
     visitCallExpr(expr: Call) {
         let callee = this.expression(expr.callee);
+        const func = callee;
         if (!(callee instanceof FunctionType)) {
             throw this.error(expr.paren, `Callee must be a function!`);
         }
@@ -325,12 +326,18 @@ export class Checker implements Visitor {
             paramType = this.substituteAnyTypes(paramType, argType, anyTypes);
             const arg = expr.argumentList[index];
             if (!(callee instanceof FunctionType)) {
-                const funcName = expr.callee instanceof Get
+                const funcName = (
+                    expr.callee instanceof Get
                     ? expr.callee.object.first.lexeme + "~" + expr.callee.name.lexeme
-                    : expr.callee.first.lexeme;
+                    : (
+                        expr.callee instanceof Grouping
+                        ? ""
+                        : expr.callee.first.lexeme
+                    )
+                );
                 throw this.error(
                     arg.first,
-                    `Function '${funcName}' expects ${index} arguments but got ${argTypes.length} instead!`
+                    `Function ${funcName === "" ? func : "'" + funcName + "'"} expects ${index} arguments but got ${argTypes.length} instead!`
                 );
             }
             if (argType instanceof AnyType && arg instanceof Variable) {
