@@ -505,7 +505,7 @@ export class Parser {
     getArgumentList() {
         let list: Expr[] = [];
         while (this.checkLiteral()) {
-            list.push(this.primary());
+            list.push(this.funcExpr());
         }
         this.groupMembers = 0;
         return list;
