@@ -8,7 +8,6 @@ const reservedWords = new Map([
     ["True", TokenType.TRUE],
     ["False", TokenType.FALSE],
     ["Nil", TokenType.NIL],
-    ["f", TokenType.F],
 ])
 
 export class Scanner {
@@ -95,6 +94,8 @@ export class Scanner {
             case '≠': this.addToken(TokenType.NOT_EQUAL); break;
             case '⋎': this.addToken(TokenType.OR); break;
             case '⋏': this.addToken(TokenType.AND); break;
+
+            case 'ƒ': this.addToken(TokenType.F); break;
 
             case '#':
                 // skip the whole comment section of the line
