@@ -458,7 +458,6 @@ export class Parser {
     call(required = false) {
         let expr: Expr = this.funcExpr();
         this.groupMembers ++;
-        while (true) {
             if (this.groupMembers === 1) {
                 // maybe start of a function call
                 if (this.maybeFunctionCall(expr)) {
@@ -471,15 +470,9 @@ export class Parser {
                     } else {
                         expr = new Call(expr, funcName, argumentList);
                     }
-                // a normal expression
-                } else {
-                    this.groupMembers = 0;
-                }
-                break;
-            } else {
-                break;
             }
         }
+        this.groupMembers = 0;
         return expr;
     }
 
