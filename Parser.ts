@@ -501,6 +501,20 @@ export class Parser {
             NUMBER,
             IDENTIFIER,
         ];
+        // Disallow consuming function arguments at the next line without using ()
+        // e.g. The following is disallowed
+        // var result: foo 
+        // a # argument on the next line without ()
+        // This rule is to support record literal parsing
+        // e.g.
+        // var record: {
+        //      a: foo # without this rule, SOFT_NEWLINE permits
+        //             # variable 'foo' to consume 'b' as its argument
+        //      b: 'text'
+        // }
+        if (this.groupMembers === 1 && this.check(SOFT_NEWLINE)) {
+            return false;
+        }
         return (
             this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN, F)
         );
