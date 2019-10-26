@@ -1,6 +1,6 @@
 import R from "ramda";
 import Decimal from "decimal.js";
-import { isNumber } from "./utils";
+import { number } from "./utils";
 
 const map = R.map;
 const filter = R.filter;
@@ -45,13 +45,6 @@ const concat = R.concat;
 const adjust = R.curry(function<T>(index: Decimal, fn: (a: T) => T, list: readonly T[]) {
     return R.adjust(number(index), fn, list);
 });
-
-function number(n: any) {
-    if (isNumber(n)) {
-        return n.toNumber()
-    }
-    throw `List index must be a number!`;
-}
 
 export default {
     map,
