@@ -1,8 +1,9 @@
 {
   "name": "slick-lang",
-  "version": "2.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "2.0.2",
+  "description": "Uncluttered programming",
+  "main": "dist/Runner.js",
+  "types": "dist/Runner.d.ts",
   "scripts": {
     "s": "node dist/tests/simple.js",
     "t": "node dist/tests/test.js"
