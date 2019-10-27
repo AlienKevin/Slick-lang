@@ -3,19 +3,32 @@ import {CodeGenerator} from "./CodeGenerator";
 import { Token } from "./Token";
 import { Parser } from "./Parser";
 import { Checker } from "./typeChecking/TypeChecker";
+import { TokenType } from "./TokenType";
 
-export class Runner {
+enum RUN_MODE {
+    RUN,
+    MAKE,
+    TEST
+}
+
+const RUN = RUN_MODE.RUN;
+const MAKE = RUN_MODE.MAKE;
+const TEST = RUN_MODE.TEST;
+
+class Runner {
     public hadError = false;
     public lineStarts: number[];
     private source: string;
+    private mode: RUN_MODE;
 
-    constructor(readonly detailedError = false, public input?: (prompt: string) => string, public output = console["log"]) {}
+    constructor(private runtimePath?: string, public input?: (prompt: string) => string, public output = console["log"]) {}
 
     run(source: string, options = {
         printTokenList: false,
-        runCode: true
+        mode: RUN | MAKE | TEST
         }) {
         this.source = source;
+        this.mode = options.mode;
         this.lineStarts = [];
 
         // scann
@@ -58,8 +71,8 @@ export class Runner {
         }
 
         // generate code
-        const code = new CodeGenerator().generateCode(statements, options.runCode);
-        if (options.runCode) {
+        const code = new CodeGenerator(this.runtimePath).generateCode(statements, options.mode !== TEST);
+        if (options.mode === RUN) {
             // fs.writeFileSync("./tests/dist.js", code);
             eval(code);
         } else {
@@ -78,7 +91,7 @@ export class Runner {
             const lineNumber = b as number;
             const index = c as number;
             const message = d as string;
-            if (this.detailedError) {
+            if (this.mode !== TEST) {
                 this.printErrorMessage(line, lineNumber, index, message);
             } else {
                 output = `[SyntaxError] Line ${lineNumber}: ${message}`;
@@ -94,7 +107,7 @@ export class Runner {
                 if (isError) {
                     this.hadError = true;
                 }
-                if (this.detailedError) {
+                if (this.mode !== TEST) {
                     const programIndex = nameToken.index;
                     const [line, lineIndex] = this.getLocation(programIndex);
                     const lineNumber = nameToken.line;
@@ -157,4 +170,11 @@ export class Runner {
             }
         }
 
+}
+
+export {
+    Runner,
+    RUN,
+    MAKE,
+    TEST
 }

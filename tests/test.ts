@@ -379,5 +379,5 @@ $SLK.print((foo($SLK2, $SLK3)));`
 ]);
 import { test } from "./Tester";
 import { Runner } from "../Runner";
-const runner = new Runner(false);
+const runner = new Runner();
 test(source, runner);

@@ -1,6 +1,6 @@
 import "colors";
 import * as differ from 'diff'
-import { Runner } from "../Runner";
+import { TEST, Runner } from "../Runner";
 
 export function test(source: Map<string, string>, runner: Runner) {
     let outputs = "";
@@ -13,7 +13,7 @@ export function test(source: Map<string, string>, runner: Runner) {
         try {
             runner.run(source, {
                 printTokenList: false,
-                runCode: false
+                mode: TEST
             });
         } catch (ignore) {
             passedAllTests = false;
