@@ -44,7 +44,7 @@ export class Runner {
         if (this.hadError) {
             // reset back to default!!!
             this.hadError = false;
-            return;
+            throw "Parser error!";
         }
 
         // check type
@@ -54,7 +54,7 @@ export class Runner {
         if (this.hadError) {
             // reset back to default!!!
             this.hadError = false;
-            return;
+            throw "Type checker error!";
         }
 
         // generate code
