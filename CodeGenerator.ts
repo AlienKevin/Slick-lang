@@ -311,7 +311,7 @@ export class CodeGenerator implements Visitor {
     visitRecordLiteralExpr(expr: RecordLiteral) {
         if (Object.keys(expr.record).length === 0) {
             return "Object.create(null)";
-        } else {
+        } else if (expr.target === undefined) {
             this.indent();
             const padding = this.begin();
             const string = "(function (o) {"
@@ -325,6 +325,18 @@ export class CodeGenerator implements Visitor {
                 )}).join("") + padding + "return o;";
             this.outdent();
             return string + this.begin() + "}(Object.create(null)))";
+        } else {
+            this.indent();
+            const padding = this.begin();
+            const string = "{"
+            + padding + "..." + expr.target.lexeme + ","
+            + Object.entries(expr.record).map(([key, value]) => {
+                return padding + (
+                    '"' + key + '": '
+                    + this.expression(value) + ","
+                )}).join("");
+            this.outdent();
+            return string + this.begin() + "}";
         }
     }
 

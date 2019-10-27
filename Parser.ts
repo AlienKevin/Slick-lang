@@ -62,6 +62,7 @@ const TRUE = TokenType.TRUE;
 const FALSE = TokenType.FALSE;
 const NIL = TokenType.NIL;
 const ARROW = TokenType.ARROW;
+const BAR = TokenType.BAR;
 
 const keywords = new Map([
     ["if", TokenType.IF],
@@ -594,21 +595,32 @@ export class Parser {
         // record literal
         if (this.match(LEFT_BRACE)) {
             const first = this.previous();
-            let keys: string[] = [];
+            let keyNames: string[] = [];
+            let keys: Token[] = [];
             let values: Expr[] = [];
+            let target: Token = undefined;
             if (!this.check(RIGHT_BRACE)) { // has arguments
+                const firstToken = this.consume(IDENTIFIER, `Expected a key label or record name!`);
+                if (this.match(BAR)) {
+                    target = firstToken;
+                }
                 // arguments → expression ( "," expression )*
                 do {
-                    const keyToken = this.consume(IDENTIFIER, `Key must be a label, not an expression!`);
-                    const key = keyToken.lexeme;
-                    if (keys.includes(key)) {
-                        throw this.error(keyToken, `Duplicated key ${key} in record!`);
+                    let keyToken;
+                    if (keys.length === 0 && target === undefined) {
+                        keyToken = firstToken;
+                    } else {
+                        keyToken = this.consume(IDENTIFIER, `Expected a key label!`);
                     }
-                    keys.push(key);
+                    const keyName = keyToken.lexeme;
+                    if (keyNames.includes(keyName)) {
+                        throw this.error(keyToken, `Duplicated key ${keyName} in record!`);
+                    }
+                    keyNames.push(keyName);
+                    keys.push(keyToken);
                     this.consume(COLON, `Expected ':' after map key!`);
                     const value = this.expression();
                     values.push(value);
-                    
                 } while (
                     (
                         this.match(COMMA)
@@ -619,9 +631,13 @@ export class Parser {
             this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
             return new RecordLiteral(
                 first,
-                keys.reduce((record, key, index) => 
+                keyNames.reduce((record, key, index) => 
                     ({...record, [key]: values[index]}),
-                Object.create(null))
+                Object.create(null)),
+                keyNames.reduce((keyTokens, key, index) =>
+                    ({...keyTokens, [key]: keys[index]}),
+                Object.create(null)),
+                target
             );
         }
         // list literal

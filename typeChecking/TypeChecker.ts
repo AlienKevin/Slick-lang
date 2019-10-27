@@ -102,7 +102,7 @@ export class Checker implements Visitor {
         return stmt.accept(this);
     }
 
-    expression(expr: Expr) {
+    expression(expr: Expr): Type {
         return expr.accept(this);
     }
 
@@ -300,15 +300,36 @@ export class Checker implements Visitor {
         return new ListType(type);
     }
     visitRecordLiteralExpr(expr: RecordLiteral) {
-        return new RecordType(
-            Object.keys(expr.record).reduce(
-                (record, key) => ({
-                    ...record, 
-                    [key]: this.expression(expr.record[key])
-                }),
-                Object.create(null)
-            )
-        );
+        if (expr.target === undefined) {
+            return new RecordType(
+                Object.keys(expr.record).reduce(
+                    (record, key) => ({
+                        ...record, 
+                        [key]: this.expression(expr.record[key])
+                    }),
+                    Object.create(null)
+                )
+            );
+        } else {
+            // check if the new keys and values match target record's
+            const target = this.env.get(expr.target) as RecordType;
+            if (target === undefined) {
+                throw this.error(expr.target, `Target record '${expr.target.lexeme}' is not declared!`);
+            }
+            Object.keys(expr.record).forEach(key => {
+                if (target.record[key] === undefined) {
+                    throw this.error(expr.keyTokens[key], `Target record '${expr.target.lexeme}' does not contain key '${key}'!`);
+                }
+                const targetType = target.record[key];
+                const sourceType = this.expression(expr.record[key]);
+                this.matchTypes(
+                    targetType,
+                    sourceType,
+                    `Source value typed ${sourceType} does not match target value typed ${targetType}!`,
+                    expr.record[key]
+                )
+            });
+        }
     }
     visitVariableExpr(expr: Variable) {
         return this.env.get(expr.name);
