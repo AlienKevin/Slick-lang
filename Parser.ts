@@ -737,24 +737,7 @@ export class Parser {
     }
 
     private error(token: Token, errorMessage: string) {
-        if (this.runner.detailedError) {
-            this.runner.error(token, errorMessage, "SyntaxError");
-        } else {
-            if (token.type === EOF) { // End of file
-                this.runner.output(`[CompileError] At end of file: ${errorMessage}`);
-            } else {
-                switch (token.type) {
-                    case INDENT:
-                        this.runner.output(`[CompileError] Unexpected indentation at line ${token.line}: ${errorMessage}`);
-                        break;
-                    case DEDENT:
-                        this.runner.output(`[CompileError] Unexpected dedentation at line ${token.line}: ${errorMessage}`);
-                        break;
-                    default:
-                        this.runner.output(`[CompileError] Line ${token.line} at '${token.lexeme.replace(/\n/g, "\\n")}': ${errorMessage}`);
-                }
-            }
-        }
+        this.runner.error(token, errorMessage, "SyntaxError");
         return new SyntaxError();
     }
 

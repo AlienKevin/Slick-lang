@@ -100,7 +100,20 @@ export class Runner {
                     const lineNumber = nameToken.line;
                     this.printErrorMessage(line, lineNumber, lineIndex, message);
                 } else {
-                    output = `[${errorType}] Line ${nameToken.line} at '${nameToken.lexeme}': ${message}`;
+                    if (nameToken.type === TokenType.EOF) { // End of file
+                        output = `[SyntaxError] At end of file: ${message}`;
+                    } else {
+                        switch (nameToken.type) {
+                            case TokenType.INDENT:
+                                output = `[SyntaxError] Unexpected indentation at line ${nameToken.line}: ${message}`;
+                                break;
+                            case TokenType.DEDENT:
+                                output = `[SyntaxError] Unexpected dedentation at line ${nameToken.line}: ${message}`;
+                                break;
+                            default:
+                                output = `[SyntaxError] Line ${nameToken.line} at '${nameToken.lexeme.replace(/\n/g, "\\n")}': ${message}`;
+                        }
+                    }
                 }
             }
         }
