@@ -28,6 +28,7 @@ type Location = Token | Expr;
 
 export class Checker implements Visitor {
     private env: Env;
+    private anyTypeName = 'a';
     constructor(private runner: Runner) {
         // global environment
         const globals = this.newEnv();
@@ -121,13 +122,13 @@ export class Checker implements Visitor {
         }
     }
 
-    public matchTypes(a: Type, b: Type, message: string, location: Location) {
-        if (!Checker.sameTypes(a, b)) {
+    public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype: boolean}) {
+        if (!Checker.sameTypes(a, b, opts)) {
             throw this.error(location, message);
         }
     }
 
-    public static sameTypes(a: Type, b: Type): boolean {
+    public static sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean} = {isFirstSubtype: false}): boolean {
         if (a === undefined || b === undefined) {
             return true;
         }
@@ -138,23 +139,25 @@ export class Checker implements Visitor {
             return true;
         }
         if (a instanceof MaybeType && b instanceof MaybeType) {
-            return Checker.sameTypes(a.type, b.type);
+            return Checker.sameTypes(a.type, b.type, opts);
         } else if (a instanceof ListType && b instanceof ListType) {
-            return Checker.sameTypes(a.type, b.type);
+            return Checker.sameTypes(a.type, b.type, opts);
         } else if (a instanceof RecordType && b instanceof RecordType) {
-            if (Object.keys(a.record).length !== Object.keys(b.record).length) {
-                return false;
+            if (!opts.isFirstSubtype) {
+                if (Object.keys(a.record).length !== Object.keys(b.record).length) {
+                    return false;
+                }
             }
             return Object.keys(a.record).every((key) => {
                 if (b.record[key] === undefined) {
                     return false;
                 }
-                return Checker.sameTypes(a.record[key], b.record[key])
+                return Checker.sameTypes(a.record[key], b.record[key], opts);
             });
         } else if (a instanceof FunctionType && b instanceof FunctionType) {
             return (
-                Checker.sameTypes(a.inputType, b.inputType)
-                && Checker.sameTypes(a.outputType, b.outputType)
+                Checker.sameTypes(a.inputType, b.inputType, opts)
+                && Checker.sameTypes(a.outputType, b.outputType, opts)
             )
         } else if (a === b) {
             return true;
@@ -368,7 +371,8 @@ export class Checker implements Visitor {
                     paramType,
                     argType,
                     `Argument type ${argType} does not match paramter type ${paramType}!`,
-                    arg
+                    arg,
+                    {isFirstSubtype: true}
                 );
             }
             callee = callee.outputType;
@@ -409,26 +413,30 @@ export class Checker implements Visitor {
         }
     }
 
+    resetAnyTypeName() {
+        this.anyTypeName = 'a';
+    }
+
+    generateAnyType() {
+        const curr = this.anyTypeName;
+        const next = nextChar(curr);
+        this.anyTypeName = next;
+        return new AnyType(curr);
+    }
+
     visitFunctionExpr(expr: Function) {
         const enclosing = this.env;
         this.env = this.newEnv(enclosing);
         this.env.functionName = enclosing.functionName;
-        let char = "a";
-        function generateAnyType() {
-            const curr = char;
-            const next = nextChar(curr);
-            char = next;
-            return new AnyType(curr);
-        }
         expr.params.forEach((param) => {
             if (param.lexeme === this.env.functionName) {
                 throw this.error(param, `Parameter '${param.lexeme}' cannot have the same name as the function!`);
             }
-            const paramType = generateAnyType();
+            const paramType = this.generateAnyType();
             this.env.declare(param, paramType, false);
         });
         this.env.functionParams = expr.params;
-        let outputType: Type = generateAnyType();
+        let outputType: Type = this.generateAnyType();
         if (expr.body instanceof Expr) {
             outputType = this.expression(expr.body);
         } else if (expr.body instanceof Block) {
@@ -451,6 +459,7 @@ export class Checker implements Visitor {
         this.env.functionParams = undefined;
         this.env.functionReturnType = undefined;
         this.env.functionName = undefined;
+        this.resetAnyTypeName();
         return returnType;
     }
 
@@ -467,7 +476,15 @@ export class Checker implements Visitor {
         if (object instanceof RecordType) {
             return object.get(name);
         } else {
-            throw this.error(name, `${object} does not have property ${name.lexeme}!`);
+            if (object instanceof AnyType && expr.object instanceof Variable) {
+                const propertyType = this.generateAnyType();
+                this.env.define(expr.object.name, new RecordType({
+                    [name.lexeme]: propertyType
+                }));
+                return propertyType;
+            } else {
+                throw this.error(name, `${object} does not have property ${name.lexeme}!`);
+            }
         }
     }
 
@@ -516,9 +533,11 @@ export class Checker implements Visitor {
         const declaredType = stmt.typeDeclaration;
         if (stmt.typeDeclaration !== undefined) {
             this.matchTypes(
-                declaredType, this.substituteAnyTypes(type, declaredType, {}),
+                this.substituteAnyTypes(type, declaredType, {}),
+                declaredType, 
                 `Declared type ${declaredType} and actual type ${type} do not match!`,
-                stmt.initializer
+                stmt.initializer,
+                {isFirstSubtype: true}
             );
         }
         if (stmt.initializer instanceof Function) {
@@ -562,6 +581,23 @@ export class Checker implements Visitor {
                         )
                     }
                 );
+        } else if (declaredType instanceof RecordType
+                && actualType instanceof RecordType) {
+            return Object.assign(
+                clone(declaredType),
+                {
+                    record: Object.keys(declaredType.record).reduce((record, key) => (
+                        {
+                            ...record,
+                            [key]: this.substituteAnyTypes(
+                                declaredType.record[key],
+                                actualType.record[key],
+                                anyTypes
+                            )
+                        }
+                    ), Object.create(null))
+                }
+            );
         } else if (declaredType instanceof AnyType) {
             const storedType = anyTypes[declaredType.name];
             if (storedType !== undefined) {

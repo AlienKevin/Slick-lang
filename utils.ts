@@ -20,6 +20,10 @@ export function isMiddot(char: string) {
     return char === "\u00B7";
 }
 
+export function isUpper(char: string) {
+    return /[A-Z]/.test(char);
+}
+
 export function isList(value: any): value is any[] {
     return Array.isArray(value);
 }

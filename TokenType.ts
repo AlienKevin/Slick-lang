@@ -54,6 +54,8 @@ export enum TokenType {
     BREAK = "BREAK",
     MUT = "MUT",
     VAR = "VAR",
+    TYPE = "TYPE",
+    ALIAS = "ALIAS",
     F = "F",
     CALL = "CALL",
     LET = "LET",

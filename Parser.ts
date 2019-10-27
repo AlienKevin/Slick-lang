@@ -11,7 +11,7 @@ import { FunctionType } from "./typeChecking/FunctionType";
 import { AnyType } from "./typeChecking/AnyType";
 import { NilType } from "./typeChecking/NilType";
 import { MaybeType } from "./typeChecking/MaybeType";
-import { isNumber } from "./utils";
+import { isNumber, isUpper } from "./utils";
 import { RecordType } from "./typeChecking/RecordType";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
@@ -52,6 +52,8 @@ const WHILE =TokenType.WHILE;
 const BREAK =TokenType.BREAK;
 const MUT =TokenType.MUT;
 const VAR =TokenType.VAR;
+const TYPE = TokenType.TYPE;
+const ALIAS = TokenType.ALIAS;
 const F =TokenType.F;
 const CALL = TokenType.CALL;
 const LET = TokenType.LET;
@@ -73,6 +75,8 @@ const keywords = new Map([
     ["return", TokenType.RETURN],
     ["mut", TokenType.MUT],
     ["var", TokenType.VAR],
+    ["type", TokenType.TYPE],
+    ["alias", TokenType.ALIAS],
     ["call", TokenType.CALL],
     ["let", TokenType.LET],
 ]);
@@ -88,6 +92,7 @@ export class Parser {
     public current: number;
     private env: Environment;
     private groupMembers = 0;
+    private typeAliases: {[alias: string]: Type} = Object.create(null);
 
     constructor(public tokens: Token[], private runner: Runner) {
         // stores the depth of loop and use it for break statements
@@ -148,6 +153,11 @@ export class Parser {
             this.prelude();
             if (this.check(VAR, MUT)) {
                 return this.varDeclaration();
+            } else if (this.match(TYPE)) {
+                if (this.peek().lexeme === "alias") {
+                    this.advance();
+                    return this.typeAlias();
+                }
             }
             return this.statement();
         } catch (error) {
@@ -158,6 +168,21 @@ export class Parser {
                 console.log(error);
             }
         }
+    }
+
+    typeAlias() {
+        const aliasToken = this.consume(IDENTIFIER, `Expected a type alias!`);
+        const alias = aliasToken.lexeme;
+        if (!isUpper(alias[0])) {
+            throw this.error(aliasToken, `Type alias must starts with a capital letter!`);
+        }
+        if (this.typeAliases[alias] !== undefined) {
+            throw this.error(aliasToken, `Duplicated type alias!`);
+        }
+        this.consume(EQUAL, `Expected a '=' after type alias!`)
+        const type = this.typeDeclaration();
+        this.endStmt("type");
+        this.typeAliases[alias] = type;
     }
 
     func() {
@@ -235,7 +260,9 @@ export class Parser {
                         this.consume(EQUAL, `Expected a '=' after key name!`);
                         const valueType = this.typeDeclaration();
                         recordType[keyName] = valueType;
-                    } while (this.match(COMMA, SOFT_NEWLINE));
+                    } while (
+                        this.match(COMMA, SOFT_NEWLINE)
+                        && this.peek().type !== RIGHT_BRACE);
                 }
                 type = new RecordType(recordType);
                 this.consume(RIGHT_BRACE, `Expected a closing '}'!`);
@@ -256,11 +283,14 @@ export class Parser {
                 type = PrimitiveType.Num;
                 break;
             default:
-                // is uppercase
-                if (first.lexeme[0].toUpperCase() === first.lexeme[0]) {
-                    throw this.error(first, `Cannot find type ${first.lexeme}!\nUse lowercase names for generic types!`);
+                if (isUpper(first.lexeme[0])) {
+                    type = this.typeAliases[first.lexeme];
+                    if (type === undefined) {
+                        throw this.error(first, `Cannot find type ${first.lexeme}!\nUse lowercase names for generic types!`);
+                    }
+                } else {
+                    type = new AnyType(first.lexeme);
                 }
-                type = new AnyType(first.lexeme);
                 break;
         }
         while (allowFunctionType && this.match(ARROW)) {
