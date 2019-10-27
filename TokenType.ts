@@ -19,6 +19,7 @@ export enum TokenType {
     COLON = "COLON",
     AMPERSAND = "AMPERSAND",
     ARROW = "ARROW",
+    BAR = "BAR",
 
     // Newline (implicit statement terminator)
     NEWLINE = "NEWLINE",

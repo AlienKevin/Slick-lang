@@ -61,6 +61,7 @@ export class Scanner {
             case '~': this.addToken(TokenType.TILDE); break;
             case '→': this.addToken(TokenType.ARROW); break;
             case '&': this.addToken(TokenType.AMPERSAND); break;
+            case '|': this.addToken(TokenType.BAR); break;
             case '-':
                 if (
                     prev !== ' '
