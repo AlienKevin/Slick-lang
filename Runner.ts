@@ -1,7 +1,6 @@
 import {Scanner} from "./Tokenizer";
 import {CodeGenerator} from "./CodeGenerator";
 import { Token } from "./Token";
-import AsciiTable from "ascii-table";
 import { Parser } from "./Parser";
 import { Checker } from "./typeChecking/TypeChecker";
 
@@ -25,6 +24,7 @@ export class Runner {
 
         // display token list
         if (options.printTokenList) {
+            const AsciiTable = require("ascii-table");
             const table = new AsciiTable();
             table.setHeading("Type", "Lexeme", "Literal", "Line", "Index");
             scanner.tokens.forEach((token) => {
