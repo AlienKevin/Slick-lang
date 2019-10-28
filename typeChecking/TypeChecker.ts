@@ -58,7 +58,22 @@ export class Checker implements Visitor {
         min        Num → Num → Num
         neg        Num → Num
         not        Bool → Bool
-        print      a → Text`;
+        print      a → Text
+        ƒ?!        Bool → a → a → a
+        ƒ⋏         Bool → Bool → Bool
+        ƒ⋎         Bool → Bool → Bool
+        ƒ=         a → a → Bool
+        ƒ≠         a → a → Bool
+        ƒ<         a → a → Bool
+        ƒ≥         a → a → Bool
+        ƒ>         a → a → Bool
+        ƒ≤         a → a → Bool
+        ƒ+         Num → Num → Num
+        ƒ-         Num → Num → Num
+        ƒ*         Num → Num → Num
+        ƒ/         Num → Num → Num
+        ƒ%         Num → Num → Num
+        ƒ&         Text → Text → Text`;
         const types = Checker.parseTypeDeclarations(primordials);
         Object.entries(types).forEach(([name, type]) => 
             globals.declarePrimordial(name, type)
