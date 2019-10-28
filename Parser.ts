@@ -599,7 +599,7 @@ export class Parser {
                     }
                 }
                 const name = new Token(
-                    IDENTIFIER, "f" + symbol, undefined, start.line, start.index
+                    IDENTIFIER, "ƒ" + symbol, undefined, start.line, start.index
                 );
                 return new Variable(name);
             // function expression
