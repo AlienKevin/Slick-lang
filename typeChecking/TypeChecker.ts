@@ -64,10 +64,10 @@ export class Checker implements Visitor {
         ƒ⋎         Bool → Bool → Bool
         ƒ=         a → a → Bool
         ƒ≠         a → a → Bool
-        ƒ<         a → a → Bool
-        ƒ≥         a → a → Bool
-        ƒ>         a → a → Bool
-        ƒ≤         a → a → Bool
+        ƒ<         Num → Num → Bool
+        ƒ≥         Num → Num → Bool
+        ƒ>         Num → Num → Bool
+        ƒ≤         Num → Num → Bool
         ƒ+         Num → Num → Num
         ƒ-         Num → Num → Num
         ƒ*         Num → Num → Num
