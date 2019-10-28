@@ -51,15 +51,14 @@ export class Checker implements Visitor {
 
     private declarePrimordials(globals: Env) {
         const primordials = 
-        `abs=      Num → Num
-        fraction=  Num → Num
-        integer=   Num → Num
-        max=       Num → Num → Num
-        min=       Num → Num → Num
-        neg=       Num → Num
-        not=       Bool → Bool
-        print=     a → Text
-        `;
+        `abs       Num → Num
+        fraction   Num → Num
+        integer    Num → Num
+        max        Num → Num → Num
+        min        Num → Num → Num
+        neg        Num → Num
+        not        Bool → Bool
+        print      a → Text`;
         const types = Checker.parseTypeDeclarations(primordials);
         Object.entries(types).forEach(([name, type]) => 
             globals.declarePrimordial(name, type)
@@ -67,11 +66,11 @@ export class Checker implements Visitor {
     }
 
     public static parseTypeDeclarations(declarations) {
-        const regex = /(.*)\s*\=\s*(.*)/g;
+        const regex = /\s*(.*?)\s+(.*)/g;
         let match: string[];
         let types: {name: string, type: Type} = Object.create(null);
         while ((match = regex.exec(declarations)) !== null) {
-            const name = match[1].trim();
+            const name = match[1];
             const typeString = match[2];
             const runner = new Runner();
             runner.lineStarts = [];
