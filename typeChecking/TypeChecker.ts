@@ -59,6 +59,7 @@ export class Checker implements Visitor {
         neg        Num → Num
         not        Bool → Bool
         print      a → Text
+        sqrt       Num → Num
         ƒ?!        Bool → a → a → a
         ƒ⋏         Bool → Bool → Bool
         ƒ⋎         Bool → Bool → Bool

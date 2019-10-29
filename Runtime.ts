@@ -222,6 +222,13 @@ function neg(a) {
     return calc("neg", a);
 }
 
+function sqrt(a: Decimal) {
+    if (a.isNegative()) {
+        console.log("Warning: Taking the square root of a negative number!");
+    }
+    return calc("sqrt", a);
+}
+
 export default stone({
     abs,
     add,
@@ -248,6 +255,7 @@ export default stone({
     or,
     pipe,
     print,
+    sqrt,
     stone,
     sub,
     ternary,

@@ -106,6 +106,7 @@ export class Parser {
             "neg",
             "not",
             "print",
+            "sqrt",
 
             // modules
             "List",

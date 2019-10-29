@@ -29,6 +29,7 @@ const primordial = $SLK.stone({
     "neg": "$SLK.neg",
     "not": "$SLK.not",
     "print": "$SLK.print",
+    "sqrt": "$SLK.sqrt",
 
     // functinos
     "ƒ?!": "$SLK.ternary",
