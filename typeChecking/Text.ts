@@ -13,6 +13,7 @@ ends·with   Text → Text → Bool
 starts·with Text → Text → Bool
 slice       Num → Num → Text → Text
 member      Text → Text → Bool
-length      Text → Num`;
+length      Text → Num
+char        Num → Maybe Text`;
 
 export default declaration;

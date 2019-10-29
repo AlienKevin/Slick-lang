@@ -53,6 +53,13 @@ const member = R.curry(function (searchText: string, text: string) {
 const length = function (text: string) {
     return new Decimal(unified.length(text));
 }
+const char = function (code: Decimal) {
+    try {
+        return String.fromCodePoint(code.toNumber());
+    } catch(ignore) {
+        return undefined;
+    }
+}
 
 export default {
     lower,
@@ -69,5 +76,6 @@ export default {
     "starts·with": starts_with,
     slice,
     member,
-    length
+    length,
+    char
 }
