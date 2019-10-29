@@ -45,6 +45,9 @@ const concat = R.concat;
 const adjust = R.curry(function<T>(index: Decimal, fn: (a: T) => T, list: readonly T[]) {
     return R.adjust(number(index), fn, list);
 });
+const length = function<T>(list: readonly T[]) {
+    return new Decimal(list.length);
+};
 
 export default {
     map,
@@ -71,5 +74,6 @@ export default {
     drop,
     "drop·last": drop_last,
     concat,
-    adjust
+    adjust,
+    length
 };

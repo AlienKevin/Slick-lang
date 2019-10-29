@@ -23,6 +23,7 @@ update      Num → a → List a → List a
 drop        Num → List a → List a
 drop·last   Num → List a → List a
 concat      List a → List a → List a
-adjust      Num → (a → a) → List a → List a`;
+adjust      Num → (a → a) → List a → List a
+length      List a → Num`;
 
 export default declaration;
