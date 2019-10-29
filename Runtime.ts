@@ -149,17 +149,12 @@ const ne = R.curry(function (zeroth, wunth) {
     return !eq(wunth, zeroth);
 });
 
-function calc(name, a, b?) {
-    if (isNumber(a)) {
+function calc(name: string, a: Decimal, b?: Decimal) {
         if (b === undefined) {
             return a[name]();
         }
-        if (isNumber(b)) {
             return a[name](b);
         }
-    }
-    error(`Invalid arguments for ${name}()`);
-}
 
 const add = R.curry(function (a, b) {
     return calc("add", a, b);
