@@ -4,6 +4,12 @@ import Text from "./Text";
 import R from "ramda"
 import Decimal from "decimal.js";
 
+Decimal.set({
+    toExpPos: 5,
+    toExpNeg: -5,
+    precision: 20
+});
+
 function print(any) {
     const string = toString(any);
     console.log(string);

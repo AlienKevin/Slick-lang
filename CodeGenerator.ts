@@ -6,12 +6,6 @@ import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
 import { isNumber, isText, isBoolean, isNil } from "./utils";
 
-Decimal.set({
-    toExpPos: 5,
-    toExpNeg: -5,
-    precision: 30
-});
-
 const reserved = makeSet([
     "arguments", "await", "break", "case", "catch", "class", "const",
     "continue", "debugger", "default", "delete", "do", "else", "enum", "eval",
