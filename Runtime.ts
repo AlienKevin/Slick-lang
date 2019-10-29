@@ -18,7 +18,7 @@ function print(any) {
 
 function toString(any) {
     if (isNumber(any)) {
-        return any.toString();
+        return any.toDecimalPlaces(5).toString();
     }
     if (isBoolean(any)) {
         return any ? "True" : "False";
