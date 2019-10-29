@@ -62,8 +62,10 @@ export class Checker implements Visitor {
         sqrt       Num → Num
         round      Num → Num
         floor      Num → Num
-        ceil      Num → Num
+        ceil       Num → Num
         trunc      Num → Num
+        pi         Num
+        e          Num
         ƒ?!        Bool → a → a → a
         ƒ⋏         Bool → Bool → Bool
         ƒ⋎         Bool → Bool → Bool

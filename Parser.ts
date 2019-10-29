@@ -111,6 +111,8 @@ export class Parser {
             "floor",
             "ceil",
             "trunc",
+            "e",
+            "pi",
 
             // modules
             "List",

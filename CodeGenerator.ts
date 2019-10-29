@@ -28,6 +28,8 @@ const primordial = $SLK.stone({
     "floor": "$SLK.floor",
     "ceil": "$SLK.ceil",
     "trunc": "$SLK.trunc",
+    "e": "$SLK.e",
+    "pi": "$SLK.pi",
 
     // functinos
     "ƒ?!": "$SLK.ternary",

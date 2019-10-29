@@ -239,6 +239,9 @@ function sqrt(a: Decimal) {
     return calc("sqrt", a);
 }
 
+const pi = Decimal.acos(-1);
+const e = new Decimal(1).exp();
+
 export default stone({
     abs,
     add,
@@ -273,4 +276,6 @@ export default stone({
     floor,
     ceil,
     trunc,
+    pi,
+    e
 }); 
