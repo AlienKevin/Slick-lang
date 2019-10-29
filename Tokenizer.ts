@@ -267,7 +267,7 @@ export class Scanner {
         // The closing `'`
         this.advance();
 
-        this.addToken(TokenType.STRING, value);
+        this.addToken(TokenType.STRING, value.normalize());
     }
 
     private number() {
