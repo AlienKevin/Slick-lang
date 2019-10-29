@@ -173,9 +173,9 @@ const mul = R.curry(function (a, b) {
     return calc("mul", a, b);
 });
 
-const div = R.curry(function (a, b) {
-    if (isNumber(a) && isNumber(b) && b.isZero()) {
-        error(`Cannot divide by zero!`);
+const div = R.curry(function (a: Decimal, b: Decimal) {
+    if (b.isZero()) {
+        console.warn("Warning: Division by zero!")
     }
     return calc("div", a, b);
 });
