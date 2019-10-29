@@ -150,11 +150,11 @@ const ne = R.curry(function (zeroth, wunth) {
 });
 
 function calc(name: string, a: Decimal, b?: Decimal) {
-        if (b === undefined) {
-            return a[name]();
-        }
-            return a[name](b);
-        }
+    if (b === undefined) {
+        return a[name]();
+    }
+    return a[name](b);
+}
 
 const add = R.curry(function (a, b) {
     return calc("add", a, b);
@@ -199,11 +199,20 @@ function abs(a) {
     return calc("abs", a);
 }
 
-function fraction(a) {
-    if (isNumber(a)) {
-        return a.sub(a.trunc());
-    }
-    error(`Invalid arguments for integer()`);
+function round(a: Decimal) {
+    return calc("round", a);
+}
+
+function floor(a: Decimal) {
+    return calc("floor", a);
+}
+
+function ceil(a: Decimal) {
+    return calc("ceil", a);
+}
+
+function trunc(a: Decimal) {
+    return calc("trunc", a);
 }
 
 function integer(a) {
@@ -232,7 +241,7 @@ export default stone({
     cat,
     div,
     eq,
-    fraction,
+    round,
     ge,
     gt,
     integer,
@@ -255,4 +264,7 @@ export default stone({
     sub,
     ternary,
     Text,
+    floor,
+    ceil,
+    trunc,
 }); 

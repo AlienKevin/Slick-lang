@@ -107,6 +107,10 @@ export class Parser {
             "not",
             "print",
             "sqrt",
+            "round",
+            "floor",
+            "ceil",
+            "trunc",
 
             // modules
             "List",
