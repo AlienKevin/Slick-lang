@@ -59,13 +59,6 @@ function error(message: string) {
     throw message;
 }
 
-function checkNumber(n: any) {
-    if (isNumber(n)) {
-        return n.toNumber()
-    }
-    error(`List index must be a number!`)
-}
-
 const cat = R.curry(function (zeroth, wunth) {
     return zeroth + wunth;
 });
