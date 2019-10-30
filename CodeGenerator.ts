@@ -69,26 +69,6 @@ function makeSet(list: any[], value = true) {
     return $SLK.stone(object);
 }
 
-function isBooleanOperator(op) {
-    if (op instanceof Call) {
-        const booleanFunctions = makeSet([
-            "list?", "boolean?", "function?", "integer?", "number?", "record?",
-            "stone?", "text?"].map(CodeGenerator.mangle));
-        return booleanFunctions[this.expression(op.callee)] === true;
-    } else {
-        const booleanBinaryOperators = makeSet([
-            "=", "≠", "<", ">", "≤", "≥",
-            "⋏", "⋎",
-        ]);
-        return (
-            op instanceof Binary
-                && booleanBinaryOperators[op.operator.lexeme] === true
-            // 'true' and 'false'
-            || op instanceof Literal && typeof op.value === "boolean"
-        );
-    }
-}
-
 export class CodeGenerator implements Visitor {
     private frontMatter: string[];
     private indentation: number = 0;
