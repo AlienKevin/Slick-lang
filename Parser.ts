@@ -113,6 +113,13 @@ export class Parser {
             "trunc",
             "e",
             "pi",
+            "sin",
+            "cos",
+            "tan",
+            "asin",
+            "acos",
+            "atan",
+            "atan2",
 
             // modules
             "List",

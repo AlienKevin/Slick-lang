@@ -239,6 +239,34 @@ function sqrt(a: Decimal) {
     return calc("sqrt", a);
 }
 
+function sin(a: Decimal) {
+    return a.sin();
+}
+function cos(a: Decimal) {
+    return a.cos();
+}
+function tan(a: Decimal) {
+    return a.tan();
+}
+const asin = function (a: Decimal) {
+    if (a.lt(-1) || a.gt(1)) {
+        console.log("Warning: Input to asin() outside domain from -1 to 1!");
+    }
+    return a.asin();
+}
+const acos = function (a: Decimal) {
+    if (a.lt(-1) || a.gt(1)) {
+        console.log("Warning: Input to acos() outside domain from -1 to 1!");
+    }
+    return a.acos();
+}
+function atan(a: Decimal) {
+    return a.atan();
+}
+function atan2(a: Decimal, b: Decimal) {
+    return Decimal.atan2(a, b);
+}
+
 const pi = Decimal.acos(-1);
 const e = new Decimal(1).exp();
 
@@ -277,5 +305,12 @@ export default stone({
     ceil,
     trunc,
     pi,
-    e
+    e,
+    sin,
+    cos,
+    tan,
+    asin,
+    acos,
+    atan,
+    atan2,
 }); 

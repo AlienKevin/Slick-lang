@@ -52,8 +52,6 @@ export class Checker implements Visitor {
     private declarePrimordials(globals: Env) {
         const primordials = 
         `abs       Num → Num
-        fraction   Num → Num
-        integer    Num → Num
         max        Num → Num → Num
         min        Num → Num → Num
         neg        Num → Num
@@ -66,6 +64,13 @@ export class Checker implements Visitor {
         trunc      Num → Num
         pi         Num
         e          Num
+        sin        Num → Num
+        cos        Num → Num
+        tan        Num → Num
+        asin       Num → Num
+        acos       Num → Num
+        atan       Num → Num
+        atan2      Num → Num → Num
         ƒ?!        Bool → a → a → a
         ƒ⋏         Bool → Bool → Bool
         ƒ⋎         Bool → Bool → Bool
