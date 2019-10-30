@@ -11,7 +11,7 @@ first       List a → a
 tail        List a → List a
 head        List a → List a
 last        List a → a
-nth         List a → a
+nth         Num → List a → a
 take        Num → List a → List a
 take·last   Num → List a → List a
 slice       Num → Num → List a → List a
