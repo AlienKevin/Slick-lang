@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Function, ListLiteral, RecordLiteral } from "./Expr";
-import { Block, If, While, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
+import { Block, If, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
@@ -48,7 +48,6 @@ const ELIF =TokenType.ELIF;
 const IF =TokenType.IF;
 const OR =TokenType.OR;
 const RETURN =TokenType.RETURN;
-const WHILE =TokenType.WHILE;
 const BREAK =TokenType.BREAK;
 const MUT =TokenType.MUT;
 const VAR =TokenType.VAR;
@@ -70,7 +69,6 @@ const keywords = new Map([
     ["if", TokenType.IF],
     ["elif", TokenType.ELIF],
     ["else", TokenType.ELSE],
-    ["while", TokenType.WHILE],
     ["break", TokenType.BREAK],
     ["return", TokenType.RETURN],
     ["mut", TokenType.MUT],
@@ -341,8 +339,6 @@ export class Parser {
     statement() {
         if (this.match(IF)) {
             return this.ifStatement();
-        } else if (this.match(WHILE)) {
-            return this.whileStatement();
         } else if (this.match(RETURN)) {
             return this.returnStatement();
         } else if (this.match(CALL)) {
@@ -367,18 +363,6 @@ export class Parser {
         }
         this.endStmt("break");
         return new Break();
-    }
-
-    whileStatement() {
-        this.loopDepth++;
-        try {
-            const condition = this.expression();
-            this.consume(NEWLINE, "while block must be on its own line!");
-            const body = this.block();
-            return new While(condition, body);
-        } finally {
-            this.loopDepth--;
-        }
     }
 
     ifStatement() {
@@ -762,7 +746,6 @@ export class Parser {
                 return;
             }
             switch (this.peek().type) {
-                case WHILE:
                 case IF:
                 case F:
                 case RETURN:

@@ -14,7 +14,6 @@ export interface Visitor {
 	visitBlockStmt(stmt: Stmt): any;
 	visitIfStmt(stmt: Stmt): any;
 	visitCallStmt(stmt: Stmt): any;
-	visitWhileStmt(stmt: Stmt): any;
 	visitBreakStmt(stmt: Stmt): any;
 	visitReturnStmt(stmt: Stmt): any;
 	visitVarDeclarationStmt(stmt: Stmt): any;

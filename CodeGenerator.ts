@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
 import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "./Expr";
-import { Return, VarDeclaration, While, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
+import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Break, Assign } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
 import { isNumber, isText, isBoolean, isNil } from "./utils";
@@ -206,12 +206,6 @@ export class CodeGenerator implements Visitor {
                 )
             )
         )
-    }
-    visitWhileStmt(stmt: While) {
-        return (
-            "while (" + this.expression(stmt.condition) + ")"
-            + this.block(stmt.body)
-        );
     }
     visitBreakStmt(stmt: Break) {
         return "break;";

@@ -30,14 +30,6 @@ export class Call extends Stmt {
 		return visitor.visitCallStmt(this);
 	}
 }
-export class While extends Stmt {
-	constructor(public condition: Expr, public body: Block) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitWhileStmt(this);
-	}
-}
 export class Break extends Stmt {
 	constructor() {
 		super();
