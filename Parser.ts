@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Function, ListLiteral, RecordLiteral } from "./Expr";
-import { Block, If, Break, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
+import { Block, If, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
@@ -48,7 +48,6 @@ const ELIF =TokenType.ELIF;
 const IF =TokenType.IF;
 const OR =TokenType.OR;
 const RETURN =TokenType.RETURN;
-const BREAK =TokenType.BREAK;
 const MUT =TokenType.MUT;
 const VAR =TokenType.VAR;
 const TYPE = TokenType.TYPE;
@@ -69,7 +68,6 @@ const keywords = new Map([
     ["if", TokenType.IF],
     ["elif", TokenType.ELIF],
     ["else", TokenType.ELSE],
-    ["break", TokenType.BREAK],
     ["return", TokenType.RETURN],
     ["mut", TokenType.MUT],
     ["var", TokenType.VAR],
@@ -86,15 +84,12 @@ const functinos = [
 ];
 
 export class Parser {
-    private loopDepth: number;
     public current: number;
     private env: Environment;
     private groupMembers = 0;
     private typeAliases: {[alias: string]: Type} = Object.create(null);
 
     constructor(public tokens: Token[], private runner: Runner) {
-        // stores the depth of loop and use it for break statements
-        this.loopDepth = 0;
         this.env = this.newEnv();
         // declare primordials
         const primordials = [
@@ -323,8 +318,6 @@ export class Parser {
                 result = this.block();
             } else if (this.check(DEDENT)) {
                 indentStack.pop();
-            } else if (this.match(BREAK)) { // break statement
-                result = this.breakStatement();
             } else {
                 result = this.declaration();
             }
@@ -355,14 +348,6 @@ export class Parser {
         const value = this.expression();
         this.endStmt("return");
         return new Return(returnToken, value);
-    }
-
-    breakStatement() {
-        if (this.loopDepth <= 0) {
-            throw this.error(this.previous(), "Break statement cannot appear outside a loop!");
-        }
-        this.endStmt("break");
-        return new Break();
     }
 
     ifStatement() {

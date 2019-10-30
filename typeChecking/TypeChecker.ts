@@ -1,7 +1,7 @@
 import { Visitor } from "../interfaces/Visitor";
 import { Runner } from "../Runner";
 import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "../Expr";
-import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Break, Assign } from "../Stmt";
+import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign } from "../Stmt";
 import { PrimitiveType } from "./PrimitiveType";
 import { CError } from "./CompileError";
 import { TokenType } from "../TokenType";
@@ -528,10 +528,6 @@ export class Checker implements Visitor {
     }
     visitCallStmt(stmt: CallStmt) {
         this.expression(stmt.call);
-    }
-    visitBreakStmt(stmt: Break) {
-        // do nothing
-        // checking if break is in loop is already done in parser
     }
     visitReturnStmt(stmt: Return) {
         const returnType = this.expression(stmt.value);

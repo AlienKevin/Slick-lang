@@ -50,7 +50,6 @@ export enum TokenType {
     IF = "IF",
     OR = "OR",
     RETURN = "RETURN",
-    BREAK = "BREAK",
     MUT = "MUT",
     VAR = "VAR",
     TYPE = "TYPE",

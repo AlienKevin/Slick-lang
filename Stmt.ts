@@ -30,14 +30,6 @@ export class Call extends Stmt {
 		return visitor.visitCallStmt(this);
 	}
 }
-export class Break extends Stmt {
-	constructor() {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitBreakStmt(this);
-	}
-}
 export class Return extends Stmt {
 	constructor(public keyword: Token, public value: Expr) {
 		super();

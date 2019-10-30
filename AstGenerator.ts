@@ -4,7 +4,6 @@ const stmtDescriptions = {
     "Block": ["statements: Stmt[]"],
     "If": ["condition: Expr", "thenBranch: Block", "elseBranch: Block"],
     "Call": ["call: CallExpr"],
-    "Break": [],
     "Return": ["keyword: Token", "value: Expr"],
     "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType", "typeDeclaration?: Type"],
     "Assign": ["name: Token", "value: Expr"],
