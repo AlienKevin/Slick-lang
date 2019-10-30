@@ -96,15 +96,15 @@ export class CodeGenerator implements Visitor {
     private operatorTransform = $SLK.stone({
         "AND": (expr: Binary) => {
             return (
-                "(" + this.assertBoolean(expr.left)
-                + " && " + this.assertBoolean(expr.right)
+                "(" + this.expression(expr.left)
+                + " && " + this.expression(expr.right)
                 + ")"
             );
         },
         "OR": (expr: Binary) => {
             return (
-                "(" + this.assertBoolean(expr.left)
-                + " || " + this.assertBoolean(expr.right)
+                "(" + this.expression(expr.left)
+                + " || " + this.expression(expr.right)
                 + ")"
             );
         },
@@ -181,15 +181,6 @@ export class CodeGenerator implements Visitor {
         return name;
     }
 
-    private assertBoolean(expr: Expr) {
-        const string = this.expression(expr);
-        return (
-            isBooleanOperator(expr)
-            ? string
-            : "$SLK.assert_boolean(" + string + ")"
-        );
-    }
-
     statement(stmt: Stmt) {
         return stmt.accept(this);
     }
@@ -222,7 +213,7 @@ export class CodeGenerator implements Visitor {
     visitIfStmt(stmt: If) {
         return (
             "if ("
-            + this.assertBoolean(stmt.condition)
+            + this.expression(stmt.condition)
             + ")"
             + this.block(stmt.thenBranch)
             + (
@@ -269,7 +260,7 @@ export class CodeGenerator implements Visitor {
         this.indent();
         let padding = this.begin();
         let string = (
-            "(" + padding + this.assertBoolean(expr.condition)
+            "(" + padding + this.expression(expr.condition)
             + padding + "? " + this.expression(expr.trueBranch)
             + padding + ": " + this.expression(expr.falseBranch)
         );

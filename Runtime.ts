@@ -91,29 +91,21 @@ function stone(object) {
     return object;
 }
 
-function assert_boolean(boolean) {
-    if (isBoolean(boolean)) {
-        return boolean
-    } else {
-        error(`Expected a boolean value!`);
-    }
-}
-
 const and = R.curry(function(zeroth, oneth) {
-    return assert_boolean(zeroth) && assert_boolean(oneth);
+    return zeroth && oneth;
 });
 
 const or = R.curry(function (zeroth, oneth) {
-    return assert_boolean(zeroth) || assert_boolean(oneth);
+    return zeroth || oneth;
 });
 
 function not(boolean) {
-    return !assert_boolean(boolean);
+    return !boolean;
 }
 
 function ternary(zeroth, oneth, twoth) {
     return (
-        assert_boolean(zeroth)
+        zeroth
         ? oneth
         : twoth
     );
@@ -274,7 +266,6 @@ export default stone({
     abs,
     add,
     and,
-    assert_boolean,
     cat,
     div,
     eq,
