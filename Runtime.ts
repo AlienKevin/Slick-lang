@@ -206,13 +206,6 @@ function trunc(a: Decimal) {
     return calc("trunc", a);
 }
 
-function integer(a) {
-    if (isNumber(a)) {
-        a.trunc()
-    }
-    error(`Invalid arguments for integer()`);
-}
-
 function neg(a) {
     return calc("neg", a);
 }
@@ -265,7 +258,6 @@ export default stone({
     round,
     ge,
     gt,
-    integer,
     le,
     lt,
     List,
