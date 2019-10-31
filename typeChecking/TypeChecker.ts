@@ -365,6 +365,17 @@ export class Checker implements Visitor {
     }
     visitCallExpr(expr: Call) {
         let callee = this.expression(expr.callee);
+        if (callee instanceof AnyType) {
+            const argTypes = expr.argumentList.map(arg => this.expression(arg));
+            const calleeType = Checker.createFunctionType([
+                ...argTypes,
+                this.generateAnyType()
+            ]);
+            if (expr.callee instanceof Variable) {
+                this.env.define(expr.callee.name, calleeType);
+            }
+            return calleeType;
+        }
         const func = callee;
         if (!(callee instanceof FunctionType)) {
             throw this.error(expr.paren, `Callee must be a function!`);
