@@ -318,7 +318,7 @@ export class CodeGenerator implements Visitor {
     }
 
     funcExpr(expr: Function) {
-        return "$SLK.stone(function (" + expr.params.map((param) => {
+        return "$SLK.curry(function (" + expr.params.map((param) => {
             return CodeGenerator.mangle(param.lexeme);
         }).join(", ") + ") " + (
             expr.body instanceof Block

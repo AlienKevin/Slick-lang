@@ -84,6 +84,8 @@ function stone(object) {
     return object;
 }
 
+const curry = R.curry;
+
 const and = R.curry(function(zeroth, oneth) {
     return zeroth && oneth;
 });
@@ -274,6 +276,7 @@ export default stone({
     print,
     sqrt,
     stone,
+    curry,
     sub,
     ternary,
     Text,
