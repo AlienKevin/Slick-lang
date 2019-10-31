@@ -433,7 +433,12 @@ export class Checker implements Visitor {
             )
         }
          else if (returnType instanceof AnyType) {
-            return anyTypes[returnType.name];
+            const substituteType = anyTypes[returnType.name]
+            return (
+                substituteType === undefined
+                ? returnType
+                : substituteType
+            );
         } else {
             return returnType;
         }
