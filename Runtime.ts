@@ -16,7 +16,7 @@ function print(any) {
     return string;
 }
 
-function toString(any) {
+function toString(any, padding = 4) {
     if (isNumber(any)) {
         return any.toDecimalPlaces(5).toString();
     }
@@ -30,22 +30,18 @@ function toString(any) {
         return "Nil";
     }
     if (isList(any)) {
-        return "[" + any.map(toString).join(", ") + "]";
+        return "[" + any.map(any => toString(any, padding)).join(", ") + "]";
     }
     if (typeof any === "object") {
-        let linebreak = "";
-        let padding = "";
-        if (Object.keys(any).length > 1) {
-            linebreak = "\n";
-            padding = "    ";
-        }
+        let linebreak = "\n";
+        const indent = 4;
         return (
             "{" + linebreak
             + Object.entries(any).map(([key, value]) => 
-                padding + toString(key) + ": " + toString(value)
+                " ".repeat(padding) + toString(key, padding + indent) + ": " + toString(value, padding + indent)
             ).join(linebreak)
             + linebreak
-            + "}"
+            + " ".repeat(padding - indent) + "}"
         );
     }
     if (typeof any === "function") {
