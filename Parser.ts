@@ -186,7 +186,7 @@ export class Parser {
         if (this.typeAliases[alias] !== undefined) {
             throw this.error(aliasToken, `Duplicated type alias!`);
         }
-        this.consume(EQUAL, `Expected a '=' after type alias!`)
+        this.consume(COLON, `Expected a ':' after type alias!`)
         const type = this.typeDeclaration();
         this.endStmt("type");
         this.typeAliases[alias] = type;
