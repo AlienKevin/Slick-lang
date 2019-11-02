@@ -341,13 +341,13 @@ export class Checker implements Visitor {
             );
         } else {
             // check if the new keys and values match target record's
-            const target = this.env.get(expr.target) as RecordType;
+            const target = this.expression(expr.target) as RecordType;
             if (target === undefined) {
-                throw this.error(expr.target, `Target record '${expr.target.lexeme}' is not declared!`);
+                throw this.error(expr.target, `Target record '${expr.target}' is not declared!`);
             }
             Object.keys(expr.record).forEach(key => {
                 if (target.record[key] === undefined) {
-                    throw this.error(expr.keyTokens[key], `Target record '${expr.target.lexeme}' does not contain key '${key}'!`);
+                    throw this.error(expr.keyTokens[key], `Target record '${expr.target}' does not contain key '${key}'!`);
                 }
                 const targetType = target.record[key];
                 const sourceType = this.expression(expr.record[key]);

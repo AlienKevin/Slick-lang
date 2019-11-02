@@ -302,7 +302,7 @@ export class CodeGenerator implements Visitor {
             this.indent();
             const padding = this.begin();
             const string = "{"
-            + padding + "..." + expr.target.lexeme + ","
+            + padding + "..." + this.expression(expr.target) + ","
             + Object.entries(expr.record).map(([key, value]) => {
                 return padding + (
                     '"' + key + '": '

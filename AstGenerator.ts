@@ -17,7 +17,7 @@ const exprDescriptions = {
     "Variable": ["name: Token"],
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
     "ListLiteral": ["first: Token", "list: Expr[]"],
-    "RecordLiteral": ["first: Token", "record: {[name: string]: Expr}", "keyTokens: {[name: string]: Token}", "target: Token"],
+    "RecordLiteral": ["first: Token", "record: {[name: string]: Expr}", "keyTokens: {[name: string]: Token}", "target: Variable | Get"],
     "Function": ["first: Token", "params: Token[]", "body: Block | Expr"],
     "Get": ["object: Expr", "name: Token", "bracket?: Token"],
 };

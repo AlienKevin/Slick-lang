@@ -595,6 +595,10 @@ export class Parser {
 
     primary() {
         let expr = this.primaryHelper();
+        return this.getExpr(expr);
+    }
+
+    getExpr(expr: Expr) {
         // get expression
         while (this.match(TILDE)) {
             const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
@@ -611,11 +615,17 @@ export class Parser {
             let keyNames: string[] = [];
             let keys: Token[] = [];
             let values: Expr[] = [];
-            let target: Token = undefined;
+            let target: Variable | Get = undefined;
             if (!this.check(RIGHT_BRACE)) { // has arguments
                 const firstToken = this.consume(IDENTIFIER, `Expected a key label or record name!`);
-                if (this.match(BAR)) {
-                    target = firstToken;
+                // get expression
+                if (this.check(TILDE)) {
+                    target = this.getExpr(new Variable(firstToken)) as Get;
+                    this.consume(BAR, `Expected a '|' after target record!`);
+                } else {
+                    if (this.match(BAR)) {
+                        target = new Variable(firstToken);
+                    }
                 }
                 // arguments → expression ( "," expression )*
                 do {
