@@ -1,8 +1,9 @@
-import { isList, isNumber, isText, isBoolean, isNil } from "./utils";
+import { isList, isNumber, isText, isBoolean, isNil, isCustomType } from "./utils";
 import List from "./List";
 import Text from "./Text";
 import R from "ramda"
 import Decimal from "decimal.js";
+import { CustomType } from "./typeChecking/CustomType";
 
 Decimal.set({
     toExpPos: 5,
@@ -28,6 +29,9 @@ function toString(any, padding = 4) {
     }
     if (isNil(any)) {
         return "Nil";
+    }
+    if (isCustomType(any)) {
+        return any.name;
     }
     if (isList(any)) {
         return "[" + any.map(any => toString(any, padding)).join(", ") + "]";
@@ -288,4 +292,5 @@ export default stone({
     acos,
     atan,
     atan2,
+    CustomType
 }); 

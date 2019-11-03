@@ -1,4 +1,5 @@
 import Decimal from "decimal.js";
+import { CustomType } from "./typeChecking/CustomType";
 
 // Source: https://stackoverflow.com/a/8935675/6798201
 export function isDigit(char: string) {
@@ -36,6 +37,10 @@ export function isBoolean(value: any): value is boolean {
 
 export function isNil(value: any): value is undefined {
     return value === undefined;
+}
+
+export function isCustomType(value: any): value is CustomType {
+    return value instanceof CustomType;
 }
 
 export function capitalize(str: string) {
