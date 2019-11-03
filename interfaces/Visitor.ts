@@ -17,4 +17,5 @@ export interface Visitor {
 	visitReturnStmt(stmt: Stmt): any;
 	visitVarDeclarationStmt(stmt: Stmt): any;
 	visitAssignStmt(stmt: Stmt): any;
+	visitCustomTypeDeclarationStmt(stmt: Stmt): any;
 }

@@ -7,6 +7,7 @@ const stmtDescriptions = {
     "Return": ["keyword: Token", "value: Expr"],
     "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType", "typeDeclaration?: Type"],
     "Assign": ["name: Token", "value: Expr"],
+    "CustomTypeDeclaration": ["name: Token", "subtypes: {[name: string] : RecordType}"]
 };
 
 const exprDescriptions = {
@@ -41,7 +42,8 @@ function createStmt() {
 `import {Expr, Variable, Call as CallExpr} from "./Expr";
 import { TokenType } from "./TokenType";
 import { Token } from "./Token";
-import { Type } from "./typeChecking/Type";\n`
+import { Type } from "./typeChecking/Type";
+import { RecordType } from "./typeChecking/RecordType";\n`
     createAst(filePath, parentClassName, descriptions, imports);
 }
 

@@ -3,6 +3,7 @@ import {Expr, Variable, Call as CallExpr} from "./Expr";
 import { TokenType } from "./TokenType";
 import { Token } from "./Token";
 import { Type } from "./typeChecking/Type";
+import { RecordType } from "./typeChecking/RecordType";
 export abstract class Stmt {
     abstract accept(visitor: Visitor): any;
 }
@@ -52,5 +53,13 @@ export class Assign extends Stmt {
 	}
 	accept(visitor: Visitor) {
 		return visitor.visitAssignStmt(this);
+	}
+}
+export class CustomTypeDeclaration extends Stmt {
+	constructor(public name: Token, public subtypes: {[name: string] : RecordType}) {
+		super();
+	}
+	accept(visitor: Visitor) {
+		return visitor.visitCustomTypeDeclarationStmt(this);
 	}
 }
