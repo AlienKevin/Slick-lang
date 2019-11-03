@@ -21,7 +21,7 @@ const take = R.curry(function (length: Decimal, text: string) {
     }
     return unified.substring(text, 0, len);
 });
-const take_last = R.curry(function (length: Decimal, text: string) {
+const takeLast = R.curry(function (length: Decimal, text: string) {
     const len = number(length);
     if (len <= 0) {
         return "";
@@ -38,10 +38,10 @@ const capitalize = R.curry(function (text: string) {
     }
     return unified.charAt(text, 0) + capitalize(unified.substring(text, 1));
 });
-const ends_with = R.curry(function (searchText: string, text: string) {
+const endsWith = R.curry(function (searchText: string, text: string) {
     return unified.endsWith(text, searchText);
 });
-const starts_with = R.curry(function (searchText: string, text: string) {
+const startsWith = R.curry(function (searchText: string, text: string) {
     return unified.startsWith(text, searchText);
 });
 const slice = R.curry(function (start: Decimal, end: Decimal, text: string) {
@@ -68,12 +68,12 @@ export default {
     "upper?": upper_,
     nth,
     take,
-    "take·last": take_last,
+    takeLast,
     trim,
     split,
     capitalize,
-    "ends·with": ends_with,
-    "starts·with": starts_with,
+    endsWith,
+    startsWith,
     slice,
     member,
     length,

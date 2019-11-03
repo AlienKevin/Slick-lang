@@ -14,12 +14,6 @@ export function isAlphaNumeric(char: string) {
     return isAlpha(char) || isDigit(char);
 }
 
-export function isMiddot(char: string) {
-    // unicode mid point or interpunct character: "·"
-    // wikipedia: https://www.wikiwand.com/en/Interpunct
-    return char === "\u00B7";
-}
-
 export function isUpper(char: string) {
     return /[A-Z]/.test(char);
 }

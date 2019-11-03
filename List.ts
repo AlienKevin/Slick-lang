@@ -7,7 +7,7 @@ const filter = R.filter;
 const reject = R.reject;
 const find = R.find;
 const reduce = R.reduce;
-const reduce_last = R.reduceRight;
+const reduceLast = R.reduceRight;
 const all = R.all;
 const any = R.any;
 const first = R.head;
@@ -20,7 +20,7 @@ const nth = R.curry(function<T>(n: Decimal, list: readonly T[]) {
 const take = R.curry(function<T>(n: Decimal, list: readonly T[]) {
     return R.take(number(n), list);
 });
-const take_last = R.curry(function<T>(n: Decimal, list: readonly T[]) {
+const takeLast = R.curry(function<T>(n: Decimal, list: readonly T[]) {
     return R.takeLast(number(n), list);
 });
 const slice = R.curry(function<T>(a: Decimal, b: Decimal, list: readonly T[]) {
@@ -38,7 +38,7 @@ const update = R.curry(function<T>(index: Decimal, value: T, list: readonly T[])
 const drop = R.curry(function<T>(index: Decimal, list: readonly T[]) {
     return R.drop(number(index), list);
 });
-const drop_last = R.curry(function<T>(index: Decimal, list: readonly T[]) {
+const dropLast = R.curry(function<T>(index: Decimal, list: readonly T[]) {
     return R.dropLast(number(index), list);
 });
 const concat = R.concat;
@@ -55,7 +55,7 @@ export default {
     reject,
     find,
     reduce,
-    "reduce·last": reduce_last,
+    reduceLast,
     all,
     any,
     first,
@@ -64,7 +64,7 @@ export default {
     last,
     nth,
     take,
-    "take·last": take_last,
+    takeLast,
     slice,
     member,
     insert,
@@ -72,7 +72,7 @@ export default {
     prepend,
     update,
     drop,
-    "drop·last": drop_last,
+    dropLast,
     concat,
     adjust,
     length

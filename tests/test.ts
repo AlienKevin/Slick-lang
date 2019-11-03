@@ -5,14 +5,14 @@ const source = new Map([
 `$SLK.print($SLK3e_10);`
 ],
 [
-`var my·simple·name·of·a·variable: 'a string 📆🤞🌈'`,
+`var mySimpleNameOfAVariable: 'a string 📆🤞🌈'`,
 
 `var my_simple_name_of_a_variable = "a string 📆🤞🌈";`
 ],
 [
-`var exit: f final·value
-    var element·nr: 0
-    return final·value`,
+`var exit: f finalValue
+    var elementNr: 0
+    return finalValue`,
     
 `var exit = $SLK.stone(function (final_value) {
     var element_nr = $SLK0;
@@ -20,21 +20,21 @@ const source = new Map([
 });`
 ],
 [
-`var element·nr: 10
-var callback·function: f reduction element element·nr exit
+`var elementNr: 10
+var callbackFunction: f reduction element elementNr exit
     # function details omitted
     return null
-while element·nr ≥ 0
-    let element·nr: element·nr - 1
+while elementNr ≥ 0
+    let elementNr: elementNr - 1
     # fake some variables
     var reduction: null
     var array: null
     var exit: null
     call (
-        callback·function
+        callbackFunction
         reduction
         array
-        element·nr
+        elementNr
         exit
     )`,
 
@@ -51,10 +51,10 @@ while ($SLK.ge(element_nr, $SLK0)){
 }`
 ],
 [
-`var my·hero: 'butterfly'
-if my·hero = 'monster'
+`var myHero: 'butterfly'
+if myHero = 'monster'
     call print 'blood curdling scream'
-elif my·hero = 'butterfly'
+elif myHero = 'butterfly'
     call print 'do not make a sound'
 else
     call print 'sing like a rainbow'`,
@@ -97,22 +97,22 @@ if ($SLK.eq(my_hero, "monster")){
 ],
 [
 `var wala : {
-    some·thing: true
+    someThing: true
 }
 var three: {
     a: 0.1
     b: 'lala'
-    a·long·var·name: wala
+    aLongVarName: wala
 }`,
 
 `var wala = (function (o) {
-    o["some·thing"] = true;
+    o["someThing"] = true;
     return o;
 }(Object.create(null)));
 var three = (function (o) {
     o["a"] = $SLK0_1;
     o["b"] = "lala";
-    o["a·long·var·name"] = wala;
+    o["aLongVarName"] = wala;
     return o;
 }(Object.create(null)));`
 ],
@@ -241,9 +241,9 @@ $SLK.print((a));`
 `var a = ((true && false) || (true && false));`
 ],
 [
-`var first·boolean·variable: true
-var second·boolean·variable: false
-if first·boolean·variable ⋎ second·boolean·variable
+`var firstBooleanVariable: true
+var secondBooleanVariable: false
+if firstBooleanVariable ⋎ secondBooleanVariable
     call print 'Either the first or the second is true'`,
 
 `var first_boolean_variable = true;

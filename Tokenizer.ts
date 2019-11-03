@@ -1,7 +1,7 @@
 import { Decimal } from "decimal.js";
 import { TokenType } from "./TokenType";
 import { Token } from "./Token";
-import { isDigit, isAlpha, isAlphaNumeric, isMiddot } from "./utils";
+import { isDigit, isAlpha, isAlphaNumeric } from "./utils";
 import { Runner } from "./Runner";
 
 const reservedWords = new Map([
@@ -199,11 +199,10 @@ export class Scanner {
     }
 
     private identifier() {
-        while (isAlphaNumeric(this.peek())
-            || (isMiddot(this.peek()) && isAlphaNumeric(this.peekNext()))) {
+        while (isAlphaNumeric(this.peek())) {
             this.advance();
         }
-        if (!isMiddot(this.previous()) && this.previous() !== "f"
+        if (this.previous() !== "f"
         && this.peek() === '?') {
             this.advance();
         }
