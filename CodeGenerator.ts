@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
 import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "./Expr";
-import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign } from "./Stmt";
+import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign, CustomTypeDeclaration } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
 import { isNumber, isText, isBoolean, isNil } from "./utils";
@@ -210,6 +210,21 @@ export class CodeGenerator implements Visitor {
     visitReturnStmt(stmt: Return) {
         return "return " + this.expression(stmt.value) + ";";
     }
+
+    visitCustomTypeDeclarationStmt(stmt: CustomTypeDeclaration) {
+        return Object.entries(stmt.subtypes).map(([name, type]) => 
+            "var " + CodeGenerator.mangle(name) + " = "
+            + (
+                type === undefined
+                ? "new $SLK.CustomType(\"" + name + "\")"
+                : (
+                    "function (t) { return t; }"
+                )
+            )
+            + ";"
+        ).join("\n");
+    }
+
     visitVarDeclarationStmt(stmt: VarDeclaration) {
         return (
             "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
