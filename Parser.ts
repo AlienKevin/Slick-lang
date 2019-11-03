@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Function, ListLiteral, RecordLiteral } from "./Expr";
-import { Block, If, Return, VarDeclaration, Assign, Call as CallStmt } from "./Stmt";
+import { Block, If, Return, VarDeclaration, Assign, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
@@ -13,6 +13,7 @@ import { NilType } from "./typeChecking/NilType";
 import { MaybeType } from "./typeChecking/MaybeType";
 import { isNumber, isUpper } from "./utils";
 import { RecordType } from "./typeChecking/RecordType";
+import { CustomType } from "./typeChecking/CustomType";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -87,7 +88,14 @@ export class Parser {
     public current: number;
     private env: Environment;
     private groupMembers = 0;
-    private typeAliases: {[alias: string]: Type} = Object.create(null);
+    private types: {[alias: string]: Type} = (function(o) {
+        o["Text"] = PrimitiveType.Text;
+        o["Num"] = PrimitiveType.Num;
+        o["Bool"] = PrimitiveType.Bool;
+        o["Maybe"] = MaybeType;
+        o["List"] = ListType;
+        return o;
+    })(Object.create(null));
 
     constructor(public tokens: Token[], private runner: Runner) {
         this.env = this.newEnv();
@@ -164,6 +172,8 @@ export class Parser {
                 if (this.peek().lexeme === "alias") {
                     this.advance();
                     return this.typeAlias();
+                } else {
+                    return this.customType();
                 }
             }
             return this.statement();
@@ -177,19 +187,57 @@ export class Parser {
         }
     }
 
+    customType() {
+        const nameToken = this.consume(IDENTIFIER, `Expected a custom type name!`);
+        const name = nameToken.lexeme;
+        if (!isUpper(name[0])) {
+            throw this.error(nameToken, `Custom type must starts with a capital letter!`);
+        }
+        if (this.types[name] !== undefined) {
+            throw this.error(nameToken, `Duplicated type name!`);
+        }
+        this.consume(COLON, `Expected a ':' after custom type name!`);
+        this.consume(NEWLINE, `Expected a linebreak after ':'!`);
+        this.consume(INDENT, `Expected indentation before types!`);
+        let subtypes = Object.create(null);
+        do {
+            const subtypeToken = this.consume(IDENTIFIER, `Expected a subtype name!`);
+            const subtypeName = subtypeToken.lexeme;
+            let subtypeProperties = undefined;
+            if (this.peek().type !== NEWLINE) {
+                subtypeProperties = this.typeDeclaration();
+                if (!(subtypeProperties instanceof RecordType)) {
+                    throw this.error(subtypeToken, `Subtype properties must be a record!`);
+                }
+            }
+            subtypes = {
+                ...subtypes,
+                [subtypeName] : subtypeProperties
+            }
+            this.env.declare(subtypeToken, false);
+        } while (this.match(NEWLINE) && !this.match(DEDENT));
+        
+        const customType = new CustomTypeDeclaration(
+            nameToken,
+            subtypes
+        );
+        this.types[name] = new CustomType(name);
+        return customType;
+    }
+
     typeAlias() {
         const aliasToken = this.consume(IDENTIFIER, `Expected a type alias!`);
         const alias = aliasToken.lexeme;
         if (!isUpper(alias[0])) {
             throw this.error(aliasToken, `Type alias must starts with a capital letter!`);
         }
-        if (this.typeAliases[alias] !== undefined) {
-            throw this.error(aliasToken, `Duplicated type alias!`);
+        if (this.types[alias] !== undefined) {
+            throw this.error(aliasToken, `Duplicated type name!`);
         }
         this.consume(COLON, `Expected a ':' after type alias!`)
         const type = this.typeDeclaration();
         this.endStmt("type");
-        this.typeAliases[alias] = type;
+        this.types[alias] = type;
     }
 
     func() {
@@ -291,7 +339,7 @@ export class Parser {
                 break;
             default:
                 if (isUpper(first.lexeme[0])) {
-                    type = this.typeAliases[first.lexeme];
+                    type = this.types[first.lexeme];
                     if (type === undefined) {
                         throw this.error(first, `Cannot find type ${first.lexeme}!\nUse lowercase names for generic types!`);
                     }
