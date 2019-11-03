@@ -389,7 +389,7 @@ export class Checker implements Visitor {
             if (!(callee instanceof FunctionType)) {
                 const funcName = (
                     expr.callee instanceof Get
-                    ? expr.callee.object.first.lexeme + "~" + expr.callee.name.lexeme
+                    ? expr.callee.object.first.lexeme + "." + expr.callee.name.lexeme
                     : (
                         expr.callee instanceof Grouping
                         ? ""

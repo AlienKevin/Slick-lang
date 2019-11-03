@@ -58,7 +58,7 @@ export class Scanner {
             case '{': this.addToken(TokenType.LEFT_BRACE); this.braceStack.push('{'); break;
             case '}': this.addToken(TokenType.RIGHT_BRACE); this.braceStack.pop(); break;
             case ',': this.addToken(TokenType.COMMA); break;
-            case '~': this.addToken(TokenType.TILDE); break;
+            case '.': this.addToken(TokenType.DOT); break;
             case '→': this.addToken(TokenType.ARROW); break;
             case '&': this.addToken(TokenType.AMPERSAND); break;
             case '|': this.addToken(TokenType.BAR); break;

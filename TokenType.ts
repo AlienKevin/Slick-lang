@@ -9,7 +9,7 @@ export enum TokenType {
     BANG = "BANG",
     QUESTION = "QUESTION",
     COMMA = "COMMA",
-    TILDE = "TILDE",
+    DOT = "DOT",
     MINUS = "MINUS",
     PLUS = "PLUS",
     SLASH = "SLASH",

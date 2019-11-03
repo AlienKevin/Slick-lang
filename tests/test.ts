@@ -121,7 +121,7 @@ var three = (function (o) {
     a: 0.1
     b: 'lala'
 }
-call print three~a`,
+call print three.a`,
 
 `var three = (function (o) {
     o["a"] = $SLK0_1;

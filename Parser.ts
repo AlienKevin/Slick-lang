@@ -23,7 +23,7 @@ const RIGHT_BRACKET = TokenType.RIGHT_BRACKET;
 const BANG =TokenType.BANG;
 const QUESTION =TokenType.QUESTION;
 const COMMA =TokenType.COMMA;
-const TILDE =TokenType.TILDE;
+const DOT =TokenType.DOT;
 const MINUS =TokenType.MINUS;
 const PLUS =TokenType.PLUS;
 const AMPERSAND = TokenType.AMPERSAND;
@@ -600,7 +600,7 @@ export class Parser {
 
     getExpr(expr: Expr) {
         // get expression
-        while (this.match(TILDE)) {
+        while (this.match(DOT)) {
             const property = this.consume(IDENTIFIER, `Expected property name after '.'!`);
             expr = new Get(expr, property);
         }
@@ -619,7 +619,7 @@ export class Parser {
             if (!this.check(RIGHT_BRACE)) { // has arguments
                 const firstToken = this.consume(IDENTIFIER, `Expected a key label or record name!`);
                 // get expression
-                if (this.check(TILDE)) {
+                if (this.check(DOT)) {
                     target = this.getExpr(new Variable(firstToken)) as Get;
                     this.consume(BAR, `Expected a '|' after target record!`);
                 } else {
