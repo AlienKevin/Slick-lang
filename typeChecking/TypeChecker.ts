@@ -1,7 +1,7 @@
 import { Visitor } from "../interfaces/Visitor";
 import { Runner } from "../Runner";
 import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "../Expr";
-import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign } from "../Stmt";
+import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign, CustomTypeDeclaration } from "../Stmt";
 import { PrimitiveType } from "./PrimitiveType";
 import { CError } from "./CompileError";
 import { TokenType } from "../TokenType";
@@ -18,6 +18,7 @@ import { Scanner } from "../Tokenizer";
 import { Parser } from "../Parser";
 import { NilType } from "./NilType";
 import { MaybeType } from "./MaybeType";
+import { CustomType } from "./CustomType";
 
 const NUMBER = PrimitiveType.Num;
 const TEXT = PrimitiveType.Text;
@@ -149,25 +150,39 @@ export class Checker implements Visitor {
     }
 
     public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype: boolean}) {
-        if (!Checker.sameTypes(a, b, opts)) {
+        if (!this.sameTypes(a, b, opts)) {
             throw this.error(location, message);
         }
     }
 
-    public static sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean} = {isFirstSubtype: false}): boolean {
+    public sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean} = {isFirstSubtype: false}): boolean {
         if (a === undefined || b === undefined) {
             return true;
         }
         if (a instanceof AnyType && b instanceof AnyType) {
             return a.name === b.name;
         }
+        if (a instanceof CustomType && b instanceof CustomType) {
+            if (a.name === b.name) {
+                return true;
+            }
+            const subtypesA = this.env.getSubtypes(a.name);
+            if (subtypesA !== undefined && subtypesA[b.name] !== undefined) {
+                return true;
+            }
+            const subtypesB = this.env.getSubtypes(b.name);
+            if (subtypesB !== undefined && subtypesB[a.name] !== undefined) {
+                return true;
+            }
+            return false;
+        }
         if (a instanceof NilType && b instanceof NilType) {
             return true;
         }
         if (a instanceof MaybeType && b instanceof MaybeType) {
-            return Checker.sameTypes(a.type, b.type, opts);
+            return this.sameTypes(a.type, b.type, opts);
         } else if (a instanceof ListType && b instanceof ListType) {
-            return Checker.sameTypes(a.type, b.type, opts);
+            return this.sameTypes(a.type, b.type, opts);
         } else if (a instanceof RecordType && b instanceof RecordType) {
             if (!opts.isFirstSubtype) {
                 if (Object.keys(a.record).length !== Object.keys(b.record).length) {
@@ -178,12 +193,12 @@ export class Checker implements Visitor {
                 if (b.record[key] === undefined) {
                     return false;
                 }
-                return Checker.sameTypes(a.record[key], b.record[key], opts);
+                return this.sameTypes(a.record[key], b.record[key], opts);
             });
         } else if (a instanceof FunctionType && b instanceof FunctionType) {
             return (
-                Checker.sameTypes(a.inputType, b.inputType, opts)
-                && Checker.sameTypes(a.outputType, b.outputType, opts)
+                this.sameTypes(a.inputType, b.inputType, opts)
+                && this.sameTypes(a.outputType, b.outputType, opts)
             )
         } else if (a === b) {
             return true;
@@ -564,6 +579,20 @@ export class Checker implements Visitor {
             );
         }
     }
+
+    visitCustomTypeDeclarationStmt(stmt: CustomTypeDeclaration) {
+        const name = stmt.name.lexeme;
+        const customType = new CustomType(name);
+        this.env.declareCustomType(name, stmt.subtypes);
+        Object.entries(stmt.subtypes).forEach(([name, type]) => {
+            if (type === undefined) {
+                this.env.declare(name, customType, false);
+            } else {
+                this.env.declare(name, new FunctionType(type, customType), false);
+            }
+        });
+    }
+
     visitVarDeclarationStmt(stmt: VarDeclaration) {
         const mutable = stmt.typeModifier === TokenType.MUT;
         if (stmt.initializer instanceof Function) {
@@ -648,7 +677,7 @@ export class Checker implements Visitor {
                             storedType instanceof AnyType
                             && !(actualType instanceof AnyType)
                         )
-                        || Checker.sameTypes(storedType, actualType)
+                        || this.sameTypes(storedType, actualType)
                     )
                 ) {
                     return storedType;

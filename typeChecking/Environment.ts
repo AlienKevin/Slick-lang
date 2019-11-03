@@ -3,11 +3,15 @@ import { Token } from "../Token";
 import { CError } from "./CompileError";
 import { Checker } from "./TypeChecker";
 import { Expr } from "../Expr";
+import { CustomType } from "./CustomType";
+import { RecordType } from "./RecordType";
 
 interface Value {
     mutable: boolean,
     type: Type
 }
+
+type Subtypes = {[name: string] : RecordType};
 
 export class Env {
     private values: { [name: string]: Value } = Object.create(null);
@@ -15,7 +19,22 @@ export class Env {
     public functionParams: Token[];
     public functionReturnType: Type;
     public functionName: string;
+    public customTypes : {[name: string] : Subtypes} = Object.create(null);
     constructor(readonly checker: Checker, readonly enclosing?: Env) {}
+
+    getSubtypes(name: string) : Subtypes {
+        if (this.customTypes[name] !== undefined) {
+            return this.customTypes[name];
+        }
+        if (this.enclosing !== undefined) {
+            return this.enclosing.getSubtypes(name);
+        }
+        return undefined;
+    }
+
+    declareCustomType(name: string, subtypes: Subtypes) {
+        this.customTypes[name] = subtypes;
+    }
 
     get(nameToken: Token): Type {
         const name = nameToken.lexeme;
@@ -39,8 +58,8 @@ export class Env {
         }
     }
 
-    declare(nameToken: Token, type: Type, mutable: boolean) {
-        const name = nameToken.lexeme;
+    declare(nameToken: Token | string, type: Type, mutable: boolean) {
+        const name = nameToken instanceof Token ? nameToken.lexeme : nameToken;
         this.values[name] = {
             "mutable": mutable,
             "type": type
