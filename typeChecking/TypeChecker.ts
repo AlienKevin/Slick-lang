@@ -270,8 +270,6 @@ export class Checker implements Visitor {
             if (subtype instanceof Token) {
                 sub = new CustomType(subtype.lexeme);
                 if (supertype instanceof CustomType) {
-                    console.log("TCL: visitCaseExpr -> this.env.getSubtypes(supertype.name)", this.env.getSubtypes(supertype.name))
-                    console.log("TCL: visitCaseExpr -> subtype.lexeme", subtype.lexeme)
                     const subtypes = this.env.getSubtypes(supertype.name);
                     if (subtypes.hasOwnProperty(subtype.lexeme)) {
                         const typeParameters = subtypes[subtype.lexeme];
@@ -293,12 +291,14 @@ export class Checker implements Visitor {
                     } else {
                         throw this.error(subtype, `Subtype ${subtype} does not exist in ${supertype}!`);
                     }
+                } else {
+                    throw this.error(subtype, `Expected case condition to be a ${supertype}, not a custom type ${subtype}!`);
                 }
             } else {
                 sub = this.expression(subtype);
                 const isSubtype = this.sameTypes(sub, supertype, {isFirstSubtype: true});
                 if (!isSubtype) {
-                    throw this.error(subtype, `${sub} is not a subtype of the case expression typed ${supertype}!`);
+                    throw this.error(subtype, `Expected case condition to be a ${supertype}, not a ${sub}!`);
                 }
             }
 
