@@ -262,14 +262,23 @@ export class Checker implements Visitor {
         );
     }
 
+    // anatomy of case expression
+    // case value
+    //     condition 1 →
+    //          result 1
+    //     condition 2 →
+    //          result 2
+    //     else →
+    //          else result
     visitCaseExpr(caseExpr: Case) {
         const supertype = this.expression(caseExpr.expr);
         let returnType;
-        caseExpr.cases.forEach(({subtype, parameters, result}) => {
-            let sub;
+        caseExpr.cases.forEach(({subtype, parameters, result}, index) => {
             if (subtype instanceof Token) {
-                sub = new CustomType(subtype.lexeme);
                 if (supertype instanceof CustomType) {
+                    if (subtype.lexeme === "else") {
+                        throw this.error(subtype, `Cannot use 'else' in case expression with custom types.\nMust handle all subtypes explicitly!`)
+                    }
                     const subtypes = this.env.getSubtypes(supertype.name);
                     if (subtypes.hasOwnProperty(subtype.lexeme)) {
                         const typeParameters = subtypes[subtype.lexeme];
@@ -292,10 +301,21 @@ export class Checker implements Visitor {
                         throw this.error(subtype, `Subtype ${subtype} does not exist in ${supertype}!`);
                     }
                 } else {
-                    throw this.error(subtype, `Expected case condition to be a ${supertype}, not a custom type ${subtype}!`);
+                    if (subtype.lexeme === "else") {
+                        // 'else' is not the last case condition
+                        if (index < caseExpr.cases.length - 1) {
+                            throw this.error(subtype, `'else' must be the last case condition of non-custom types!`);
+                        }
+                    } else {
+                        throw this.error(subtype, `Expected case condition to be a ${supertype}, not a custom type ${subtype}!`);
+                    }
                 }
             } else {
-                sub = this.expression(subtype);
+                // last case condition reached
+                if (index === caseExpr.cases.length - 1) {
+                    throw this.error(subtype, `'else' must be the last case condition of non-custom types!`);
+                }
+                const sub = this.expression(subtype);
                 const isSubtype = this.sameTypes(sub, supertype, {isFirstSubtype: true});
                 if (!isSubtype) {
                     throw this.error(subtype, `Expected case condition to be a ${supertype}, not a ${sub}!`);
@@ -315,6 +335,11 @@ export class Checker implements Visitor {
                 throw this.error(result, `Return type ${currentReturnType} of this case expression does not match previous return type ${returnType}!`);
             }
         });
+
+        // case expression is a literal
+        if (!(supertype instanceof CustomType)) {
+
+        }
     }
 
     visitTernaryExpr(expr: Ternary) {
