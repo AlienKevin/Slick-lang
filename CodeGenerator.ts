@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
-import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "./Expr";
+import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
 import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign, CustomTypeDeclaration } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
@@ -216,9 +216,9 @@ export class CodeGenerator implements Visitor {
             "var " + CodeGenerator.mangle(name) + " = "
             + (
                 type === undefined
-                ? "new $SLK.CustomType(\"" + name + "\")"
+                ? "$SLK.createCustomType(\"" + name + "\")"
                 : (
-                    "function (t) { return t; }"
+                    "function (t) { return $SLK.createCustomType(\"" + name + "\", t); }"
                 )
             )
             + ";"
@@ -230,6 +230,49 @@ export class CodeGenerator implements Visitor {
             "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
             + this.expression(stmt.initializer) + ";"
         );
+    }
+
+    visitCaseExpr(caseExpr: Case) {
+        const expr = this.expression(caseExpr.expr);
+        this.indent();
+        let padding = this.begin();
+        let str = 
+            "(function() {"
+            + padding + "const $expr = " + expr + ";"
+        str += caseExpr.cases.map(
+                (currentCase, index) => {
+                    let caseStr =
+                        padding
+                        + (
+                            index === 0
+                            ? ""
+                            : "else "
+                        );
+                    if (currentCase.subtype instanceof Literal) {
+                        caseStr +=
+                            "if (" + "$SLK.eq(" + "$expr, " + this.expression(currentCase.subtype) + ")) {";
+                    } else {
+                        caseStr +=
+                            "if ($expr.name === \""  + currentCase.subtype + "\") {";
+                    }
+                    this.indent();
+                    padding = this.begin();
+                    caseStr +=
+                        currentCase.parameters.map(
+                            (parameter) => {
+                                return padding + "const " + parameter + " = $expr.parameters." + parameter + ";"
+                            }
+                        )
+                        + padding + "return " + this.expression(currentCase.result) + ";"
+                    this.outdent();
+                    padding = this.begin();
+                    caseStr += padding + "}"
+                    return caseStr;
+                }
+            ).join("")
+        this.outdent();
+        str += this.begin() + "})()"
+        return str;
     }
 
     private expression(expr: Expr) {

@@ -43,4 +43,8 @@ export class Environment {
         }
     }
 
+    undeclare(nameToken: Token) {
+        delete this.values[nameToken.lexeme];
+    }
+
 }

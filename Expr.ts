@@ -115,3 +115,14 @@ export class Get extends Expr {
 		return "Get expression"
 	}
 }
+export class Case extends Expr {
+	constructor(first: Token, public expr: Expr, public cases: {subtype: Token | Literal, parameters: Token[], result: Expr}[]) {
+		super(first);
+	}
+	accept(visitor: Visitor) {
+		return visitor.visitCaseExpr(this);
+	}
+	toString() {
+		return "Case expression"
+	}
+}

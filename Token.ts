@@ -10,8 +10,7 @@ export class Token {
     }
 
     toString() {
-        return `${this.type}: "${this.lexeme}", ${this.literal !== undefined ?
-             this.literal.toString() : "undefined"}`;
+        return this.lexeme;
     }
 
 }

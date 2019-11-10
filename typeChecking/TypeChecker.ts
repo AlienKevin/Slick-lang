@@ -1,6 +1,6 @@
 import { Visitor } from "../interfaces/Visitor";
 import { Runner } from "../Runner";
-import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral } from "../Expr";
+import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "../Expr";
 import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign, CustomTypeDeclaration } from "../Stmt";
 import { PrimitiveType } from "./PrimitiveType";
 import { CError } from "./CompileError";
@@ -163,15 +163,22 @@ export class Checker implements Visitor {
             return a.name === b.name;
         }
         if (a instanceof CustomType && b instanceof CustomType) {
+            if (opts.isFirstSubtype) {
+                const subtypesOfB = this.env.getSubtypes(b.name);
+                return (
+                    subtypesOfB !== undefined
+                    && subtypesOfB[a.name] !== undefined
+                );
+            }
             if (a.name === b.name) {
                 return true;
             }
-            const subtypesA = this.env.getSubtypes(a.name);
-            if (subtypesA !== undefined && subtypesA[b.name] !== undefined) {
+            const subtypesOfA = this.env.getSubtypes(a.name);
+            if (subtypesOfA !== undefined && subtypesOfA[b.name] !== undefined) {
                 return true;
             }
-            const subtypesB = this.env.getSubtypes(b.name);
-            if (subtypesB !== undefined && subtypesB[a.name] !== undefined) {
+            const subtypesOfB = this.env.getSubtypes(b.name);
+            if (subtypesOfB !== undefined && subtypesOfB[a.name] !== undefined) {
                 return true;
             }
             return false;
@@ -253,6 +260,61 @@ export class Checker implements Visitor {
                 : location
             , message
         );
+    }
+
+    visitCaseExpr(caseExpr: Case) {
+        const supertype = this.expression(caseExpr.expr);
+        let returnType;
+        caseExpr.cases.forEach(({subtype, parameters, result}) => {
+            let sub;
+            if (subtype instanceof Token) {
+                sub = new CustomType(subtype.lexeme);
+                if (supertype instanceof CustomType) {
+                    console.log("TCL: visitCaseExpr -> this.env.getSubtypes(supertype.name)", this.env.getSubtypes(supertype.name))
+                    console.log("TCL: visitCaseExpr -> subtype.lexeme", subtype.lexeme)
+                    const subtypes = this.env.getSubtypes(supertype.name);
+                    if (subtypes.hasOwnProperty(subtype.lexeme)) {
+                        const typeParameters = subtypes[subtype.lexeme];
+
+                        if (typeParameters === undefined) {
+                            if (parameters.length > 0) {
+                                throw this.error(subtype, `Expected 0 parameters for subtype ${subtype} but got ${parameters.length}!`);
+                            }
+                        } else {
+                            parameters.forEach((parameter) => {
+                                const declaredType = typeParameters.record[parameter.lexeme];
+                                if (declaredType === undefined) {
+                                    throw this.error(parameter, `Paramter ${parameter} does not exist on custom type ${supertype}!`);
+                                }
+                                // declare paramter types temporarily
+                                this.env.declare(parameter, declaredType , false);
+                            });
+                        }
+                    } else {
+                        throw this.error(subtype, `Subtype ${subtype} does not exist in ${supertype}!`);
+                    }
+                }
+            } else {
+                sub = this.expression(subtype);
+                const isSubtype = this.sameTypes(sub, supertype, {isFirstSubtype: true});
+                if (!isSubtype) {
+                    throw this.error(subtype, `${sub} is not a subtype of the case expression typed ${supertype}!`);
+                }
+            }
+
+            const currentReturnType = this.expression(result);
+
+            // remove temporary parameter declarations from scope
+            parameters.forEach((parameter) =>
+                this.env.undeclare(parameter)
+            )
+
+            if (returnType === undefined) {
+                returnType = currentReturnType
+            } else if (!this.sameTypes(currentReturnType, returnType)) {
+                throw this.error(result, `Return type ${currentReturnType} of this case expression does not match previous return type ${returnType}!`);
+            }
+        });
     }
 
     visitTernaryExpr(expr: Ternary) {

@@ -73,6 +73,10 @@ export class Env {
         }
     }
 
+    undeclare(nameToken: Token) {
+        delete this.values[nameToken.lexeme];
+    }
+
     isDeclared(name: string) {
         return this.values[name] !== undefined;
     }

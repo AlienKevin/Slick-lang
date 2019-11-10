@@ -3,7 +3,7 @@ import List from "./List";
 import Text from "./Text";
 import R from "ramda"
 import Decimal from "decimal.js";
-import { CustomType } from "./typeChecking/CustomType";
+import { RecordLiteral } from "./Expr";
 
 Decimal.set({
     toExpPos: 5,
@@ -250,6 +250,18 @@ function atan2(a: Decimal, b: Decimal) {
 const pi = Decimal.acos(-1);
 const e = new Decimal(1).exp();
 
+class CustomType {
+    constructor(readonly name: string, readonly parameters?: RecordLiteral) {}
+
+    toString() {
+        return this.name;
+    }
+}
+
+function createCustomType(name: string, parameters?: RecordLiteral) {
+    return new CustomType(name, parameters)
+}
+
 export default stone({
     abs,
     add,
@@ -292,5 +304,5 @@ export default stone({
     acos,
     atan,
     atan2,
-    CustomType
+    createCustomType
 }); 

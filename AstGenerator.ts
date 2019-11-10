@@ -21,6 +21,7 @@ const exprDescriptions = {
     "RecordLiteral": ["first: Token", "record: {[name: string]: Expr}", "keyTokens: {[name: string]: Token}", "target: Variable | Get"],
     "Function": ["first: Token", "params: Token[]", "body: Block | Expr"],
     "Get": ["object: Expr", "name: Token", "bracket?: Token"],
+    "Case": ["first: Token", "expr: Expr", "cases: {subtype: Token | Literal, parameters: Token[], result: Expr}[]"]
 };
 
 function createExpr() {

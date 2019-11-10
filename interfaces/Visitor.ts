@@ -11,6 +11,7 @@ export interface Visitor {
 	visitRecordLiteralExpr(expr: Expr): any;
 	visitFunctionExpr(expr: Expr): any;
 	visitGetExpr(expr: Expr): any;
+	visitCaseExpr(expr: Expr): any;
 	visitBlockStmt(stmt: Stmt): any;
 	visitIfStmt(stmt: Stmt): any;
 	visitCallStmt(stmt: Stmt): any;

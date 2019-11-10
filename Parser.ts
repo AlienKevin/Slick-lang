@@ -1,5 +1,5 @@
 import { TokenType } from "./TokenType";
-import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Function, ListLiteral, RecordLiteral } from "./Expr";
+import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
 import { Block, If, Return, VarDeclaration, Assign, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
@@ -76,6 +76,7 @@ const keywords = new Map([
     ["alias", TokenType.ALIAS],
     ["call", TokenType.CALL],
     ["let", TokenType.LET],
+    ["case", TokenType.CASE]
 ]);
 
 const functinos = [
@@ -447,7 +448,63 @@ export class Parser {
 
     // expression → assignment
     expression(): Expr {
-        return this.ternary();
+        return this.caseExpr();
+    }
+
+    caseExpr() {
+        if (this.peek().lexeme === "case") {
+            this.advance();
+            const keyword = this.previous();
+            let expr = this.ternary();
+            this.consume(NEWLINE, `Expected a linebreak before caes branches!`);
+            this.consume(INDENT, `Expected indentation before case branches!`);
+            let cases: {
+                subtype: Token | Literal,
+                parameters: Token[],
+                result: Expr
+            }[] = [];
+            do {
+                let subtype;
+                let parameters = [];
+                if (this.match(IDENTIFIER)) {
+                    subtype = this.previous();
+                    if (this.match(LEFT_BRACE)) {
+                        do {
+                            parameters.push(this.consume(IDENTIFIER, `Expected a record property name!`));
+                        } while (this.match(COMMA) && !this.check(RIGHT_BRACE))
+                        this.consume(RIGHT_BRACE, `Expected a '}' to close the record!`);
+                    } else if (this.match(IDENTIFIER)) {
+                        parameters.push(this.previous());
+                    }
+                } else {
+                    subtype = this.primitiveLiteral()
+                }
+                // declare parameters temporarily
+                parameters.forEach(parameter =>
+                    this.env.declare(parameter, false)
+                )
+                this.consume(ARROW, `Expected a '→' after case condition!`);
+                this.consume(NEWLINE, `Expected a linebreak before caes condition!`);
+                this.consume(INDENT, `Expected indentation before case condition!`);
+                const result = this.expression();
+
+                // remove parameters from scope
+                parameters.forEach(parameter =>
+                    this.env.undeclare(parameter)
+                )
+
+                this.consume(NEWLINE, `Expected a linebreak before caes result!`);
+                this.consume(DEDENT, `Expected dendetation after case result!`);
+                cases.push({
+                    subtype,
+                    parameters,
+                    result
+                });
+            } while (!this.match(DEDENT));
+            return new Case(keyword, expr, cases);
+        } else {
+            return this.ternary();
+        }
     }
 
     // ternary → or ("?" expression ! ternary)?
@@ -642,7 +699,7 @@ export class Parser {
     }
 
     primary() {
-        let expr = this.primaryHelper();
+        let expr = this.basicPrimary();
         return this.getExpr(expr);
     }
 
@@ -656,7 +713,7 @@ export class Parser {
     }
 
     // primary → NUMBER | STRING | "false" | "true" | "Nil" | "(" expression ")" | IDENTIFIER
-    primaryHelper() {
+    basicPrimary() {
         // record literal
         if (this.match(LEFT_BRACE)) {
             const first = this.previous();
@@ -718,18 +775,9 @@ export class Parser {
             this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
             return new ListLiteral(first, list);
         }
-        if (this.match(NUMBER, STRING)) {
-            const token = this.previous();
-            return new Literal(token, token.literal);
-        }
-        if (this.match(TRUE)) {
-            return new Literal(this.previous(), true);
-        }
-        if (this.match(FALSE)) {
-            return new Literal(this.previous(), false);
-        }
-        if (this.match(NIL)) {
-            return new Literal(this.previous(), undefined);
+        const primitive = this.primitiveLiteral();
+        if (primitive !== undefined) {
+            return primitive;
         }
         if (this.match(LEFT_PAREN)) {
             const first = this.previous();
@@ -748,6 +796,23 @@ export class Parser {
             return new Variable(name);
         }
         throw this.error(this.peek(), "Expression expected!");
+    }
+
+    private primitiveLiteral() {
+        if (this.match(NUMBER, STRING)) {
+            const token = this.previous();
+            return new Literal(token, token.literal);
+        }
+        if (this.match(TRUE)) {
+            return new Literal(this.previous(), true);
+        }
+        if (this.match(FALSE)) {
+            return new Literal(this.previous(), false);
+        }
+        if (this.match(NIL)) {
+            return new Literal(this.previous(), undefined);
+        }
+        return undefined;
     }
 
     private consume(tokenType: TokenType | TokenType[], errorMessage: string) {
