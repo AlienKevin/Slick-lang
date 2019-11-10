@@ -14,6 +14,7 @@ import { MaybeType } from "./typeChecking/MaybeType";
 import { isNumber, isUpper } from "./utils";
 import { RecordType } from "./typeChecking/RecordType";
 import { CustomType } from "./typeChecking/CustomType";
+import runtime from "./Runtime";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -468,6 +469,15 @@ export class Parser {
                 let parameters = [];
                 if (this.match(IDENTIFIER)) {
                     subtype = this.previous();
+                    if (cases
+                        .filter((individualCase) =>
+                            individualCase.subtype instanceof Token)
+                        .map((individualCase) =>
+                            (individualCase.subtype as Token).lexeme
+                        )
+                        .includes(subtype.lexeme)) {
+                        throw this.error(subtype, `Duplicated case condition ${subtype}!`);
+                    }
                     if (this.match(LEFT_BRACE)) {
                         do {
                             parameters.push(this.consume(IDENTIFIER, `Expected a record property name!`));
@@ -477,7 +487,14 @@ export class Parser {
                         parameters.push(this.previous());
                     }
                 } else {
-                    subtype = this.primitiveLiteral()
+                    subtype = this.primitiveLiteral();
+                    if (cases.some((individualCase) =>
+                        individualCase.subtype instanceof Literal
+                        ? runtime.eq(individualCase.subtype.value, subtype.value)
+                        : false
+                    )) {
+                        throw this.error(subtype.first, `Duplicated case condition ${runtime.toString(subtype.value)}!`);
+                    }
                 }
                 // declare parameters temporarily
                 parameters.forEach(parameter =>

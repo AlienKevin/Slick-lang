@@ -304,5 +304,6 @@ export default stone({
     acos,
     atan,
     atan2,
-    createCustomType
+    createCustomType,
+    toString
 }); 
