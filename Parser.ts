@@ -733,6 +733,8 @@ export class Parser {
     basicPrimary() {
         // record literal
         if (this.match(LEFT_BRACE)) {
+            const enclosingGroupMembers = this.groupMembers;
+            this.groupMembers = 0;
             const first = this.previous();
             let keyNames: string[] = [];
             let keys: Token[] = [];
@@ -774,6 +776,7 @@ export class Parser {
                 && this.peek().type !== RIGHT_BRACE);
             }
             this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
+            this.groupMembers = enclosingGroupMembers;
             return new RecordLiteral(
                 first,
                 keyNames.reduce((record, key, index) => 
@@ -787,9 +790,12 @@ export class Parser {
         }
         // list literal
         if (this.match(LEFT_BRACKET)) {
+            const enclosingGroupMembers = this.groupMembers;
+            this.groupMembers = 0;
             const first = this.previous();
             const list = this.getList(TokenType.RIGHT_BRACKET, COMMA);
             this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
+            this.groupMembers = enclosingGroupMembers;
             return new ListLiteral(first, list);
         }
         const primitive = this.primitiveLiteral();
