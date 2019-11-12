@@ -501,7 +501,7 @@ export class Parser {
                     this.env.declare(parameter, false)
                 )
                 this.consume(ARROW, `Expected a '→' after case condition!`);
-                this.consume(NEWLINE, `Expected a linebreak before caes condition!`);
+                this.consume(NEWLINE, `Expected a linebreak before case condition!`);
                 this.consume(INDENT, `Expected indentation before case condition!`);
                 const result = this.expression();
 
@@ -509,8 +509,8 @@ export class Parser {
                 parameters.forEach(parameter =>
                     this.env.undeclare(parameter)
                 )
-
-                this.consume(NEWLINE, `Expected a linebreak before caes result!`);
+                
+                this.match(NEWLINE);
                 this.consume(DEDENT, `Expected dendetation after case result!`);
                 cases.push({
                     subtype,
