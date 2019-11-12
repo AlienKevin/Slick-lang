@@ -265,7 +265,7 @@ export class CodeGenerator implements Visitor {
                             (parameter) => {
                                 return padding + "const " + parameter + " = $expr.parameters." + parameter + ";"
                             }
-                        )
+                        ).join("")
                         + padding + "return " + this.expression(currentCase.result) + ";"
                     this.outdent();
                     padding = this.begin();
