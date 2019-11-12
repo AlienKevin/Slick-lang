@@ -163,25 +163,7 @@ export class Checker implements Visitor {
             return a.name === b.name;
         }
         if (a instanceof CustomType && b instanceof CustomType) {
-            if (opts.isFirstSubtype) {
-                const subtypesOfB = this.env.getSubtypes(b.name);
-                return (
-                    subtypesOfB !== undefined
-                    && subtypesOfB[a.name] !== undefined
-                );
-            }
-            if (a.name === b.name) {
-                return true;
-            }
-            const subtypesOfA = this.env.getSubtypes(a.name);
-            if (subtypesOfA !== undefined && subtypesOfA[b.name] !== undefined) {
-                return true;
-            }
-            const subtypesOfB = this.env.getSubtypes(b.name);
-            if (subtypesOfB !== undefined && subtypesOfB[a.name] !== undefined) {
-                return true;
-            }
-            return false;
+            return a.name === b.name;
         }
         if (a instanceof NilType && b instanceof NilType) {
             return true;
