@@ -4,6 +4,7 @@ import Text from "./Text";
 import R from "ramda"
 import Decimal from "decimal.js";
 import { RecordLiteral } from "./Expr";
+import { CustomType } from "./typeChecking/CustomType";
 
 Decimal.set({
     toExpPos: 5,
@@ -31,7 +32,14 @@ function toString(any, padding = 4) {
         return "Nil";
     }
     if (isCustomType(any)) {
-        return any.name;
+        return (
+            any.name
+            + (
+                any.parameters === undefined
+                ? ""
+                : " " + toString(any.parameters, padding)
+            )
+        );
     }
     if (isList(any)) {
         return "[" + any.map(any => toString(any, padding)).join(", ") + "]";
@@ -249,14 +257,6 @@ function atan2(a: Decimal, b: Decimal) {
 
 const pi = Decimal.acos(-1);
 const e = new Decimal(1).exp();
-
-class CustomType {
-    constructor(readonly name: string, readonly parameters?: RecordLiteral) {}
-
-    toString() {
-        return this.name;
-    }
-}
 
 function createCustomType(name: string, parameters?: RecordLiteral) {
     return new CustomType(name, parameters)
