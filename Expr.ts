@@ -116,7 +116,7 @@ export class Get extends Expr {
 	}
 }
 export class Case extends Expr {
-	constructor(first: Token, public expr: Expr, public cases: {subtype: Token | Literal, parameters: Token[], result: Expr}[]) {
+	constructor(first: Token, public expr: Expr, public cases: {subtype: Token | Literal, parameters: Token[], isRecord: boolean, result: Expr}[]) {
 		super(first);
 	}
 	accept(visitor: Visitor) {

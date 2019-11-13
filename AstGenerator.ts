@@ -7,7 +7,7 @@ const stmtDescriptions = {
     "Return": ["keyword: Token", "value: Expr"],
     "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType", "typeDeclaration?: Type"],
     "Assign": ["name: Token", "value: Expr"],
-    "CustomTypeDeclaration": ["name: Token", "subtypes: {[name: string] : RecordType}"]
+    "CustomTypeDeclaration": ["name: Token", "subtypes: {[name: string] : Type}"]
 };
 
 const exprDescriptions = {
@@ -21,7 +21,7 @@ const exprDescriptions = {
     "RecordLiteral": ["first: Token", "record: {[name: string]: Expr}", "keyTokens: {[name: string]: Token}", "target: Variable | Get"],
     "Function": ["first: Token", "params: Token[]", "body: Block | Expr"],
     "Get": ["object: Expr", "name: Token", "bracket?: Token"],
-    "Case": ["first: Token", "expr: Expr", "cases: {subtype: Token | Literal, parameters: Token[], result: Expr}[]"]
+    "Case": ["first: Token", "expr: Expr", "cases: {subtype: Token | Literal, parameters: Token[], isRecord: boolean, result: Expr}[]"]
 };
 
 function createExpr() {

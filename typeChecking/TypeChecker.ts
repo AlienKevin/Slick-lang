@@ -267,17 +267,23 @@ export class Checker implements Visitor {
 
                         if (typeParameters === undefined) {
                             if (parameters.length > 0) {
-                                throw this.error(subtype, `Expected 0 parameters for subtype ${subtype} but got ${parameters.length}!`);
+                                throw this.error(subtype, `Expected 0 parameter for subtype ${subtype} but got ${parameters.length}!`);
                             }
-                        } else {
+                        } else if (typeParameters instanceof RecordType) {
                             parameters.forEach((parameter) => {
                                 const declaredType = typeParameters.record[parameter.lexeme];
                                 if (declaredType === undefined) {
                                     throw this.error(parameter, `Paramter ${parameter} does not exist on custom type ${supertype}!`);
                                 }
-                                // declare paramter types temporarily
+                                // declare parameter types temporarily
                                 this.env.declare(parameter, declaredType , false);
                             });
+                        } else {
+                            if (parameters.length > 1) {
+                                throw this.error(parameters[1], `Expected 1 parameter but got ${parameters.length}!`);
+                            }
+                            // declare parameter type temporarily
+                            this.env.declare(parameters[0], typeParameters , false);
                         }
                     } else {
                         throw this.error(subtype, `Subtype ${subtype} does not exist in ${supertype}!`);

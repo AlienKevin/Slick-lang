@@ -56,7 +56,7 @@ export class Assign extends Stmt {
 	}
 }
 export class CustomTypeDeclaration extends Stmt {
-	constructor(public name: Token, public subtypes: {[name: string] : RecordType}) {
+	constructor(public name: Token, public subtypes: {[name: string] : Type}) {
 		super();
 	}
 	accept(visitor: Visitor) {

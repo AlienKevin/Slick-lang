@@ -261,12 +261,15 @@ export class CodeGenerator implements Visitor {
                     this.indent();
                     padding = this.begin();
                     caseStr +=
-                        currentCase.parameters.map(
-                            (parameter) => {
-                                return padding + "const " + parameter + " = $expr.parameters." + parameter + ";"
-                            }
-                        ).join("")
-                        + padding + "return " + this.expression(currentCase.result) + ";"
+                        (
+                            currentCase.isRecord
+                            ? currentCase.parameters.map(
+                                (parameter) => {
+                                    return padding + "const " + parameter + " = $expr.parameters." + parameter + ";"
+                                }
+                            ).join("")
+                            : padding + "const " + currentCase.parameters[0] + " = $expr.parameters;"
+                        ) + padding + "return " + this.expression(currentCase.result) + ";"
                     this.outdent();
                     padding = this.begin();
                     caseStr += padding + "}"

@@ -3,15 +3,13 @@ import { Token } from "../Token";
 import { CError } from "./CompileError";
 import { Checker } from "./TypeChecker";
 import { Expr } from "../Expr";
-import { CustomType } from "./CustomType";
-import { RecordType } from "./RecordType";
 
 interface Value {
     mutable: boolean,
     type: Type
 }
 
-type Subtypes = {[name: string] : RecordType};
+type Subtypes = {[name: string] : Type};
 
 export class Env {
     private values: { [name: string]: Value } = Object.create(null);

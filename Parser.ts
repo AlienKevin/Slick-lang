@@ -208,8 +208,11 @@ export class Parser {
             let subtypeProperties = undefined;
             if (this.peek().type !== NEWLINE) {
                 subtypeProperties = this.typeDeclaration();
-                if (!(subtypeProperties instanceof RecordType)) {
-                    throw this.error(subtypeToken, `Subtype properties must be a record!`);
+                if (subtypeProperties instanceof FunctionType) {
+                    throw this.error(
+                        subtypeToken, 
+                        `Subtype parameter cannot be a function type.\nIt must be a single type (including a record of types)!`
+                    );
                 }
             }
             subtypes = {
@@ -237,7 +240,10 @@ export class Parser {
             throw this.error(aliasToken, `Duplicated type name!`);
         }
         this.consume(COLON, `Expected a ':' after type alias!`)
-        const type = this.typeDeclaration();
+        const type = this.typeDeclaration({
+            allowFunctionType : true,
+            allowTypeVariable : false
+        });
         this.endStmt("type");
         this.types[alias] = type;
     }
@@ -301,12 +307,12 @@ export class Parser {
         }
     }
 
-    typeDeclaration(allowFunctionType = true): Type {
+    typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true}): Type {
         const first = this.consume([NIL, IDENTIFIER, LEFT_PAREN, LEFT_BRACE], `Expected a type!`);
         let type: Type;
         switch (first.lexeme) {
             case "(":
-                type = this.typeDeclaration();
+                type = this.typeDeclaration(opts);
                 this.consume(RIGHT_PAREN, `Expected a ')'!`);
                 break;
             case "{":
@@ -315,7 +321,7 @@ export class Parser {
                     do {
                         const keyName = this.consume(IDENTIFIER, `Expected a key name!`).lexeme;
                         this.consume(EQUAL, `Expected a '=' after key name!`);
-                        const valueType = this.typeDeclaration();
+                        const valueType = this.typeDeclaration(opts);
                         recordType[keyName] = valueType;
                     } while (
                         this.match(COMMA, SOFT_NEWLINE)
@@ -325,10 +331,16 @@ export class Parser {
                 this.consume(RIGHT_BRACE, `Expected a closing '}'!`);
                 break;
             case "List":
-                type = new ListType(this.typeDeclaration(false));
+                type = new ListType(this.typeDeclaration({
+                    ...opts,
+                    allowFunctionType : false
+                }));
                 break;
             case "Maybe":
-                type = new MaybeType(this.typeDeclaration(false));
+                type = new MaybeType(this.typeDeclaration({
+                    ...opts,
+                    allowFunctionType : false
+                }));
                 break;
             case "Bool":
                 type = PrimitiveType.Bool;
@@ -345,13 +357,15 @@ export class Parser {
                     if (type === undefined) {
                         throw this.error(first, `Cannot find type ${first.lexeme}!\nUse lowercase names for generic types!`);
                     }
-                } else {
+                } else if (opts.allowTypeVariable) {
                     type = new AnyType(first.lexeme);
+                } else {
+                    throw this.error(first, `Cannot declare type variable here!`)
                 }
                 break;
         }
-        while (allowFunctionType && this.match(ARROW)) {
-            type = new FunctionType(type, this.typeDeclaration());
+        while (opts.allowFunctionType && this.match(ARROW)) {
+            type = new FunctionType(type, this.typeDeclaration(opts));
         }
         return type;
     }
@@ -462,11 +476,13 @@ export class Parser {
             let cases: {
                 subtype: Token | Literal,
                 parameters: Token[],
+                isRecord: boolean,
                 result: Expr
             }[] = [];
             do {
                 let subtype;
                 let parameters = [];
+                let isRecord;
                 if (this.match(IDENTIFIER)) {
                     subtype = this.previous();
                     if (cases
@@ -483,8 +499,10 @@ export class Parser {
                             parameters.push(this.consume(IDENTIFIER, `Expected a record property name!`));
                         } while (this.match(COMMA) && !this.check(RIGHT_BRACE))
                         this.consume(RIGHT_BRACE, `Expected a '}' to close the record!`);
+                        isRecord = true;
                     } else if (this.match(IDENTIFIER)) {
                         parameters.push(this.previous());
+                        isRecord = false;
                     }
                 } else {
                     subtype = this.primitiveLiteral();
@@ -515,6 +533,7 @@ export class Parser {
                 cases.push({
                     subtype,
                     parameters,
+                    isRecord,
                     result
                 });
             } while (!this.match(DEDENT));
