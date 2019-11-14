@@ -11,7 +11,7 @@ import { FunctionType } from "./typeChecking/FunctionType";
 import { AnyType } from "./typeChecking/AnyType";
 import { NilType } from "./typeChecking/NilType";
 import { MaybeType } from "./typeChecking/MaybeType";
-import { isNumber, isUpper } from "./utils";
+import { isNumber, isUpper, are, them } from "./utils";
 import { RecordType } from "./typeChecking/RecordType";
 import { CustomType } from "./typeChecking/CustomType";
 import runtime from "./Runtime";
@@ -200,13 +200,17 @@ export class Parser {
             throw this.error(nameToken, `Duplicated type name!`);
         }
         let typeParameters: AnyType[] = [];
+        let typeParameterTokens: Token[] = [];
         if (this.peek().type === IDENTIFIER) {
-            typeParameters.push(new AnyType(this.advance().lexeme));
+            const token = this.advance();
+            typeParameterTokens.push(token);
+            typeParameters.push(new AnyType(token.lexeme));
         }
         this.consume(COLON, `Expected a ':' after custom type name!`);
         this.consume(NEWLINE, `Expected a linebreak after ':'!`);
         this.consume(INDENT, `Expected indentation before types!`);
         let subtypes = Object.create(null);
+        let usedParameters: string[] = [];
         do {
             const subtypeToken = this.consume(IDENTIFIER, `Expected a subtype name!`);
             const subtypeName = subtypeToken.lexeme;
@@ -215,7 +219,8 @@ export class Parser {
                 subtype = this.typeDeclaration({
                     allowFunctionType : true,
                     allowTypeVariable : true,
-                    typeParameters : typeParameters
+                    typeParameters : typeParameters,
+                    usedParameters : usedParameters
                 });
                 if (subtype instanceof FunctionType) {
                     throw this.error(
@@ -231,6 +236,22 @@ export class Parser {
             this.env.declare(subtypeToken, false);
         } while (this.match(NEWLINE) && !this.match(DEDENT));
         
+        // check if all type parameters are used
+        const notusedParameters = typeParameters.map((parameter) => parameter.name).filter((parameter) => !usedParameters.includes(parameter))
+        if (notusedParameters.length > 0) {
+            const firstUnusedParameterToken = typeParameterTokens[usedParameters.length];
+            throw this.error(
+                firstUnusedParameterToken,
+                "Type parameter "
+                + typeParameterTokens.slice(usedParameters.length).join(", ")
+                + are(notusedParameters.length)
+                + "unused. Remove"
+                + them(notusedParameters.length)
+                + "or use"
+                + them(notusedParameters.length)
+                + "in subtypes!")
+        }
+
         const customType = new CustomTypeDeclaration(
             nameToken,
             subtypes,
@@ -253,7 +274,8 @@ export class Parser {
         const type = this.typeDeclaration({
             allowFunctionType : true,
             allowTypeVariable : false,
-            typeParameters : []
+            typeParameters : [],
+            usedParameters : []
         });
         this.endStmt("type");
         this.types[alias] = type;
@@ -317,7 +339,7 @@ export class Parser {
             return this.varDeclaration(typeModifier, name, type);
         }
     }
-    typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true, typeParameters : []}): Type {
+    typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true, typeParameters : [], usedParameters : []}): Type {
         const first = this.consume([NIL, IDENTIFIER, LEFT_PAREN, LEFT_BRACE], `Expected a type!`);
         let type: Type;
         switch (first.lexeme) {
@@ -388,6 +410,7 @@ export class Parser {
                         }
                     }
                     type = new AnyType(name);
+                    opts.usedParameters.push(name);
                 } else {
                     throw this.error(first, `Cannot declare type variable here!`)
                 }
