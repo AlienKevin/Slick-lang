@@ -60,3 +60,19 @@ export function number(n: any) {
         return n.toNumber()
     }
 }
+
+export function are(length: number) {
+    if (length === 0 || length > 1) {
+        return " are "
+    } else {
+        return " is "
+    }
+}
+
+export function them(length: number) {
+    if (length === 0 || length > 1) {
+        return " them "
+    } else {
+        return " it "
+    }
+}
