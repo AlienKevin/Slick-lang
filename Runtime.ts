@@ -1,10 +1,8 @@
-import { isList, isNumber, isText, isBoolean, isCustomType } from "./utils";
+import { isList, isNumber, isText, isBoolean, isCustomType, createCustomType } from "./utils";
 import List from "./List";
 import Text from "./Text";
 import R from "ramda"
 import Decimal from "decimal.js";
-import { RecordLiteral } from "./Expr";
-import { CustomType } from "./typeChecking/CustomType";
 
 Decimal.set({
     toExpPos: 5,
@@ -254,10 +252,6 @@ function atan2(a: Decimal, b: Decimal) {
 
 const pi = Decimal.acos(-1);
 const e = new Decimal(1).exp();
-
-function createCustomType(name: string, parameters?: RecordLiteral) {
-    return new CustomType(name, [], parameters);
-}
 
 export default stone({
     abs,

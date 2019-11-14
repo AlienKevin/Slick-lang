@@ -1,5 +1,6 @@
 import Decimal from "decimal.js";
 import { CustomType } from "./typeChecking/CustomType";
+import { RecordLiteral } from "./Expr";
 
 // Source: https://stackoverflow.com/a/8935675/6798201
 export function isDigit(char: string) {
@@ -72,3 +73,8 @@ export function them(length: number) {
         return " it "
     }
 }
+
+export function createCustomType(name: string, parameters?: RecordLiteral) {
+    return new CustomType(name, [], parameters);
+}
+
