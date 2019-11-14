@@ -9,7 +9,6 @@ import { ListType } from "./typeChecking/ListType";
 import { PrimitiveType } from "./typeChecking/PrimitiveType";
 import { FunctionType } from "./typeChecking/FunctionType";
 import { AnyType } from "./typeChecking/AnyType";
-import { MaybeType } from "./typeChecking/MaybeType";
 import { isNumber, isUpper, are, them } from "./utils";
 import { RecordType } from "./typeChecking/RecordType";
 import { CustomType } from "./typeChecking/CustomType";
@@ -89,11 +88,10 @@ export class Parser {
     public current: number;
     private env: Environment;
     private groupMembers = 0;
-    private types: {[alias: string]: Type} = (function(o) {
+    public types: {[alias: string]: Type} = (function(o) {
         o["Text"] = PrimitiveType.Text;
         o["Num"] = PrimitiveType.Num;
         o["Bool"] = PrimitiveType.Bool;
-        o["Maybe"] = MaybeType;
         o["List"] = ListType;
         return o;
     })(Object.create(null));
@@ -362,12 +360,6 @@ export class Parser {
                 break;
             case "List":
                 type = new ListType(this.typeDeclaration({
-                    ...opts,
-                    allowFunctionType : false
-                }));
-                break;
-            case "Maybe":
-                type = new MaybeType(this.typeDeclaration({
                     ...opts,
                     allowFunctionType : false
                 }));

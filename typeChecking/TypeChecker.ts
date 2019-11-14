@@ -16,7 +16,6 @@ import { AnyType } from "./AnyType";
 import clone from "lodash.clone";
 import { Scanner } from "../Tokenizer";
 import { Parser } from "../Parser";
-import { MaybeType } from "./MaybeType";
 import { CustomType } from "./CustomType";
 import { zip, zip_longest as zipLongest } from 'zip-array';
 
@@ -50,6 +49,8 @@ export class Checker implements Visitor {
     }
 
     private declarePrimordials(globals: Env) {
+        this.declareMaybeType();
+
         const primordials = 
         `abs       Num → Num
         max        Num → Num → Num
@@ -92,6 +93,18 @@ export class Checker implements Visitor {
         );
     }
 
+    private declareMaybeType() {
+        // declare Maybe type
+        this.visitCustomTypeDeclarationStmt(new CustomTypeDeclaration(
+            new Token(TokenType.IDENTIFIER, "Maybe", undefined, undefined, undefined),
+            {
+                "Nothing": undefined,
+                "Just": new AnyType("a")
+            },
+            [new AnyType("a")]
+        ));
+    }
+
     public static parseTypeDeclarations(declarations) {
         const regex = /\s*(.*?)\s+(.*)/g;
         let match: string[];
@@ -105,6 +118,13 @@ export class Checker implements Visitor {
             scanner.scan();
             const parser = new Parser(scanner.tokens, runner);
             parser.current = 0;
+
+            // declare Maybe type
+            // TODO: import Maybe type instead of hardcoding declaration
+            if (typeString.includes("Maybe")) {
+                parser.types["Maybe"] = new CustomType("Maybe", [new AnyType("a")]);
+            }
+
             types[name] = parser.typeDeclaration();
         }
         return types;
@@ -171,9 +191,6 @@ export class Checker implements Visitor {
                     : this.sameTypes(aParameter, bParameter)
                 )
             );
-        }
-        if (a instanceof MaybeType && b instanceof MaybeType) {
-            return this.sameTypes(a.type, b.type, opts);
         } else if (a instanceof ListType && b instanceof ListType) {
             return this.sameTypes(a.type, b.type, opts);
         } else if (a instanceof RecordType && b instanceof RecordType) {
@@ -531,7 +548,6 @@ export class Checker implements Visitor {
             )
         } else if (
             returnType instanceof ListType
-            || returnType instanceof MaybeType
         ) {
             return Object.assign(
                 clone(returnType),
