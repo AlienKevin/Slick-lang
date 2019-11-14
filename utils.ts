@@ -78,3 +78,9 @@ export function createCustomType(name: string, parameters?: RecordLiteral) {
     return new CustomType(name, [], parameters);
 }
 
+export function maybe(result) {
+    if (result === undefined) {
+        return createCustomType("Nothing");
+    }
+    return result;
+}

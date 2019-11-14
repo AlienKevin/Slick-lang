@@ -7,11 +7,11 @@ reduce      (a → b → a) → a → List b → a
 reduceLast (a → b → a) → a → List b → a
 all         (a → Bool) → List a → Bool
 any         (a → Bool) → List a → Bool
-first       List a → a
+first       List a → Maybe a
 tail        List a → List a
 head        List a → List a
-last        List a → a
-nth         Num → List a → a
+last        List a → Maybe a
+nth         Num → List a → Maybe a
 take        Num → List a → List a
 takeLast   Num → List a → List a
 slice       Num → Num → List a → List a

@@ -1,21 +1,27 @@
 import R from "ramda";
 import Decimal from "decimal.js";
-import { number } from "./utils";
+import { number, maybe } from "./utils";
 
 const map = R.map;
 const filter = R.filter;
 const reject = R.reject;
-const find = R.find;
+const find = R.curry(function<T>(f: (a: T) => boolean, list: readonly T[]) {
+    return maybe(R.find(f, list));
+});
 const reduce = R.reduce;
 const reduceLast = R.reduceRight;
 const all = R.all;
 const any = R.any;
-const first = R.head;
+const first = maybe(function<T>(list: readonly T[]) {
+    return maybe(R.head(list));
+});
 const tail = R.tail;
 const head = R.init;
-const last = R.last;
+const last = maybe(function<T>(list: readonly T[]) {
+    return maybe(R.last(list));
+});
 const nth = R.curry(function<T>(n: Decimal, list: readonly T[]) {
-    return R.nth(number(n), list);
+    return maybe(R.nth(number(n), list));
 });
 const take = R.curry(function<T>(n: Decimal, list: readonly T[]) {
     return R.take(number(n), list);
