@@ -1,6 +1,6 @@
 import R from "ramda";
 import Decimal from "decimal.js";
-import { number } from "./utils";
+import { number, maybe } from "./utils";
 import * as unified from "string-unified";
 
 const lower = R.toLower;
@@ -12,7 +12,7 @@ const upper_ = R.curry(function (text: string) {
     return !/[a-z]/.test(text) && /[A-Z]/.test(text);
 });
 const nth = R.curry(function (index: Decimal, text: string) {
-    return unified.charAt(text, number(index));
+    return maybe(unified.charAt(text, number(index)));
 });
 const take = R.curry(function (length: Decimal, text: string) {
     const len = number(length);
@@ -57,7 +57,7 @@ const char = function (code: Decimal) {
     try {
         return String.fromCodePoint(code.toNumber());
     } catch(ignore) {
-        return undefined;
+        return maybe(undefined);
     }
 }
 
