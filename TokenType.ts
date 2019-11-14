@@ -59,7 +59,6 @@ export enum TokenType {
     LET = "LET",
     FALSE = "FALSE",
     TRUE = "TRUE",
-    NIL = "NIL",
     CASE = "CASE",
 
     // End of File

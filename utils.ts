@@ -35,10 +35,6 @@ export function isBoolean(value: any): value is boolean {
     return typeof value === "boolean";
 }
 
-export function isNil(value: any): value is undefined {
-    return value === undefined;
-}
-
 export function isCustomType(value: any): value is CustomType {
     return value instanceof CustomType;
 }

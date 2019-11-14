@@ -7,7 +7,6 @@ import { Runner } from "./Runner";
 const reservedWords = new Map([
     ["True", TokenType.TRUE],
     ["False", TokenType.FALSE],
-    ["Nil", TokenType.NIL],
 ])
 
 export class Scanner {

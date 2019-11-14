@@ -4,7 +4,7 @@ import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function
 import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign, CustomTypeDeclaration } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
-import { isNumber, isText, isBoolean, isNil } from "./utils";
+import { isNumber, isText, isBoolean } from "./utils";
 
 const reserved = makeSet([
     "arguments", "await", "break", "case", "catch", "class", "const",
@@ -423,9 +423,6 @@ export class CodeGenerator implements Visitor {
         }
         if (isNumber(expr.value)) {
             return this.numgle(expr.value);
-        }
-        if (isNil(expr.value)) {
-            return "undefined";
         }
     }
 }

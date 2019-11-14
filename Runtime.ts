@@ -1,4 +1,4 @@
-import { isList, isNumber, isText, isBoolean, isNil, isCustomType } from "./utils";
+import { isList, isNumber, isText, isBoolean, isCustomType } from "./utils";
 import List from "./List";
 import Text from "./Text";
 import R from "ramda"
@@ -27,9 +27,6 @@ function toString(any, padding = 4) {
     }
     if (isText(any)) {
         return "'" + any + "'";
-    }
-    if (isNil(any)) {
-        return "Nil";
     }
     if (isCustomType(any)) {
         return (

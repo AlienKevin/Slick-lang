@@ -9,7 +9,6 @@ import { ListType } from "./typeChecking/ListType";
 import { PrimitiveType } from "./typeChecking/PrimitiveType";
 import { FunctionType } from "./typeChecking/FunctionType";
 import { AnyType } from "./typeChecking/AnyType";
-import { NilType } from "./typeChecking/NilType";
 import { MaybeType } from "./typeChecking/MaybeType";
 import { isNumber, isUpper, are, them } from "./utils";
 import { RecordType } from "./typeChecking/RecordType";
@@ -63,7 +62,6 @@ const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
 const TRUE = TokenType.TRUE;
 const FALSE = TokenType.FALSE;
-const NIL = TokenType.NIL;
 const ARROW = TokenType.ARROW;
 const BAR = TokenType.BAR;
 
@@ -340,7 +338,7 @@ export class Parser {
         }
     }
     typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true, typeParameters : [], usedParameters : []}): Type {
-        const first = this.consume([NIL, IDENTIFIER, LEFT_PAREN, LEFT_BRACE], `Expected a type!`);
+        const first = this.consume([IDENTIFIER, LEFT_PAREN, LEFT_BRACE], `Expected a type!`);
         let type: Type;
         switch (first.lexeme) {
             case "(":
@@ -710,7 +708,6 @@ export class Parser {
         const literals = [
             TRUE,
             FALSE,
-            NIL,
             STRING,
             NUMBER,
             IDENTIFIER,
@@ -800,7 +797,7 @@ export class Parser {
         return expr;
     }
 
-    // primary → NUMBER | STRING | "false" | "true" | "Nil" | "(" expression ")" | IDENTIFIER
+    // primary → NUMBER | STRING | "false" | "true" | "(" expression ")" | IDENTIFIER
     basicPrimary() {
         // record literal
         if (this.match(LEFT_BRACE)) {
@@ -902,9 +899,6 @@ export class Parser {
         }
         if (this.match(FALSE)) {
             return new Literal(this.previous(), false);
-        }
-        if (this.match(NIL)) {
-            return new Literal(this.previous(), undefined);
         }
         return undefined;
     }

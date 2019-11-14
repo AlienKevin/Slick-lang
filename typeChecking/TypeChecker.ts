@@ -8,7 +8,7 @@ import { TokenType } from "../TokenType";
 import { Token } from "../Token";
 import { Type } from "./Type";
 import { RecordType } from "./RecordType";
-import { isList, capitalize, isNumber, isBoolean, isText, nextChar, isNil } from "../utils";
+import { isList, capitalize, isNumber, isBoolean, isText, nextChar } from "../utils";
 import { Env } from "./Environment";
 import { ListType } from "./ListType";
 import { FunctionType } from "./FunctionType";
@@ -16,7 +16,6 @@ import { AnyType } from "./AnyType";
 import clone from "lodash.clone";
 import { Scanner } from "../Tokenizer";
 import { Parser } from "../Parser";
-import { NilType } from "./NilType";
 import { MaybeType } from "./MaybeType";
 import { CustomType } from "./CustomType";
 import { zip, zip_longest as zipLongest } from 'zip-array';
@@ -24,7 +23,6 @@ import { zip, zip_longest as zipLongest } from 'zip-array';
 const NUMBER = PrimitiveType.Num;
 const TEXT = PrimitiveType.Text;
 const BOOLEAN = PrimitiveType.Bool;
-const NIL = new NilType();
 
 type Location = Token | Expr;
 
@@ -97,7 +95,7 @@ export class Checker implements Visitor {
     public static parseTypeDeclarations(declarations) {
         const regex = /\s*(.*?)\s+(.*)/g;
         let match: string[];
-        let types: {name: string, type: Type} = Object.create(null);
+        let types: {[name: string]: Type} = Object.create(null);
         while ((match = regex.exec(declarations)) !== null) {
             const name = match[1];
             const typeString = match[2];
@@ -145,9 +143,6 @@ export class Checker implements Visitor {
         if (isNumber(expr)) {
             return NUMBER;
         }
-        if (isNil(expr)) {
-            return NIL;
-        }
     }
 
     public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype: boolean, looseCustomType: boolean}) {
@@ -176,9 +171,6 @@ export class Checker implements Visitor {
                     : this.sameTypes(aParameter, bParameter)
                 )
             );
-        }
-        if (a instanceof NilType && b instanceof NilType) {
-            return true;
         }
         if (a instanceof MaybeType && b instanceof MaybeType) {
             return this.sameTypes(a.type, b.type, opts);
@@ -601,9 +593,6 @@ export class Checker implements Visitor {
         } else if (expr.body instanceof Block) {
             this.visitBlockStmt(expr.body);
             outputType = this.env.functionReturnType;
-            if (outputType === undefined) {
-                outputType = NIL;
-            }
         }
         const paramTypes = (
             expr.params.length > 0
