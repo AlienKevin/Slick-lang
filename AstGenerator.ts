@@ -7,7 +7,7 @@ const stmtDescriptions = {
     "Return": ["keyword: Token", "value: Expr"],
     "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType", "typeDeclaration?: Type"],
     "Assign": ["name: Token", "value: Expr"],
-    "CustomTypeDeclaration": ["name: Token", "subtypes: {[name: string] : Type}"]
+    "CustomTypeDeclaration": ["name: Token", "subtypes: {[name: string] : Type}", "typeParameters: Type[]"]
 };
 
 const exprDescriptions = {

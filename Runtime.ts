@@ -259,7 +259,7 @@ const pi = Decimal.acos(-1);
 const e = new Decimal(1).exp();
 
 function createCustomType(name: string, parameters?: RecordLiteral) {
-    return new CustomType(name, parameters)
+    return new CustomType(name, [], parameters);
 }
 
 export default stone({

@@ -15,6 +15,7 @@ import { isNumber, isUpper } from "./utils";
 import { RecordType } from "./typeChecking/RecordType";
 import { CustomType } from "./typeChecking/CustomType";
 import runtime from "./Runtime";
+import clone from "lodash.clone";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -198,6 +199,10 @@ export class Parser {
         if (this.types[name] !== undefined) {
             throw this.error(nameToken, `Duplicated type name!`);
         }
+        let typeParameters: AnyType[] = [];
+        if (this.peek().type === IDENTIFIER) {
+            typeParameters.push(new AnyType(this.advance().lexeme));
+        }
         this.consume(COLON, `Expected a ':' after custom type name!`);
         this.consume(NEWLINE, `Expected a linebreak after ':'!`);
         this.consume(INDENT, `Expected indentation before types!`);
@@ -207,7 +212,11 @@ export class Parser {
             const subtypeName = subtypeToken.lexeme;
             let subtypeProperties = undefined;
             if (this.peek().type !== NEWLINE) {
-                subtypeProperties = this.typeDeclaration();
+                subtypeProperties = this.typeDeclaration({
+                    allowFunctionType : true,
+                    allowTypeVariable : true,
+                    typeParameters : typeParameters
+                });
                 if (subtypeProperties instanceof FunctionType) {
                     throw this.error(
                         subtypeToken, 
@@ -224,9 +233,10 @@ export class Parser {
         
         const customType = new CustomTypeDeclaration(
             nameToken,
-            subtypes
+            subtypes,
+            typeParameters
         );
-        this.types[name] = new CustomType(name);
+        this.types[name] = new CustomType(name, typeParameters);
         return customType;
     }
 
@@ -242,7 +252,8 @@ export class Parser {
         this.consume(COLON, `Expected a ':' after type alias!`)
         const type = this.typeDeclaration({
             allowFunctionType : true,
-            allowTypeVariable : false
+            allowTypeVariable : false,
+            typeParameters : []
         });
         this.endStmt("type");
         this.types[alias] = type;
@@ -306,8 +317,7 @@ export class Parser {
             return this.varDeclaration(typeModifier, name, type);
         }
     }
-
-    typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true}): Type {
+    typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true, typeParameters : []}): Type {
         const first = this.consume([NIL, IDENTIFIER, LEFT_PAREN, LEFT_BRACE], `Expected a type!`);
         let type: Type;
         switch (first.lexeme) {
@@ -357,8 +367,27 @@ export class Parser {
                     if (type === undefined) {
                         throw this.error(first, `Cannot find type ${first.lexeme}!\nUse lowercase names for generic types!`);
                     }
+                    if (type instanceof CustomType) {
+                        type = Object.assign(
+                            clone(type),
+                            {
+                                typeParameters: type.typeParameters.map(() =>
+                                    this.typeDeclaration({
+                                        ...opts,
+                                        allowFunctionType : false
+                                    })
+                                )
+                            }
+                        );
+                    }
                 } else if (opts.allowTypeVariable) {
-                    type = new AnyType(first.lexeme);
+                    const name = first.lexeme;
+                    if (opts.typeParameters.length > 0) {
+                        if (!opts.typeParameters.map(parameter => parameter.name).includes(name)) {
+                            throw this.error(first, `Type variable ${name} must be declared in the custom type declaration header before being used here!`);
+                        }
+                    }
+                    type = new AnyType(name);
                 } else {
                     throw this.error(first, `Cannot declare type variable here!`)
                 }

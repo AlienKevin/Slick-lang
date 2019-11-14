@@ -19,6 +19,7 @@ import { Parser } from "../Parser";
 import { NilType } from "./NilType";
 import { MaybeType } from "./MaybeType";
 import { CustomType } from "./CustomType";
+import { zip, zip_longest as zipLongest } from 'zip-array';
 
 const NUMBER = PrimitiveType.Num;
 const TEXT = PrimitiveType.Text;
@@ -149,13 +150,13 @@ export class Checker implements Visitor {
         }
     }
 
-    public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype: boolean}) {
+    public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype: boolean, looseCustomType: boolean}) {
         if (!this.sameTypes(a, b, opts)) {
             throw this.error(location, message);
         }
     }
 
-    public sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean} = {isFirstSubtype: false}): boolean {
+    public sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean, looseCustomType: boolean} = {isFirstSubtype: false, looseCustomType: false}): boolean {
         if (a === undefined || b === undefined) {
             return true;
         }
@@ -163,7 +164,18 @@ export class Checker implements Visitor {
             return a.name === b.name;
         }
         if (a instanceof CustomType && b instanceof CustomType) {
-            return a.name === b.name;
+            return (
+                a.name === b.name
+                && zip(a.typeParameters, b.typeParameters).every(([aParameter, bParameter]) =>
+                    opts.looseCustomType
+                    ? (
+                        aParameter instanceof AnyType
+                        || bParameter instanceof AnyType
+                        || this.sameTypes(aParameter, bParameter)
+                    )
+                    : this.sameTypes(aParameter, bParameter)
+                )
+            );
         }
         if (a instanceof NilType && b instanceof NilType) {
             return true;
@@ -304,7 +316,7 @@ export class Checker implements Visitor {
                     throw this.error(subtype, `'else' must be the last case condition of non-custom types!`);
                 }
                 const sub = this.expression(subtype);
-                const isSubtype = this.sameTypes(sub, supertype, {isFirstSubtype: true});
+                const isSubtype = this.sameTypes(sub, supertype, {isFirstSubtype: true, looseCustomType: false});
                 if (!isSubtype) {
                     throw this.error(subtype, `Expected case condition to be a ${supertype}, not a ${sub}!`);
                 }
@@ -499,7 +511,10 @@ export class Checker implements Visitor {
                     argType,
                     `Argument type ${argType} does not match paramter type ${paramType}!`,
                     arg,
-                    {isFirstSubtype: true}
+                    {
+                        isFirstSubtype: true,
+                        looseCustomType: false
+                    }
                 );
             }
             callee = callee.outputType;
@@ -533,7 +548,16 @@ export class Checker implements Visitor {
                 }
             )
         }
-         else if (returnType instanceof AnyType) {
+        else if (returnType instanceof CustomType) {
+            return Object.assign(
+                clone(returnType),
+                {
+                    typeParameters: returnType.typeParameters.map((parameter) =>
+                        this.substituteReturnType(parameter, anyTypes)
+                    )
+                }
+            )
+        } else if (returnType instanceof AnyType) {
             const substituteType = anyTypes[returnType.name]
             return (
                 substituteType === undefined
@@ -650,14 +674,29 @@ export class Checker implements Visitor {
                 this.env.functionReturnType,
                 returnType,
                 `Return type ${returnType} differs from previous type ${this.env.functionReturnType}!`,
-                stmt.value
+                stmt.value,
+                {
+                    isFirstSubtype: false,
+                    looseCustomType: true
+                }
             );
+            // substitute anytypes in previous custom types
+            // for situations like:
+            // var foo = Text → Maybe Text
+            // var foo : ƒ text
+            //     if text = ''
+            //         return Nothing
+            //     else
+            //         return Just 3
+            // "Just 3"'s `Maybe Num` type would override previous "Nothing"'s `Maybe a` type
+            // so more concrete return types will be preserved
+            this.env.functionReturnType = this.substituteAnyTypes(this.env.functionReturnType, returnType, {});
         }
     }
 
     visitCustomTypeDeclarationStmt(stmt: CustomTypeDeclaration) {
         const name = stmt.name.lexeme;
-        const customType = new CustomType(name);
+        const customType = new CustomType(name, stmt.typeParameters);
         this.env.declareCustomType(name, stmt.subtypes);
         Object.entries(stmt.subtypes).forEach(([name, type]) => {
             if (type === undefined) {
@@ -681,7 +720,10 @@ export class Checker implements Visitor {
                 declaredType, 
                 `Declared type ${declaredType} and actual type ${type} do not match!`,
                 stmt.initializer,
-                {isFirstSubtype: true}
+                {
+                    isFirstSubtype: true,
+                    looseCustomType: false
+                }
             );
         }
         if (stmt.initializer instanceof Function) {
@@ -740,6 +782,16 @@ export class Checker implements Visitor {
                             )
                         }
                     ), Object.create(null))
+                }
+            );
+        } else if (declaredType instanceof CustomType
+            && actualType instanceof CustomType) {
+            return Object.assign(
+                clone(declaredType),
+                {
+                    typeParameters: zipLongest(declaredType.typeParameters, actualType.typeParameters).map(([declaredParameter, actualParameter]) =>
+                        this.substituteAnyTypes(declaredParameter, actualParameter, anyTypes)
+                    )
                 }
             );
         } else if (declaredType instanceof AnyType) {

@@ -13,7 +13,8 @@
     "esm": "^3.2.25",
     "lodash.clone": "^4.5.0",
     "ramda": "^0.26.1",
-    "string-unified": "^2.0.0"
+    "string-unified": "^2.0.0",
+    "zip-array": "^1.0.1"
   },
   "author": "Kevin Li",
   "license": "MIT",
