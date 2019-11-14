@@ -210,14 +210,14 @@ export class Parser {
         do {
             const subtypeToken = this.consume(IDENTIFIER, `Expected a subtype name!`);
             const subtypeName = subtypeToken.lexeme;
-            let subtypeProperties = undefined;
+            let subtype = undefined;
             if (this.peek().type !== NEWLINE) {
-                subtypeProperties = this.typeDeclaration({
+                subtype = this.typeDeclaration({
                     allowFunctionType : true,
                     allowTypeVariable : true,
                     typeParameters : typeParameters
                 });
-                if (subtypeProperties instanceof FunctionType) {
+                if (subtype instanceof FunctionType) {
                     throw this.error(
                         subtypeToken, 
                         `Subtype parameter cannot be a function type.\nIt must be a single type (including a record of types)!`
@@ -226,7 +226,7 @@ export class Parser {
             }
             subtypes = {
                 ...subtypes,
-                [subtypeName] : subtypeProperties
+                [subtypeName] : subtype
             }
             this.env.declare(subtypeToken, false);
         } while (this.match(NEWLINE) && !this.match(DEDENT));
