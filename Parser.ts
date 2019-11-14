@@ -9,7 +9,7 @@ import { ListType } from "./typeChecking/ListType";
 import { PrimitiveType } from "./typeChecking/PrimitiveType";
 import { FunctionType } from "./typeChecking/FunctionType";
 import { AnyType } from "./typeChecking/AnyType";
-import { isNumber, isUpper, are, them } from "./utils";
+import { isNumber, isUpper, are, them, createCustomType } from "./utils";
 import { RecordType } from "./typeChecking/RecordType";
 import { CustomType } from "./typeChecking/CustomType";
 import runtime from "./Runtime";
@@ -131,9 +131,26 @@ export class Parser {
         });
     }
 
+    declareMaybe() {
+        this.types["Maybe"] = createCustomType("Maybe", undefined, [new AnyType("a")]);
+        this.env.declare(new Token(IDENTIFIER, "Just", undefined, undefined, undefined), false);
+        this.env.declare(new Token(IDENTIFIER, "Nothing", undefined, undefined, undefined), false);
+        return new CustomTypeDeclaration(
+            new Token(IDENTIFIER, "Maybe", undefined, undefined, undefined),
+            {
+                "Just": new AnyType("a"),
+                "Nothing": undefined
+            },
+            [new AnyType("a")]
+        );
+    }
+
     parse() {
         this.current = 0;
         let statements = [];
+        // declare maybe
+        // TODO: import instead of hardcode
+        statements.push(this.declareMaybe());
         try {
             while (!this.isAtEnd()) {
                 const declaration = this.declaration();
