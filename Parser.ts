@@ -527,6 +527,10 @@ export class Parser {
 
     caseExpr() {
         if (this.peek().lexeme === "case") {
+            // 'case' is a variable name
+            if (this.env.lookup(this.peek())) {
+                return this.ternary();
+            }
             this.advance();
             const keyword = this.previous();
             let expr = this.ternary();
