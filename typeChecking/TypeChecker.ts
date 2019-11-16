@@ -284,7 +284,14 @@ export class Checker implements Visitor {
                     }
                     const subtypes = this.env.getSubtypes(supertype.name);
                     if (subtypes.hasOwnProperty(subtype.lexeme)) {
-                        const typeParameters = subtypes[subtype.lexeme];
+                        const typeParameters = (
+                            subtypes[subtype.lexeme] === undefined
+                            ? subtypes[subtype.lexeme]
+                            : this.substituteReturnType(
+                                subtypes[subtype.lexeme],
+                                supertype.typeParameters
+                            )
+                        );
 
                         if (typeParameters === undefined) {
                             if (parameters.length > 0) {
