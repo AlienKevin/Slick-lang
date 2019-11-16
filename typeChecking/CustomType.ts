@@ -1,7 +1,7 @@
 import { Type } from "./Type";
 
 export class CustomType {
-    constructor(readonly name: string, readonly typeParameters: Type[] = [], readonly parameters?: {[key: string]: any}) {}
+    constructor(readonly name: string, readonly typeParameters: {[key: string]: Type}, readonly parameters?: {[key: string]: any}) {}
 
     toString() {
         return (
@@ -9,7 +9,7 @@ export class CustomType {
             + (
                 this.typeParameters === undefined
                 ? ""
-                : " " + this.typeParameters.join(" ")
+                : " " + Object.values(this.typeParameters).join(" ")
             )
         );
     }

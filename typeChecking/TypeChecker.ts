@@ -17,7 +17,7 @@ import clone from "lodash.clone";
 import { Scanner } from "../Tokenizer";
 import { Parser } from "../Parser";
 import { CustomType } from "./CustomType";
-import { zip, zip_longest as zipLongest } from 'zip-array';
+import { zip } from 'zip-array';
 
 const NUMBER = PrimitiveType.Num;
 const TEXT = PrimitiveType.Text;
@@ -101,7 +101,7 @@ export class Checker implements Visitor {
                 "Nothing": undefined,
                 "Just": new AnyType("a")
             },
-            [new AnyType("a")]
+            {a: new AnyType("a")}
         ));
     }
 
@@ -122,7 +122,7 @@ export class Checker implements Visitor {
             // declare Maybe type
             // TODO: import Maybe type instead of hardcoding declaration
             if (typeString.includes("Maybe")) {
-                parser.types["Maybe"] = new CustomType("Maybe", [new AnyType("a")]);
+                parser.types["Maybe"] = new CustomType("Maybe", {a: new AnyType("a")});
             }
 
             types[name] = parser.typeDeclaration();
@@ -181,7 +181,7 @@ export class Checker implements Visitor {
         if (a instanceof CustomType && b instanceof CustomType) {
             return (
                 a.name === b.name
-                && zip(a.typeParameters, b.typeParameters).every(([aParameter, bParameter]) =>
+                && zip(Object.values(a.typeParameters), Object.values(b.typeParameters)).every(([aParameter, bParameter]) =>
                     opts.looseCustomType
                     ? (
                         aParameter instanceof AnyType
@@ -560,8 +560,13 @@ export class Checker implements Visitor {
             return Object.assign(
                 clone(returnType),
                 {
-                    typeParameters: returnType.typeParameters.map((parameter) =>
-                        this.substituteReturnType(parameter, anyTypes)
+                    typeParameters: Object.entries(returnType.typeParameters).reduce(
+                        (parameters, [name, type]) =>
+                            ({
+                                ... parameters,
+                                [name]: this.substituteReturnType(type, anyTypes)
+                            }),
+                        {}
                     )
                 }
             )
@@ -794,9 +799,12 @@ export class Checker implements Visitor {
             return Object.assign(
                 clone(declaredType),
                 {
-                    typeParameters: zipLongest(declaredType.typeParameters, actualType.typeParameters).map(([declaredParameter, actualParameter]) =>
-                        this.substituteAnyTypes(declaredParameter, actualParameter, anyTypes)
-                    )
+                    typeParameters: Object.entries(declaredType.typeParameters).reduce((parameters, [declaredName, declaredParameter]) =>
+                        ({
+                            ... parameters,
+                            [declaredName]: this.substituteAnyTypes(declaredParameter, actualType.typeParameters[declaredName], anyTypes)
+                        }),
+                    {})
                 }
             );
         } else if (declaredType instanceof AnyType) {

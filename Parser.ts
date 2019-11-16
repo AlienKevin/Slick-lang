@@ -132,7 +132,7 @@ export class Parser {
     }
 
     declareMaybe() {
-        this.types["Maybe"] = createCustomType("Maybe", undefined, [new AnyType("a")]);
+        this.types["Maybe"] = createCustomType("Maybe", undefined, {a: new AnyType("a")});
         this.env.declare(new Token(IDENTIFIER, "Just", undefined, undefined, undefined), false);
         this.env.declare(new Token(IDENTIFIER, "Nothing", undefined, undefined, undefined), false);
         return new CustomTypeDeclaration(
@@ -141,7 +141,7 @@ export class Parser {
                 "Just": new AnyType("a"),
                 "Nothing": undefined
             },
-            [new AnyType("a")]
+            {a: new AnyType("a")}
         );
     }
 
@@ -212,12 +212,12 @@ export class Parser {
         if (this.types[name] !== undefined) {
             throw this.error(nameToken, `Duplicated type name!`);
         }
-        let typeParameters: AnyType[] = [];
+        let typeParameters: {[name: string]: AnyType} = {};
         let typeParameterTokens: Token[] = [];
         if (this.peek().type === IDENTIFIER) {
             const token = this.advance();
             typeParameterTokens.push(token);
-            typeParameters.push(new AnyType(token.lexeme));
+            typeParameters[token.lexeme] = new AnyType(token.lexeme);
         }
         this.consume(COLON, `Expected a ':' after custom type name!`);
         this.consume(NEWLINE, `Expected a linebreak after ':'!`);
@@ -250,7 +250,7 @@ export class Parser {
         } while (this.match(NEWLINE) && !this.match(DEDENT));
         
         // check if all type parameters are used
-        const notusedParameters = typeParameters.map((parameter) => parameter.name).filter((parameter) => !usedParameters.includes(parameter))
+        const notusedParameters = Object.values(typeParameters).map((parameter) => parameter.name).filter((parameter) => !usedParameters.includes(parameter))
         if (notusedParameters.length > 0) {
             const firstUnusedParameterToken = typeParameterTokens[usedParameters.length];
             throw this.error(
@@ -352,7 +352,7 @@ export class Parser {
             return this.varDeclaration(typeModifier, name, type);
         }
     }
-    typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true, typeParameters : [], usedParameters : []}): Type {
+    typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true, typeParameters : undefined, usedParameters : []}): Type {
         const first = this.consume([IDENTIFIER, LEFT_PAREN, LEFT_BRACE], `Expected a type!`);
         let type: Type;
         switch (first.lexeme) {
@@ -400,19 +400,23 @@ export class Parser {
                         type = Object.assign(
                             clone(type),
                             {
-                                typeParameters: type.typeParameters.map(() =>
-                                    this.typeDeclaration({
-                                        ...opts,
-                                        allowFunctionType : false
-                                    })
+                                typeParameters: Object.keys(type.typeParameters).reduce((parameters, name) =>
+                                    ({
+                                        ...parameters,
+                                        [name]: this.typeDeclaration({
+                                            ...opts,
+                                            allowFunctionType : false
+                                        })
+                                    }),
+                                    {}
                                 )
                             }
                         );
                     }
                 } else if (opts.allowTypeVariable) {
                     const name = first.lexeme;
-                    if (opts.typeParameters.length > 0) {
-                        if (!opts.typeParameters.map(parameter => parameter.name).includes(name)) {
+                    if (opts.typeParameters !== undefined) {
+                        if (!Object.values(opts.typeParameters).map(parameter => (parameter as AnyType).name).includes(name)) {
                             throw this.error(first, `Type variable ${name} must be declared in the custom type declaration header before being used here!`);
                         }
                     }

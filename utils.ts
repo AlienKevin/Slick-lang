@@ -75,7 +75,7 @@ export function them(length: number) {
     }
 }
 
-export function createCustomType(name: string, parameters?: RecordLiteral, typeParameters?: Type[],) {
+export function createCustomType(name: string, parameters?: RecordLiteral, typeParameters?: {[name: string]: Type}) {
     return new CustomType(name, typeParameters, parameters);
 }
 
