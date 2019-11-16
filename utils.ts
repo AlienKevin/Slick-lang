@@ -83,5 +83,5 @@ export function maybe(result) {
     if (result === undefined) {
         return createCustomType("Nothing");
     }
-    return result;
+    return createCustomType("Just", result);
 }
