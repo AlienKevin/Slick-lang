@@ -347,7 +347,13 @@ export class Checker implements Visitor {
 
             if (returnType === undefined) {
                 returnType = currentReturnType
-            } else if (!this.sameTypes(currentReturnType, returnType)) {
+            } else if (
+                this.sameTypes(currentReturnType, returnType)
+                || currentReturnType instanceof AnyType
+                || returnType instanceof AnyType
+            ) {
+                returnType = this.substituteAnyTypes(returnType, currentReturnType, {});
+            } else {
                 throw this.error(result, `Return type ${currentReturnType} of this case expression does not match previous return type ${returnType}!`);
             }
         });
