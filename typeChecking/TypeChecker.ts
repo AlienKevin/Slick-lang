@@ -358,10 +358,7 @@ export class Checker implements Visitor {
             }
         });
 
-        // case expression is a literal
-        if (!(supertype instanceof CustomType)) {
-
-        }
+        return returnType;
     }
 
     visitTernaryExpr(expr: Ternary) {
