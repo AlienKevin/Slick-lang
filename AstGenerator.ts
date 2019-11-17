@@ -17,7 +17,7 @@ const exprDescriptions = {
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
     "ListLiteral": ["first: Token", "list: Expr[]"],
     "RecordLiteral": ["first: Token", "record: {[name: string]: Expr}", "keyTokens: {[name: string]: Token}", "target: Variable | Get"],
-    "Function": ["first: Token", "params: Token[]", "body: Block | Expr"],
+    "Function": ["first: Token", "params: Token[]", "body: Expr"],
     "Get": ["object: Expr", "name: Token", "bracket?: Token"],
     "Case": ["first: Token", "expr: Expr", "cases: {subtype: Token | Literal, parameters: Token[], isRecord: boolean, result: Expr}[]"]
 };

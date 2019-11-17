@@ -614,16 +614,7 @@ export class Checker implements Visitor {
             this.env.declare(param, paramType, false);
         });
         this.env.functionParams = expr.params;
-        let outputType = undefined;
-        if (expr.body instanceof Expr) {
-            outputType = this.expression(expr.body);
-            if (outputType === undefined) {
-                outputType = this.generateAnyType();
-            }
-        } else if (expr.body instanceof Block) {
-            this.visitBlockStmt(expr.body);
-            outputType = this.env.functionReturnType;
-        }
+        const outputType = this.expression(expr.body);
         const paramTypes = (
             expr.params.length > 0
             ? (expr.params.map(param => this.env.get(param)))

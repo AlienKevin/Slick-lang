@@ -318,8 +318,7 @@ export class Parser {
             typeParameters : [],
             usedParameters : []
         });
-        this.endStmt("type");
-        this.dedent();
+        this.endStmt("type", {dedent: true});
         this.types[alias] = type;
     }
 
@@ -334,8 +333,12 @@ export class Parser {
             this.env.declare(param, mutable);
         });
         const body = (
-            this.match(NEWLINE)
-            ? this.block()
+            this.check(NEWLINE)
+            ? (() => {
+                this.beginBlock("Expected the body of function to be on it's own line!");
+                const expr = this.expression();
+                return expr;
+            })()
             : (() => {
                 this.consume(LEFT_PAREN, `Expected '(' before function body!`);
                 const expr = this.expression();
@@ -387,8 +390,7 @@ export class Parser {
         if (operator.type === COLON) {
             const mutable = false;
             this.env.declare(nameToken, mutable);
-            const isFunctionNext = this.check(F);
-            if (!isFunctionNext) {
+            if (!this.check(F)) {
                 this.consume(NEWLINE, `All expressions except functions must be on its own line!`);
                 this.indent();
             }
@@ -400,10 +402,7 @@ export class Parser {
             )
             const initializer: Expr = this.expression();
             this.env = enclosing;
-            this.endStmt("value");
-            if (!isFunctionNext) {
-                this.dedent();
-            }
+            this.endStmt("value", {dedent: true});
             return new VarDeclaration(nameToken, locals, initializer, declaredType);
         } else if (operator.type === EQUAL) {
             const type: Type = this.typeDeclaration();
@@ -984,11 +983,11 @@ export class Parser {
         throw this.error(this.peek(), errorMessage);
     }
 
-    private endStmt(name: string) {
-        if (this.previous().type === DEDENT) {
-            return;
+    private endStmt(name: string, opts = {dedent : false}) {
+        this.match(NEWLINE, EOF);
+        if (opts.dedent) {
+            this.match(DEDENT);
         }
-        this.consume([NEWLINE, EOF], `Expected newline or EOF after ${name}!`);
     }
 
     private error(token: Token, errorMessage: string) {
