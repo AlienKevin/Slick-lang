@@ -39,14 +39,6 @@ export class VarDeclaration extends Stmt {
 		return visitor.visitVarDeclarationStmt(this);
 	}
 }
-export class Assign extends Stmt {
-	constructor(public name: Token, public value: Expr) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitAssignStmt(this);
-	}
-}
 export class CustomTypeDeclaration extends Stmt {
 	constructor(public name: Token, public subtypes: {[name: string] : Type}, public typeParameters: {[name: string] : Type}) {
 		super();

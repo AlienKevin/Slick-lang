@@ -1,7 +1,7 @@
 import { Visitor } from "../interfaces/Visitor";
 import { Runner } from "../Runner";
 import { If, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "../Expr";
-import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, Assign, CustomTypeDeclaration } from "../Stmt";
+import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, CustomTypeDeclaration } from "../Stmt";
 import { PrimitiveType } from "./PrimitiveType";
 import { CError } from "./CompileError";
 import { TokenType } from "../TokenType";
@@ -841,11 +841,6 @@ export class Checker implements Visitor {
             return actualType;
         }
         return declaredType;
-    }
-
-    visitAssignStmt(stmt: Assign) {
-        let type = this.expression(stmt.value);
-        this.env.define(stmt.name, type, stmt.value);
     }
 
 }

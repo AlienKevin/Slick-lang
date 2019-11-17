@@ -56,7 +56,6 @@ export enum TokenType {
     ALIAS = "ALIAS",
     F = "F",
     CALL = "CALL",
-    LET = "LET",
     FALSE = "FALSE",
     TRUE = "TRUE",
     CASE = "CASE",

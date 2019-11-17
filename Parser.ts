@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Expr, Binary, Grouping, Literal, Variable, Call, If, Get, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
-import { Block, Return, VarDeclaration, Assign, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
+import { Block, Return, VarDeclaration, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
@@ -55,7 +55,6 @@ const TYPE = TokenType.TYPE;
 const ALIAS = TokenType.ALIAS;
 const F =TokenType.F;
 const CALL = TokenType.CALL;
-const LET = TokenType.LET;
 const EOF =TokenType.EOF;
 const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
@@ -77,7 +76,6 @@ const keywords = new Map([
     ["type", TokenType.TYPE],
     ["alias", TokenType.ALIAS],
     ["call", TokenType.CALL],
-    ["let", TokenType.LET],
     ["case", TokenType.CASE],
     ["in", TokenType.IN],
 ]);
@@ -529,9 +527,6 @@ export class Parser {
         } else if (this.peek().lexeme === "call") {
             this.advance();
             return this.callStatement();
-        } else if (this.peek().lexeme === "let") {
-            this.advance();
-            return this.assignStatement();
         } else {
             return this.varDeclaration();
         }
@@ -556,21 +551,6 @@ export class Parser {
             return new CallStmt(expr.expression);
         } else {
             throw this.error(expr.first, `Expected a function call, not a ${expr}!`);
-        }
-    }
-
-    assignStatement() {
-        const expr = this.expression();
-        const equal = this.consume(COLON, `Expected ':' after assignment target!`);
-        const value = this.expression();
-        this.endStmt("assignment");
-        if (expr instanceof Variable) {
-            const name = expr.name;
-            return new Assign(name, value);
-        } else if (expr instanceof Get) {
-            throw this.error(expr.name, "Cannot modify an immutable property!");
-        } else {
-            throw this.error(equal, "Invalid assignment target!");
         }
     }
 
