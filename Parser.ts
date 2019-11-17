@@ -14,7 +14,6 @@ import { RecordType } from "./typeChecking/RecordType";
 import { CustomType } from "./typeChecking/CustomType";
 import runtime from "./Runtime";
 import clone from "lodash.clone";
-import is from "ramda/es/is";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -65,6 +64,7 @@ const FALSE = TokenType.FALSE;
 const ARROW = TokenType.ARROW;
 const BAR = TokenType.BAR;
 const THEN = TokenType.THEN;
+const IN = TokenType.IN;
 
 const keywords = new Map([
     ["if", TokenType.IF],
@@ -78,7 +78,8 @@ const keywords = new Map([
     ["alias", TokenType.ALIAS],
     ["call", TokenType.CALL],
     ["let", TokenType.LET],
-    ["case", TokenType.CASE]
+    ["case", TokenType.CASE],
+    ["in", TokenType.IN],
 ]);
 
 const functinos = [
@@ -214,10 +215,8 @@ export class Parser {
 
     declaration() {
         try {
-            this.prelude();
-            if (this.check(VAR, MUT)) {
-                return this.varDeclaration();
-            } else if (this.match(TYPE)) {
+            if (this.peek().lexeme === "type") {
+                this.advance();
                 if (this.peek().lexeme === "alias") {
                     this.advance();
                     return this.typeAlias();
@@ -362,12 +361,28 @@ export class Parser {
         return params;
     }
 
-    varDeclaration(declaredTypeModifier?: TokenType, declaredName?: string, declaredType?: Type) {
-        const typeModifier: TokenType = this.consume([VAR, MUT], `Variable declaration must begin with the 'var' or 'mut' keyword!`).type;
-        if (declaredTypeModifier !== undefined
-            && typeModifier !== declaredTypeModifier) {
-            throw this.error(this.previous(), `Type modifiers do not match between type declaration and actual declaration!`);
+    letInExpr(declaredNames: string[]) {
+        let locals: { [name: string]: VarDeclaration } = Object.create(null);
+        if (this.peek().lexeme === "let") {
+            this.advance();
+            this.beginBlock("Expected the body of let to be on it's own line!");
+            do {
+                const declaration = this.varDeclaration();
+                const name = declaration.name.lexeme;
+                if (Object.keys(locals).includes(name)
+                || declaredNames.includes(name)) {
+                    throw this.error(declaration.name, `Duplicated variable name ${name}!`);
+                }
+                locals[name] = declaration;
+            } while (!this.match(DEDENT));
+            this.prelude();
+            this.consume(IN, `Expected 'in' keyword at the end of let expression!`);
+            this.consume(NEWLINE, `Expected linebreak after 'in' keyword!`);
         }
+        return locals;
+    }
+
+    varDeclaration(declaredName?: string, declaredType?: Type): VarDeclaration {
         const nameToken: Token = this.consume(IDENTIFIER, `Variable must have a valid name!`);
         const name: string = nameToken.lexeme;
         if (declaredName !== undefined
@@ -376,24 +391,31 @@ export class Parser {
         }
         const operator = this.consume([EQUAL, COLON], `Variable '${name}' must be initialized when declared!`);
         if (operator.type === COLON) {
-            const mutable = typeModifier === MUT;
+            const mutable = false;
             this.env.declare(nameToken, mutable);
             const isFunctionNext = this.check(F);
             if (!isFunctionNext) {
                 this.consume(NEWLINE, `All expressions except functions must be on its own line!`);
                 this.indent();
             }
+            const locals = this.letInExpr([name]);
+            const enclosing = this.env;
+            this.env = this.newEnv(enclosing);
+            Object.keys(locals).forEach((name) =>
+                this.env.declare(name, false)
+            )
             const initializer: Expr = this.expression();
+            this.env = enclosing;
             this.endStmt("value");
             if (!isFunctionNext) {
                 this.dedent();
             }
-            return new VarDeclaration(nameToken, initializer, typeModifier, declaredType);
+            return new VarDeclaration(nameToken, locals, initializer, declaredType);
         } else if (operator.type === EQUAL) {
             const type: Type = this.typeDeclaration();
             this.endStmt("type declaration");
             this.prelude();
-            return this.varDeclaration(typeModifier, name, type);
+            return this.varDeclaration(name, type);
         }
     }
     typeDeclaration(opts = {allowFunctionType : true, allowTypeVariable : true, typeParameters : undefined, usedParameters : []}): Type {
@@ -501,14 +523,17 @@ export class Parser {
     }
 
     statement() {
-        if (this.match(RETURN)) {
+        if (this.peek().lexeme === "return") {
+            this.advance();
             return this.returnStatement();
-        } else if (this.match(CALL)) {
+        } else if (this.peek().lexeme === "call") {
+            this.advance();
             return this.callStatement();
-        } else if (this.match(LET)) {
+        } else if (this.peek().lexeme === "let") {
+            this.advance();
             return this.assignStatement();
         } else {
-            throw this.error(this.peek(), `Expected a statement!`);
+            return this.varDeclaration();
         }
     }
 

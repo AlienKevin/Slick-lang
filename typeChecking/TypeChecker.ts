@@ -728,10 +728,13 @@ export class Checker implements Visitor {
     }
 
     visitVarDeclarationStmt(stmt: VarDeclaration) {
-        const mutable = stmt.typeModifier === TokenType.MUT;
+        const mutable = false;
         if (stmt.initializer instanceof Function) {
             this.env.functionName = stmt.name.lexeme;
         }
+        Object.values(stmt.locals).forEach((declaration) =>
+            this.visitVarDeclarationStmt(declaration)
+        )
         let type = this.expression(stmt.initializer);
         const declaredType = stmt.typeDeclaration;
         if (stmt.typeDeclaration !== undefined) {

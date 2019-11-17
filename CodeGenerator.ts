@@ -209,10 +209,22 @@ export class CodeGenerator implements Visitor {
     }
 
     visitVarDeclarationStmt(stmt: VarDeclaration) {
-        return (
+        this.indent();
+        const padding = this.begin();
+        let str =
             "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
-            + this.expression(stmt.initializer) + ";"
-        );
+            + "(function () {"
+            + Object.values(stmt.locals).map((declaration) =>
+                padding + (
+                    Object.keys(declaration.locals).length > 0
+                    ? this.visitVarDeclarationStmt(declaration)
+                    : "var " + declaration.name + " = " + this.expression(declaration.initializer) + ";"
+                )
+            ).join("")
+            + padding + "return " + this.expression(stmt.initializer) + ";"
+        this.outdent();
+        str += this.begin() + "})();";
+        return str;
     }
 
     visitCaseExpr(caseExpr: Case) {

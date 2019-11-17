@@ -4,7 +4,7 @@ const stmtDescriptions = {
     "Block": ["statements: Stmt[]"],
     "Call": ["call: CallExpr"],
     "Return": ["keyword: Token", "value: Expr"],
-    "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType", "typeDeclaration?: Type"],
+    "VarDeclaration": ["name: Token", "locals: {[name: string]: VarDeclaration}", "initializer: Expr", "typeDeclaration?: Type"],
     "Assign": ["name: Token", "value: Expr"],
     "CustomTypeDeclaration": ["name: Token", "subtypes: {[name: string] : Type}", "typeParameters: {[name: string] : Type}"]
 };

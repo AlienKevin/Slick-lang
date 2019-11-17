@@ -31,8 +31,8 @@ export class Environment {
         }
     }
 
-    declare(nameToken: Token, mutable: boolean) {
-        const name = nameToken.lexeme;
+    declare(nameToken: Token | string, mutable: boolean) {
+        const name = nameToken instanceof Token ? nameToken.lexeme : nameToken;
         if (this.isDeclared(name)) {
             throw this.error(nameToken, `Duplicated declaration of '${name}'!`);
         } else {
