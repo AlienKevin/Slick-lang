@@ -39,7 +39,6 @@ const primordial = $SLK.stone({
     "atan2": "$SLK.atan2",
 
     // functinos
-    "ƒ?!": "$SLK.ternary",
     "ƒ⋏": "$SLK.and",
     "ƒ⋎": "$SLK.or",
     "ƒ=": "$SLK.eq",

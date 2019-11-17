@@ -832,13 +832,6 @@ export class Parser {
             if (this.check(...functinos)) {
                 let start = this.previous();
                 let symbol = this.advance().lexeme;
-                if (symbol === "?") {
-                    if (this.match(BANG)) {
-                        symbol = "?!";
-                    } else {
-                        throw this.error(this.peek(), `Expected '!' after '?'!`);
-                    }
-                }
                 const name = new Token(
                     IDENTIFIER, "ƒ" + symbol, undefined, start.line, start.index
                 );

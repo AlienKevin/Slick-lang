@@ -72,7 +72,6 @@ export class Checker implements Visitor {
         acos       Num → Num
         atan       Num → Num
         atan2      Num → Num → Num
-        ƒ?!        Bool → a → a → a
         ƒ⋏         Bool → Bool → Bool
         ƒ⋎         Bool → Bool → Bool
         ƒ=         a → a → Bool

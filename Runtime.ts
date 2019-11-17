@@ -101,14 +101,6 @@ function not(boolean) {
     return !boolean;
 }
 
-function ternary(zeroth, oneth, twoth) {
-    return (
-        zeroth
-        ? oneth
-        : twoth
-    );
-}
-
 const eq = R.curry(function (zeroth, oneth) {
     return R.equals(zeroth, oneth) || (
         isNumber(zeroth)
@@ -281,7 +273,6 @@ export default stone({
     stone,
     curry,
     sub,
-    ternary,
     Text,
     floor,
     ceil,
