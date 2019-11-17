@@ -7,14 +7,6 @@ import { RecordType } from "./typeChecking/RecordType";
 export abstract class Stmt {
     abstract accept(visitor: Visitor): any;
 }
-export class Block extends Stmt {
-	constructor(public statements: Stmt[]) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitBlockStmt(this);
-	}
-}
 export class Call extends Stmt {
 	constructor(public call: CallExpr) {
 		super();

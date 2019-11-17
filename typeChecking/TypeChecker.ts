@@ -1,7 +1,7 @@
 import { Visitor } from "../interfaces/Visitor";
 import { Runner } from "../Runner";
 import { If, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "../Expr";
-import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, CustomTypeDeclaration } from "../Stmt";
+import { Return, VarDeclaration, Stmt, Call as CallStmt, CustomTypeDeclaration } from "../Stmt";
 import { PrimitiveType } from "./PrimitiveType";
 import { CError } from "./CompileError";
 import { TokenType } from "../TokenType";
@@ -660,11 +660,6 @@ export class Checker implements Visitor {
         }
     }
 
-    visitBlockStmt(stmt: Block) {
-        stmt.statements.forEach((stmt) => {
-            this.statement(stmt);
-        });
-    }
     visitIfStmt(stmt: If) {
         this.boolean(this.expression(stmt.condition), stmt.condition);
         this.statement(stmt.thenBranch);

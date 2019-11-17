@@ -12,7 +12,6 @@ export interface Visitor {
 	visitFunctionExpr(expr: Expr): any;
 	visitGetExpr(expr: Expr): any;
 	visitCaseExpr(expr: Expr): any;
-	visitBlockStmt(stmt: Stmt): any;
 	visitCallStmt(stmt: Stmt): any;
 	visitReturnStmt(stmt: Stmt): any;
 	visitVarDeclarationStmt(stmt: Stmt): any;

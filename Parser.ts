@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Expr, Binary, Grouping, Literal, Variable, Call, If, Get, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
-import { Block, Return, VarDeclaration, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
+import { Return, VarDeclaration, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
@@ -490,29 +490,6 @@ export class Parser {
             type = new FunctionType(type, this.typeDeclaration(opts));
         }
         return type;
-    }
-
-    // block → INDENT (declaration* block? declaration*) (DEDENT | EOF)
-    block() {
-        this.consume(INDENT, "Expect indentation before block!");
-        let statements = []; // a list of blocks (nested arrays) and statements
-        let indentStack = [INDENT]; // push the first indent
-        while (indentStack.length > 0 && !this.isAtEnd()) {
-            this.prelude();
-            let result;
-            if (this.check(INDENT)) { // a nested block
-                result = this.block();
-            } else if (this.check(DEDENT)) {
-                indentStack.pop();
-            } else {
-                result = this.declaration();
-            }
-            if (result !== undefined) {
-                statements.push(result);
-            }
-        }
-        this.consume([DEDENT, EOF], "Expect dedentation or EOF after block!");
-        return new Block(statements);
     }
 
     statement() {

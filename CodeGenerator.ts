@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
 import { If, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
-import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
+import { Return, VarDeclaration, Stmt, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
 import { isNumber, isText, isBoolean } from "./utils";
@@ -171,24 +171,12 @@ export class CodeGenerator implements Visitor {
         }).join("");
     }
     
-    private block(block: Block) {
-        this.indent();
-        const string = this.statements(block.statements);
-        this.outdent();
-        return "{" + string + this.begin() + "}";
-    }
-
     visitCallStmt(stmt: CallStmt) {
         return (
             this.visitCallExpr(stmt.call) + ";"
         );
     }
     
-    visitBlockStmt(stmt: Block) {
-        return (
-            this.block(stmt)
-        );
-    }
     visitReturnStmt(stmt: Return) {
         return "return " + this.expression(stmt.value) + ";";
     }
@@ -376,11 +364,9 @@ export class CodeGenerator implements Visitor {
     funcExpr(expr: Function) {
         return "$SLK.curry(function (" + expr.params.map((param) => {
             return CodeGenerator.mangle(param.lexeme);
-        }).join(", ") + ") " + (
-            expr.body instanceof Block
-            ? this.block(expr.body)
-            : "{return " + this.expression(expr.body) + "}"
-        ) + ")";
+        }).join(", ") + ") "
+        + "{return " + this.expression(expr.body) + "}"
+        + ")";
     }
 
     visitVariableExpr(expr: Variable) {
