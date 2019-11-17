@@ -60,6 +60,7 @@ export enum TokenType {
     FALSE = "FALSE",
     TRUE = "TRUE",
     CASE = "CASE",
+    THEN = "THEN",
 
     // End of File
     EOF = "EOF"

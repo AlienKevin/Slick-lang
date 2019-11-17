@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
-import { Expr, Binary, Grouping, Literal, Variable, Call, Ternary, Get, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
-import { Block, If, Return, VarDeclaration, Assign, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
+import { Expr, Binary, Grouping, Literal, Variable, Call, If, Get, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
+import { Block, Return, VarDeclaration, Assign, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
@@ -14,6 +14,7 @@ import { RecordType } from "./typeChecking/RecordType";
 import { CustomType } from "./typeChecking/CustomType";
 import runtime from "./Runtime";
 import clone from "lodash.clone";
+import is from "ramda/es/is";
 
 const LEFT_PAREN = TokenType.LEFT_PAREN;
 const RIGHT_PAREN = TokenType.RIGHT_PAREN;
@@ -63,9 +64,11 @@ const TRUE = TokenType.TRUE;
 const FALSE = TokenType.FALSE;
 const ARROW = TokenType.ARROW;
 const BAR = TokenType.BAR;
+const THEN = TokenType.THEN;
 
 const keywords = new Map([
     ["if", TokenType.IF],
+    ["then", TokenType.THEN],
     ["elif", TokenType.ELIF],
     ["else", TokenType.ELSE],
     ["return", TokenType.RETURN],
@@ -176,6 +179,28 @@ export class Parser {
         const text = this.peek().lexeme;
         if (this.peek().type === IDENTIFIER && keywords.get(text) !== undefined) {
             this.peek().type = keywords.get(text);
+        }
+    }
+
+    indent() {
+        this.consume(INDENT, `Expected an indentation here!`);
+    }
+
+    dedent() {
+        this.consume(DEDENT, `Expected a dedentation here!`);
+    }
+
+    beginBlock(message: string, condition = true) {
+        if (condition) {
+            this.consume(NEWLINE, message);
+            this.indent();
+        }
+    }
+
+    endBlock(message: string, condition = true) {
+        if (condition) {
+            this.consume(NEWLINE, message);
+            this.dedent();
         }
     }
 
@@ -465,9 +490,7 @@ export class Parser {
     }
 
     statement() {
-        if (this.match(IF)) {
-            return this.ifStatement();
-        } else if (this.match(RETURN)) {
+        if (this.match(RETURN)) {
             return this.returnStatement();
         } else if (this.match(CALL)) {
             return this.callStatement();
@@ -483,23 +506,6 @@ export class Parser {
         const value = this.expression();
         this.endStmt("return");
         return new Return(returnToken, value);
-    }
-
-    ifStatement() {
-        const condition = this.expression();
-        this.consume(NEWLINE, "if block must be on its own line!");
-        const thenBranch = this.block();
-        this.prelude();
-        if (this.match(ELIF)) {
-            return new If(condition, thenBranch, this.ifStatement());
-        }
-        // last else without if
-        if (this.match(ELSE)) {
-            this.consume(NEWLINE, "else block must be on its own line!");
-            return new If(condition, thenBranch, this.block());
-        }
-        // single if statement without elif and else
-        return new If(condition, thenBranch, undefined);
     }
 
     callStatement() {
@@ -541,11 +547,11 @@ export class Parser {
         if (this.peek().lexeme === "case") {
             // 'case' is a variable name
             if (this.env.lookup(this.peek())) {
-                return this.ternary();
+                return this.if();
             }
             this.advance();
             const keyword = this.previous();
-            let expr = this.ternary();
+            let expr = this.if();
             this.consume(NEWLINE, `Expected a linebreak before caes branches!`);
             this.consume(INDENT, `Expected indentation before case branches!`);
             let cases: {
@@ -614,20 +620,44 @@ export class Parser {
             } while (!this.match(DEDENT));
             return new Case(keyword, expr, cases);
         } else {
-            return this.ternary();
+            return this.if();
         }
     }
 
-    // ternary → or ("?" expression ! ternary)?
-    ternary() {
-        let expr = this.or();
-        if (this.match(QUESTION)) {
-            const questionMark = this.previous();
-            const trueBranch = this.expression();
-            this.consume(BANG, `Expected '!' after then branch!`);
-            const falseBranch = this.ternary();
-            expr = new Ternary(expr, questionMark, trueBranch, falseBranch);
+    if() {
+        if (this.peek().lexeme === "if") {
+            // 'if' is a variable name
+            if (this.env.lookup(this.peek())) {
+                return this.or();
+            }
+            this.advance();
+            return this.ifHelper();
+        } else {
+            return this.or();
         }
+    }
+
+    ifHelper(isMultiline = false) {
+        const condition = this.or();
+        this.prelude();
+        this.consume(THEN, `Expected 'then' after if condition!`);
+        const message = `Expected the body of this branch on its own line!`;
+        this.beginBlock(message, isMultiline);
+        if (this.match(NEWLINE)) {
+            isMultiline = true;
+            this.indent();
+        }
+        const thenBranch = this.or();
+        this.endBlock(message, isMultiline);
+        this.prelude();
+        if (this.match(ELIF)) {
+            return new If(condition, thenBranch, this.ifHelper(isMultiline));
+        }
+        // last else without if
+        this.consume(ELSE, `Expected 'else' at the end of every if expression!`);
+        this.beginBlock(message, isMultiline);
+        const expr = new If(condition, thenBranch, this.or());
+        this.endBlock(message, isMultiline);
         return expr;
     }
 

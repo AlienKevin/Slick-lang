@@ -15,14 +15,6 @@ export class Block extends Stmt {
 		return visitor.visitBlockStmt(this);
 	}
 }
-export class If extends Stmt {
-	constructor(public condition: Expr, public thenBranch: Block, public elseBranch: Block) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitIfStmt(this);
-	}
-}
 export class Call extends Stmt {
 	constructor(public call: CallExpr) {
 		super();

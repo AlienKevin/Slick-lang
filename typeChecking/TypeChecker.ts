@@ -1,7 +1,7 @@
 import { Visitor } from "../interfaces/Visitor";
 import { Runner } from "../Runner";
-import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "../Expr";
-import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign, CustomTypeDeclaration } from "../Stmt";
+import { If, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "../Expr";
+import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, Assign, CustomTypeDeclaration } from "../Stmt";
 import { PrimitiveType } from "./PrimitiveType";
 import { CError } from "./CompileError";
 import { TokenType } from "../TokenType";
@@ -361,16 +361,16 @@ export class Checker implements Visitor {
         return returnType;
     }
 
-    visitTernaryExpr(expr: Ternary) {
+    visitIfExpr(expr: If) {
         this.boolean(this.expression(expr.condition), expr.condition, "condition");
-        const trueBranch = this.expression(expr.trueBranch);
-        const falseBranch = this.expression(expr.falseBranch);
+        const thenBranch = this.expression(expr.thenBranch);
+        const elseBranch = this.expression(expr.elseBranch);
         this.matchTypes(
-            trueBranch, falseBranch,
+            thenBranch, elseBranch,
             "Types in then and else branch do not match!",
             expr
         );
-        return trueBranch;
+        return thenBranch;
     }
     visitBinaryExpr(expr: Binary) {
         const leftType = this.expression(expr.left);

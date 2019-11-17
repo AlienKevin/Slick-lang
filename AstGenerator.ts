@@ -2,7 +2,6 @@ const fs = require('fs');
 
 const stmtDescriptions = {
     "Block": ["statements: Stmt[]"],
-    "If": ["condition: Expr", "thenBranch: Block", "elseBranch: Block"],
     "Call": ["call: CallExpr"],
     "Return": ["keyword: Token", "value: Expr"],
     "VarDeclaration": ["name: Token", "initializer: Expr", "typeModifier: TokenType", "typeDeclaration?: Type"],
@@ -11,7 +10,7 @@ const stmtDescriptions = {
 };
 
 const exprDescriptions = {
-    "Ternary": ["condition: Expr", "questionMark: Token", "trueBranch: Expr", "falseBranch: Expr"],
+    "If": ["condition: Expr", "thenBranch: Expr", "elseBranch: Expr"],
     "Binary": ["left: Expr", "operator: Token", "right: Expr"],
     "Grouping": ["first: Token", "expression: Expr"],
     "Literal": ["first: Token", "value: any"],

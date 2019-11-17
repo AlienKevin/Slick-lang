@@ -5,15 +5,15 @@ export abstract class Expr {
     abstract accept(visitor: Visitor): any;
 	constructor (readonly first: Token) {}
 }
-export class Ternary extends Expr {
-	constructor(public condition: Expr, public questionMark: Token, public trueBranch: Expr, public falseBranch: Expr) {
+export class If extends Expr {
+	constructor(public condition: Expr, public thenBranch: Expr, public elseBranch: Expr) {
 		super(condition.first);
 	}
 	accept(visitor: Visitor) {
-		return visitor.visitTernaryExpr(this);
+		return visitor.visitIfExpr(this);
 	}
 	toString() {
-		return "Ternary expression"
+		return "If expression"
 	}
 }
 export class Binary extends Expr {

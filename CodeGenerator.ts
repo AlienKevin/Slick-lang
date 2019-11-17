@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 import $SLK from "./Runtime";
-import { Ternary, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
-import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, If, Assign, CustomTypeDeclaration } from "./Stmt";
+import { If, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
+import { Return, VarDeclaration, Stmt, Block, Call as CallStmt, Assign, CustomTypeDeclaration } from "./Stmt";
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
 import { isNumber, isText, isBoolean } from "./utils";
@@ -190,23 +190,6 @@ export class CodeGenerator implements Visitor {
             this.block(stmt)
         );
     }
-    visitIfStmt(stmt: If) {
-        return (
-            "if ("
-            + this.expression(stmt.condition)
-            + ")"
-            + this.block(stmt.thenBranch)
-            + (
-                stmt.elseBranch === undefined
-                ? ""
-                : " else " + (
-                    stmt.elseBranch instanceof If
-                    ? this.visitIfStmt(stmt.elseBranch)
-                    : this.block(stmt.elseBranch)
-                )
-            )
-        )
-    }
     visitReturnStmt(stmt: Return) {
         return "return " + this.expression(stmt.value) + ";";
     }
@@ -295,13 +278,13 @@ export class CodeGenerator implements Visitor {
         );
     }
 
-    visitTernaryExpr(expr: Ternary) {
+    visitIfExpr(expr: If) {
         this.indent();
         let padding = this.begin();
         let string = (
             "(" + padding + this.expression(expr.condition)
-            + padding + "? " + this.expression(expr.trueBranch)
-            + padding + ": " + this.expression(expr.falseBranch)
+            + padding + "? " + this.expression(expr.thenBranch)
+            + padding + ": " + this.expression(expr.elseBranch)
         );
         this.outdent();
         return string + this.begin() + ")";

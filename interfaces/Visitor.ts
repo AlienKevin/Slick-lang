@@ -1,7 +1,7 @@
 import { Expr } from "../Expr";
 import { Stmt } from "../Stmt";
 export interface Visitor {
-	visitTernaryExpr(expr: Expr): any;
+	visitIfExpr(expr: Expr): any;
 	visitBinaryExpr(expr: Expr): any;
 	visitGroupingExpr(expr: Expr): any;
 	visitLiteralExpr(expr: Expr): any;
@@ -13,7 +13,6 @@ export interface Visitor {
 	visitGetExpr(expr: Expr): any;
 	visitCaseExpr(expr: Expr): any;
 	visitBlockStmt(stmt: Stmt): any;
-	visitIfStmt(stmt: Stmt): any;
 	visitCallStmt(stmt: Stmt): any;
 	visitReturnStmt(stmt: Stmt): any;
 	visitVarDeclarationStmt(stmt: Stmt): any;
