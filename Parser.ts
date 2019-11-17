@@ -342,8 +342,16 @@ export class Parser {
         if (operator.type === COLON) {
             const mutable = typeModifier === MUT;
             this.env.declare(nameToken, mutable);
+            const isFunctionNext = this.check(F);
+            if (!isFunctionNext) {
+                this.consume(NEWLINE, `All expressions except functions must be on its own line!`);
+                this.indent();
+            }
             const initializer: Expr = this.expression();
             this.endStmt("value");
+            if (!isFunctionNext) {
+                this.dedent();
+            }
             return new VarDeclaration(nameToken, initializer, typeModifier, declaredType);
         } else if (operator.type === EQUAL) {
             const type: Type = this.typeDeclaration();
