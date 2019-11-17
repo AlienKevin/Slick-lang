@@ -49,8 +49,6 @@ const ELIF =TokenType.ELIF;
 const IF =TokenType.IF;
 const OR =TokenType.OR;
 const RETURN =TokenType.RETURN;
-const MUT =TokenType.MUT;
-const VAR =TokenType.VAR;
 const TYPE = TokenType.TYPE;
 const ALIAS = TokenType.ALIAS;
 const F =TokenType.F;
@@ -71,8 +69,6 @@ const keywords = new Map([
     ["elif", TokenType.ELIF],
     ["else", TokenType.ELSE],
     ["return", TokenType.RETURN],
-    ["mut", TokenType.MUT],
-    ["var", TokenType.VAR],
     ["type", TokenType.TYPE],
     ["alias", TokenType.ALIAS],
     ["call", TokenType.CALL],
@@ -1018,8 +1014,6 @@ export class Parser {
                 case F:
                 case RETURN:
                 case IDENTIFIER:
-                case MUT:
-                case VAR:
                     return;
             }
             this.advance();
