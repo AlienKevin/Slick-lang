@@ -652,23 +652,24 @@ export class Parser {
         const condition = this.or();
         this.prelude();
         this.consume(THEN, `Expected 'then' after if condition!`);
-        const message = `Expected the body of this branch on its own line!`;
-        this.beginBlock(message, isMultiline);
+        const beginMessage = `Expected the body of this branch on its own line!`;
+        const endMessage = `Expected dedentation to end the body of this branch!`;
+        this.beginBlock(beginMessage, isMultiline);
         if (this.match(NEWLINE)) {
             isMultiline = true;
             this.indent();
         }
         const thenBranch = this.or();
-        this.endBlock(message, isMultiline);
+        this.endBlock(endMessage, isMultiline);
         this.prelude();
         if (this.match(ELIF)) {
             return new If(condition, thenBranch, this.ifHelper(isMultiline));
         }
         // last else without if
         this.consume(ELSE, `Expected 'else' at the end of every if expression!`);
-        this.beginBlock(message, isMultiline);
+        this.beginBlock(beginMessage, isMultiline);
         const expr = new If(condition, thenBranch, this.or());
-        this.endBlock(message, isMultiline);
+        this.endBlock(endMessage, isMultiline);
         return expr;
     }
 
