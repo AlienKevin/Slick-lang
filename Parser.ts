@@ -317,6 +317,8 @@ export class Parser {
             throw this.error(aliasToken, `Duplicated type name!`);
         }
         this.consume(COLON, `Expected a ':' after type alias!`)
+        this.consume(NEWLINE, `Expected a linebreak after ':'!`);
+        this.indent(`Expected indentation before type!`);
         const type = this.typeDeclaration({
             allowFunctionType : true,
             allowTypeVariable : false,
@@ -324,6 +326,7 @@ export class Parser {
             usedParameters : []
         });
         this.endStmt("type");
+        this.dedent();
         this.types[alias] = type;
     }
 
