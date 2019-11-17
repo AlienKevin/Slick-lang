@@ -182,12 +182,20 @@ export class Parser {
         }
     }
 
-    indent() {
-        this.consume(INDENT, `Expected an indentation here!`);
+    indent(message?: string) {
+        this.consume(INDENT, (
+            message === undefined
+            ? `Expected an indentation here!`
+            : message
+        ));
     }
 
-    dedent() {
-        this.consume(DEDENT, `Expected a dedentation here!`);
+    dedent(message?: string) {
+        this.consume(DEDENT, (
+            message === undefined
+            ? `Expected a dedentation here!`
+            : message
+        ));
     }
 
     beginBlock(message: string, condition = true) {
