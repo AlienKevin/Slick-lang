@@ -3,6 +3,7 @@ import { Token } from "../Token";
 import { CError } from "./CompileError";
 import { Checker } from "./TypeChecker";
 import { Expr } from "../Expr";
+import { AnyType } from "./AnyType";
 
 interface Value {
     mutable: boolean,
@@ -15,7 +16,6 @@ export class Env {
     private values: { [name: string]: Value } = Object.create(null);
     // current function
     public functionParams: Token[];
-    public functionReturnType: Type;
     public functionName: string;
     public customTypes : {[name: string] : Subtypes} = Object.create(null);
     constructor(readonly checker: Checker, readonly enclosing?: Env) {}
@@ -37,15 +37,12 @@ export class Env {
     get(nameToken: Token): Type {
         const name = nameToken.lexeme;
         if (name === this.functionName) {
-            if (this.functionReturnType === undefined) {
-                throw new CError(nameToken, `Cannot make recursive calls to function '${name}' before returning concrete values!`);
-            }
             const functionParamTypes = this.functionParams.map((param) =>
                 this.get(param)
             );
             return Checker.createFunctionType([
                 ...functionParamTypes,
-                this.functionReturnType
+                undefined
             ]);
         }
         if (this.isDeclared(name)) {

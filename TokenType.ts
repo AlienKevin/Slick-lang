@@ -49,7 +49,6 @@ export enum TokenType {
     ELIF = "ELIF",
     IF = "IF",
     OR = "OR",
-    RETURN = "RETURN",
     TYPE = "TYPE",
     ALIAS = "ALIAS",
     F = "F",

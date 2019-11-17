@@ -15,14 +15,6 @@ export class Call extends Stmt {
 		return visitor.visitCallStmt(this);
 	}
 }
-export class Return extends Stmt {
-	constructor(public keyword: Token, public value: Expr) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitReturnStmt(this);
-	}
-}
 export class VarDeclaration extends Stmt {
 	constructor(public name: Token, public locals: {[name: string]: VarDeclaration}, public initializer: Expr, public typeDeclaration?: Type) {
 		super();

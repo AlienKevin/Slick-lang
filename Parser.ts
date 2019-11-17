@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Expr, Binary, Grouping, Literal, Variable, Call, If, Get, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
-import { Return, VarDeclaration, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
+import { VarDeclaration, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
@@ -48,7 +48,6 @@ const ELSE =TokenType.ELSE;
 const ELIF =TokenType.ELIF;
 const IF =TokenType.IF;
 const OR =TokenType.OR;
-const RETURN =TokenType.RETURN;
 const TYPE = TokenType.TYPE;
 const ALIAS = TokenType.ALIAS;
 const F =TokenType.F;
@@ -68,7 +67,6 @@ const keywords = new Map([
     ["then", TokenType.THEN],
     ["elif", TokenType.ELIF],
     ["else", TokenType.ELSE],
-    ["return", TokenType.RETURN],
     ["type", TokenType.TYPE],
     ["alias", TokenType.ALIAS],
     ["call", TokenType.CALL],
@@ -493,22 +491,12 @@ export class Parser {
     }
 
     statement() {
-        if (this.peek().lexeme === "return") {
-            this.advance();
-            return this.returnStatement();
-        } else if (this.peek().lexeme === "call") {
+        if (this.peek().lexeme === "call") {
             this.advance();
             return this.callStatement();
         } else {
             return this.varDeclaration();
         }
-    }
-
-    returnStatement() {
-        const returnToken = this.previous();
-        const value = this.expression();
-        this.endStmt("return");
-        return new Return(returnToken, value);
     }
 
     callStatement() {
@@ -981,7 +969,6 @@ export class Parser {
             switch (this.peek().type) {
                 case IF:
                 case F:
-                case RETURN:
                 case IDENTIFIER:
                     return;
             }

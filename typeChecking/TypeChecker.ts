@@ -1,7 +1,7 @@
 import { Visitor } from "../interfaces/Visitor";
 import { Runner } from "../Runner";
 import { If, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "../Expr";
-import { Return, VarDeclaration, Stmt, Call as CallStmt, CustomTypeDeclaration } from "../Stmt";
+import { VarDeclaration, Stmt, Call as CallStmt, CustomTypeDeclaration } from "../Stmt";
 import { PrimitiveType } from "./PrimitiveType";
 import { CError } from "./CompileError";
 import { TokenType } from "../TokenType";
@@ -629,7 +629,6 @@ export class Checker implements Visitor {
         // reset to defaults
         this.env = enclosing;
         this.env.functionParams = undefined;
-        this.env.functionReturnType = undefined;
         this.env.functionName = undefined;
         this.resetAnyTypeName();
         return returnType;
@@ -669,34 +668,6 @@ export class Checker implements Visitor {
     }
     visitCallStmt(stmt: CallStmt) {
         this.expression(stmt.call);
-    }
-    visitReturnStmt(stmt: Return) {
-        const returnType = this.expression(stmt.value);
-        if (this.env.functionReturnType === undefined) {
-            this.env.functionReturnType = returnType;
-        } else {
-            this.matchTypes(
-                this.env.functionReturnType,
-                returnType,
-                `Return type ${returnType} differs from previous type ${this.env.functionReturnType}!`,
-                stmt.value,
-                {
-                    isFirstSubtype: false,
-                    looseCustomType: true
-                }
-            );
-            // substitute anytypes in previous custom types
-            // for situations like:
-            // var foo = Text → Maybe Text
-            // var foo : ƒ text
-            //     if text = ''
-            //         return Nothing
-            //     else
-            //         return Just 3
-            // "Just 3"'s `Maybe Num` type would override previous "Nothing"'s `Maybe a` type
-            // so more concrete return types will be preserved
-            this.env.functionReturnType = this.substituteAnyTypes(this.env.functionReturnType, returnType, {});
-        }
     }
 
     visitCustomTypeDeclarationStmt(stmt: CustomTypeDeclaration) {

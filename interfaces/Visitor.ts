@@ -13,7 +13,6 @@ export interface Visitor {
 	visitGetExpr(expr: Expr): any;
 	visitCaseExpr(expr: Expr): any;
 	visitCallStmt(stmt: Stmt): any;
-	visitReturnStmt(stmt: Stmt): any;
 	visitVarDeclarationStmt(stmt: Stmt): any;
 	visitCustomTypeDeclarationStmt(stmt: Stmt): any;
 }
