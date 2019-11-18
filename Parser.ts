@@ -392,12 +392,9 @@ export class Parser {
                 this.consume(NEWLINE, `All expressions except functions must be on its own line!`);
                 this.indent();
             }
-            const locals = this.letInExpr([name]);
             const enclosing = this.env;
             this.env = this.newEnv(enclosing);
-            Object.keys(locals).forEach((name) =>
-                this.env.declare(name, false)
-            )
+            const locals = this.letInExpr([name]);
             const initializer: Expr = this.expression();
             this.env = enclosing;
             this.endStmt("value", {dedent: true});
