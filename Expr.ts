@@ -1,6 +1,5 @@
 import {Visitor} from "./interfaces/Visitor";
 import {Token} from "./Token"
-import {Block} from "./Stmt";
 export abstract class Expr {
     abstract accept(visitor: Visitor): any;
 	constructor (readonly first: Token) {}

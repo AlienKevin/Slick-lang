@@ -25,8 +25,7 @@ function createExpr() {
     const descriptions: {[exprType: string]: string[]} = exprDescriptions;
     const parentClassName = "Expr";
     const imports = 
-`import {Token} from "./Token"
-import {Block} from "./Stmt";\n`;
+`import {Token} from "./Token"\n`;
     createAst(filePath, parentClassName, descriptions, imports);
 }
 
