@@ -384,7 +384,7 @@ export class CodeGenerator implements Visitor {
 
     visitLiteralExpr(expr: Literal) {
         if (isText(expr.value)) {
-            return '"' + expr.value + '"';
+            return '"' + expr.value.replace(/["]/g, "\\\"") + '"';
         }
         if (isBoolean(expr.value)) {
             return (
