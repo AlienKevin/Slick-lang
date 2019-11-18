@@ -309,7 +309,7 @@ export class CodeGenerator implements Visitor {
     visitCallExpr(expr: Call) {
         return (
             this.expression(expr.callee) + "("
-            + expr.argumentList.map(this.expression, this).join(", ") + ")"
+            + expr.argumentList.map(this.expression, this).join(")(") + ")"
         );
     }
 
