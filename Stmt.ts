@@ -7,14 +7,6 @@ import { RecordType } from "./typeChecking/RecordType";
 export abstract class Stmt {
     abstract accept(visitor: Visitor): any;
 }
-export class Call extends Stmt {
-	constructor(public call: CallExpr) {
-		super();
-	}
-	accept(visitor: Visitor) {
-		return visitor.visitCallStmt(this);
-	}
-}
 export class VarDeclaration extends Stmt {
 	constructor(public name: Token, public locals: {[name: string]: VarDeclaration}, public initializer: Expr, public typeDeclaration?: Type) {
 		super();

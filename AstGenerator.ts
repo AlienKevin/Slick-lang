@@ -1,7 +1,6 @@
 const fs = require('fs');
 
 const stmtDescriptions = {
-    "Call": ["call: CallExpr"],
     "VarDeclaration": ["name: Token", "locals: {[name: string]: VarDeclaration}", "initializer: Expr", "typeDeclaration?: Type"],
     "CustomTypeDeclaration": ["name: Token", "subtypes: {[name: string] : Type}", "typeParameters: {[name: string] : Type}"]
 };

@@ -1,7 +1,7 @@
 import { Visitor } from "../interfaces/Visitor";
 import { Runner } from "../Runner";
 import { If, Binary, Expr, Get, Call, Literal, Grouping, Variable, Function, ListLiteral, RecordLiteral, Case } from "../Expr";
-import { VarDeclaration, Stmt, Call as CallStmt, CustomTypeDeclaration } from "../Stmt";
+import { VarDeclaration, Stmt, CustomTypeDeclaration } from "../Stmt";
 import { PrimitiveType } from "./PrimitiveType";
 import { CError } from "./CompileError";
 import { TokenType } from "../TokenType";
@@ -665,9 +665,6 @@ export class Checker implements Visitor {
         if (stmt.elseBranch !== undefined) {
             this.statement(stmt.elseBranch);
         }
-    }
-    visitCallStmt(stmt: CallStmt) {
-        this.expression(stmt.call);
     }
 
     visitCustomTypeDeclarationStmt(stmt: CustomTypeDeclaration) {

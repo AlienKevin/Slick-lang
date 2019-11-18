@@ -1,6 +1,6 @@
 import { TokenType } from "./TokenType";
 import { Expr, Binary, Grouping, Literal, Variable, Call, If, Get, Function, ListLiteral, RecordLiteral, Case } from "./Expr";
-import { VarDeclaration, Call as CallStmt, CustomTypeDeclaration } from "./Stmt";
+import { VarDeclaration, CustomTypeDeclaration } from "./Stmt";
 import { Token } from "./Token";
 import { Runner } from "./Runner";
 import { Environment } from "./Environment";
@@ -51,7 +51,6 @@ const OR =TokenType.OR;
 const TYPE = TokenType.TYPE;
 const ALIAS = TokenType.ALIAS;
 const F =TokenType.F;
-const CALL = TokenType.CALL;
 const EOF =TokenType.EOF;
 const NEWLINE = TokenType.NEWLINE;
 const SOFT_NEWLINE = TokenType.SOFT_NEWLINE;
@@ -70,7 +69,6 @@ const keywords = new Map([
     ["else", TokenType.ELSE],
     ["type", TokenType.TYPE],
     ["alias", TokenType.ALIAS],
-    ["call", TokenType.CALL],
     ["case", TokenType.CASE],
     ["in", TokenType.IN],
 ]);
@@ -216,8 +214,9 @@ export class Parser {
                 } else {
                     return this.customType();
                 }
+            } else {
+                return this.varDeclaration();
             }
-            return this.statement();
         } catch (error) {
             if (error instanceof SyntaxError) {
                 this.synchronize();
@@ -492,30 +491,6 @@ export class Parser {
             type = new FunctionType(type, this.typeDeclaration(opts));
         }
         return type;
-    }
-
-    statement() {
-        if (this.peek().lexeme === "call") {
-            this.advance();
-            return this.callStatement();
-        } else {
-            return this.varDeclaration();
-        }
-    }
-
-    callStatement() {
-        const keyword = this.previous();
-        const expr = this.expression();
-        // call statement
-        if (expr instanceof Call) {
-            this.endStmt("call");
-            return new CallStmt(expr);
-        } else if (expr instanceof Grouping && expr.expression instanceof Call) {
-            this.endStmt("call");
-            return new CallStmt(expr.expression);
-        } else {
-            throw this.error(expr.first, `Expected a function call, not a ${expr}!`);
-        }
     }
 
     // expression → assignment
