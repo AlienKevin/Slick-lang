@@ -14,7 +14,7 @@ const exprDescriptions = {
     "Call": ["callee: Expr", "paren: Token", "argumentList: Expr[]"],
     "ListLiteral": ["first: Token", "list: Expr[]"],
     "RecordLiteral": ["first: Token", "record: {[name: string]: Expr}", "keyTokens: {[name: string]: Token}", "target: Variable | Get"],
-    "Function": ["first: Token", "params: Token[]", "body: Expr"],
+    "Function": ["first: Token", "params: Token[]", "locals: {[name: string]: VarDeclaration}", "body: Expr"],
     "Get": ["object: Expr", "name: Token", "bracket?: Token"],
     "Case": ["first: Token", "expr: Expr", "cases: {subtype: Token | Literal, parameters: Token[], isRecord: boolean, result: Expr}[]"]
 };
@@ -25,7 +25,8 @@ function createExpr() {
     const descriptions: {[exprType: string]: string[]} = exprDescriptions;
     const parentClassName = "Expr";
     const imports = 
-`import {Token} from "./Token"\n`;
+`import {Token} from "./Token";
+import { VarDeclaration } from "./Stmt";\n`;
     createAst(filePath, parentClassName, descriptions, imports);
 }
 

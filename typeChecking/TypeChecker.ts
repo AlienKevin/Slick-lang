@@ -614,6 +614,9 @@ export class Checker implements Visitor {
             this.env.declare(param, paramType, false);
         });
         this.env.functionParams = expr.params;
+        Object.values(expr.locals).forEach((declaration) =>
+            this.visitVarDeclarationStmt(declaration)
+        )
         const outputType = this.expression(expr.body);
         const paramTypes = (
             expr.params.length > 0

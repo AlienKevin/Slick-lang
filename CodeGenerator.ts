@@ -195,17 +195,21 @@ export class CodeGenerator implements Visitor {
         let str =
             "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
             + "(function () {"
-            + Object.entries(stmt.locals).map(([name, declaration]) =>
+            + this.localDeclaration(stmt, padding)
+            + padding + "return " + this.expression(stmt.initializer) + ";"
+        this.outdent();
+        str += this.begin() + "})();";
+        return str;
+    }
+
+    localDeclaration(container: VarDeclaration | Function, padding: string): string {
+        return Object.entries(container.locals).map(([name, declaration]) =>
                 padding + (
                     Object.keys(declaration.locals).length > 0
                     ? this.visitVarDeclarationStmt(declaration)
                     : "var " + name + " = " + this.expression(declaration.initializer) + ";"
                 )
             ).join("")
-            + padding + "return " + this.expression(stmt.initializer) + ";"
-        this.outdent();
-        str += this.begin() + "})();";
-        return str;
     }
 
     visitCaseExpr(caseExpr: Case) {
@@ -356,10 +360,15 @@ export class CodeGenerator implements Visitor {
     }
 
     funcExpr(expr: Function) {
+        this.indent();
+        const padding = this.begin();
         return "$SLK.curry(function (" + expr.params.map((param) => {
             return CodeGenerator.mangle(param.lexeme);
         }).join(", ") + ") "
-        + "{return " + this.expression(expr.body) + "}"
+        + "{"
+        + this.localDeclaration(expr, padding)
+        + padding + "return " + this.expression(expr.body)
+        + "}"
         + ")";
     }
 

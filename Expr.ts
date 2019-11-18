@@ -1,5 +1,6 @@
 import {Visitor} from "./interfaces/Visitor";
-import {Token} from "./Token"
+import {Token} from "./Token";
+import { VarDeclaration } from "./Stmt";
 export abstract class Expr {
     abstract accept(visitor: Visitor): any;
 	constructor (readonly first: Token) {}
@@ -93,7 +94,7 @@ export class RecordLiteral extends Expr {
 	}
 }
 export class Function extends Expr {
-	constructor(first: Token, public params: Token[], public body: Expr) {
+	constructor(first: Token, public params: Token[], public locals: {[name: string]: VarDeclaration}, public body: Expr) {
 		super(first);
 	}
 	accept(visitor: Visitor) {

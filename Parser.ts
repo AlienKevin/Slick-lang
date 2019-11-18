@@ -354,10 +354,12 @@ export class Parser {
         params.forEach((param) => {
             this.env.declare(param, mutable);
         });
+        let locals = Object.create(null);
         const body = (
             this.check(NEWLINE)
             ? (() => {
                 this.beginBlock("Expected the body of function to be on it's own line!");
+                locals = this.letInExpr(params.map((param) => param.lexeme));
                 const expr = this.expression();
                 this.endBlock("Expected dedentation to end the body of function!");
                 return expr;
@@ -370,7 +372,7 @@ export class Parser {
             })()
         );
         this.env = enclosing;
-        return new Function(first, params, body);
+        return new Function(first, params, locals, body);
     }
 
     consumeParameters() {
