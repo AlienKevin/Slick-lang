@@ -61,6 +61,7 @@ const BAR = TokenType.BAR;
 const THEN = TokenType.THEN;
 const IN = TokenType.IN;
 const UNDERSCORE = TokenType.UNDERSCORE;
+const OF = TokenType.OF;
 
 const keywords = new Map([
     ["if", TokenType.IF],
@@ -70,6 +71,7 @@ const keywords = new Map([
     ["type", TokenType.TYPE],
     ["alias", TokenType.ALIAS],
     ["case", TokenType.CASE],
+    ["of", TokenType.OF],
     ["in", TokenType.IN],
 ]);
 
@@ -523,7 +525,9 @@ export class Parser {
             }
             this.advance();
             const keyword = this.previous();
-            let expr = this.if();
+            let expr = this.getExprKeywordsAware(this.if, ["of"]);
+            this.prelude();
+            this.consume(OF, `Expected 'of' keyword after case condition!`);
             this.consume(NEWLINE, `Expected a linebreak before caes branches!`);
             this.consume(INDENT, `Expected indentation before case branches!`);
             let cases: {

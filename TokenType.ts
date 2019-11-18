@@ -55,6 +55,7 @@ export enum TokenType {
     FALSE = "FALSE",
     TRUE = "TRUE",
     CASE = "CASE",
+    OF = "OF",
     THEN = "THEN",
     IN = "IN",
     UNDERSCORE = "UNDERSCORE",
