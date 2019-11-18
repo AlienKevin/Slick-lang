@@ -96,6 +96,7 @@ export class Scanner {
             case '⋏': this.addToken(TokenType.AND); break;
 
             case 'ƒ': this.addToken(TokenType.F); break;
+            case '_': this.addToken(TokenType.UNDERSCORE); break;
 
             case '#':
                 // skip the whole comment section of the line

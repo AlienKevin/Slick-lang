@@ -58,6 +58,7 @@ export enum TokenType {
     CASE = "CASE",
     THEN = "THEN",
     IN = "IN",
+    UNDERSCORE = "UNDERSCORE",
 
     // End of File
     EOF = "EOF"

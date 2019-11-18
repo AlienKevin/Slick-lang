@@ -5,6 +5,7 @@ import { VarDeclaration, Stmt, Call as CallStmt, CustomTypeDeclaration } from ".
 import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
 import { isNumber, isText, isBoolean } from "./utils";
+import { TokenType } from "./TokenType";
 
 const reserved = makeSet([
     "arguments", "await", "break", "case", "catch", "class", "const",
@@ -192,16 +193,19 @@ export class CodeGenerator implements Visitor {
     }
 
     visitVarDeclarationStmt(stmt: VarDeclaration) {
+        if (stmt.name.type === TokenType.UNDERSCORE) {
+            return this.expression(stmt.initializer);
+        }
         this.indent();
         const padding = this.begin();
         let str =
             "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
             + "(function () {"
-            + Object.values(stmt.locals).map((declaration) =>
+            + Object.entries(stmt.locals).map(([name, declaration]) =>
                 padding + (
                     Object.keys(declaration.locals).length > 0
                     ? this.visitVarDeclarationStmt(declaration)
-                    : "var " + declaration.name + " = " + this.expression(declaration.initializer) + ";"
+                    : "var " + name + " = " + this.expression(declaration.initializer) + ";"
                 )
             ).join("")
             + padding + "return " + this.expression(stmt.initializer) + ";"

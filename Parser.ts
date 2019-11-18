@@ -61,6 +61,7 @@ const ARROW = TokenType.ARROW;
 const BAR = TokenType.BAR;
 const THEN = TokenType.THEN;
 const IN = TokenType.IN;
+const UNDERSCORE = TokenType.UNDERSCORE;
 
 const keywords = new Map([
     ["if", TokenType.IF],
@@ -361,12 +362,17 @@ export class Parser {
         if (this.peek().lexeme === "let") {
             this.advance();
             this.beginBlock("Expected the body of let to be on it's own line!");
+            let numberOfUnderscores = 0;
             do {
                 const declaration = this.varDeclaration();
-                const name = declaration.name.lexeme;
+                let name = declaration.name.lexeme;
                 if (Object.keys(locals).includes(name)
                 || declaredNames.includes(name)) {
-                    throw this.error(declaration.name, `Duplicated variable name ${name}!`);
+                    throw this.error(declaration.name, `Duplicated variable name '${name}'!`);
+                }
+                if (name === "_") {
+                    name = "_" + numberOfUnderscores;
+                    numberOfUnderscores ++;
                 }
                 locals[name] = declaration;
             } while (!this.match(DEDENT));
@@ -378,7 +384,7 @@ export class Parser {
     }
 
     varDeclaration(declaredName?: string, declaredType?: Type): VarDeclaration {
-        const nameToken: Token = this.consume(IDENTIFIER, `Variable must have a valid name!`);
+        const nameToken: Token = this.consume([IDENTIFIER, UNDERSCORE], `Variable must have a valid name!`);
         const name: string = nameToken.lexeme;
         if (declaredName !== undefined
             && name !== declaredName) {
@@ -387,10 +393,11 @@ export class Parser {
         const operator = this.consume([EQUAL, COLON], `Variable '${name}' must be initialized when declared!`);
         if (operator.type === COLON) {
             const mutable = false;
-            this.env.declare(nameToken, mutable);
+            if (nameToken.type !== UNDERSCORE) {
+                this.env.declare(nameToken, mutable);
+            }
             if (!this.check(F)) {
-                this.consume(NEWLINE, `All expressions except functions must be on its own line!`);
-                this.indent();
+                this.beginBlock('All expressions except functions must be on its own line!');
             }
             const enclosing = this.env;
             this.env = this.newEnv(enclosing);
