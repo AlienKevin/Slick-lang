@@ -359,6 +359,7 @@ export class Parser {
             ? (() => {
                 this.beginBlock("Expected the body of function to be on it's own line!");
                 const expr = this.expression();
+                this.endBlock("Expected dedentation to end the body of function!");
                 return expr;
             })()
             : (() => {
