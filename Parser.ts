@@ -206,7 +206,10 @@ export class Parser {
 
     declaration() {
         try {
-            if (this.peek().lexeme === "type") {
+            if (this.peek().lexeme === "type"
+            && this.peekNext().type !== COLON
+            && this.peekNext().type !== EQUAL
+            ) {
                 this.advance();
                 if (this.peek().lexeme === "alias") {
                     this.advance();
@@ -408,7 +411,6 @@ export class Parser {
         } else if (operator.type === EQUAL) {
             const type: Type = this.typeDeclaration();
             this.endStmt("type declaration");
-            this.prelude();
             return this.varDeclaration(name, type);
         }
     }
