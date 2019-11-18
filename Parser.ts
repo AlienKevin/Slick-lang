@@ -216,8 +216,12 @@ export class Parser {
 
     endBlock(message: string, condition = true) {
         if (condition) {
-            this.consume(NEWLINE, message);
-            this.dedent();
+            let hadEnd = false;
+            hadEnd = this.match(NEWLINE) || hadEnd;
+            hadEnd = this.match(DEDENT) || hadEnd;
+            if (!hadEnd) {
+                throw this.error(this.peek(), message);
+            }
         }
     }
 
