@@ -83,6 +83,7 @@ export class Parser {
     public current: number;
     private env: Environment;
     private groupMembers = 0;
+    private endKeywordNames: String[] = [];
     public types: {[alias: string]: Type} = (function(o) {
         o["Text"] = PrimitiveType.Text;
         o["Num"] = PrimitiveType.Num;
@@ -172,6 +173,20 @@ export class Parser {
         if (this.peek().type === IDENTIFIER && keywords.get(text) !== undefined) {
             this.peek().type = keywords.get(text);
         }
+    }
+
+    getExprKeywordsAware(func: () => Expr, keywords: string[]) {
+        keywords.forEach((keyword) =>
+            this.endKeywordNames.push(keyword)
+        );
+        const expr = func.bind(this)();
+        keywords.forEach((keyword) =>
+            this.endKeywordNames.splice(
+                this.endKeywordNames.indexOf(keyword),
+                1
+            )
+        );
+        return expr;
     }
 
     indent(message?: string) {
@@ -595,7 +610,7 @@ export class Parser {
     }
 
     ifHelper(isMultiline = false) {
-        const condition = this.or();
+        const condition = this.getExprKeywordsAware(this.or, ["then"]);
         this.prelude();
         this.consume(THEN, `Expected 'then' after if condition!`);
         const beginMessage = `Expected the body of this branch on its own line!`;
@@ -605,7 +620,7 @@ export class Parser {
             isMultiline = true;
             this.indent();
         }
-        const thenBranch = this.or();
+        const thenBranch = this.getExprKeywordsAware(this.or, ["elif", "else"]);
         this.endBlock(endMessage, isMultiline);
         this.prelude();
         if (this.match(ELIF)) {
@@ -741,6 +756,7 @@ export class Parser {
         }
         return (
             this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN, F)
+            && !this.endKeywordNames.includes(this.peek().lexeme)
         );
     }
 
@@ -885,11 +901,15 @@ export class Parser {
             this.groupMembers = enclosingGroupMembers;
             return new Grouping(first, expr);
         }
-        if (this.match(IDENTIFIER)) {
-            const name = this.previous();
+        if (this.peek().type === IDENTIFIER) {
+            const name = this.peek();
             if (!this.env.lookup(name)) {
+                if (this.endKeywordNames.includes(name.lexeme)) {
+                    throw this.error(this.peek(), `Expression expected before '${name}' keyword!`);
+                }
                 throw this.error(name, `Variable '${name.lexeme}' is not declared!`);
             }
+            this.advance();
             return new Variable(name);
         }
         throw this.error(this.peek(), "Expression expected!");
