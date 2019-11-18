@@ -253,7 +253,7 @@ export class Scanner {
             }
             this.advance();
             if (this.previous() === '\n') {
-                this.incrementLineCount();
+                this.error("Text literal can only span a single line!");
             }
         }
 
