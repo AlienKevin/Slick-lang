@@ -86,6 +86,7 @@ export class Parser {
     private env: Environment;
     private groupMembers = 0;
     private endKeywordNames: String[] = [];
+    private canBeFunctionCall = true;
     public types: {[alias: string]: Type} = (function(o) {
         o["Text"] = PrimitiveType.Text;
         o["Num"] = PrimitiveType.Num;
@@ -362,6 +363,7 @@ export class Parser {
                 locals = this.letInExpr(params.map((param) => param.lexeme));
                 const expr = this.expression();
                 this.endBlock("Expected dedentation to end the body of function!");
+                this.canBeFunctionCall = false;
                 return expr;
             })()
             : (() => {
@@ -744,12 +746,17 @@ export class Parser {
     }
 
     maybeFunctionCall(expr: Expr) {
-        return (
-            expr instanceof Variable
-            || expr instanceof Get
-            || (expr instanceof Function && expr.body instanceof Expr)
-            || expr instanceof Grouping
+        const bool = (
+            this.canBeFunctionCall
+            && (
+                expr instanceof Variable
+                || expr instanceof Get
+                || (expr instanceof Function && expr.body instanceof Expr)
+                || expr instanceof Grouping
+            )
         );
+        this.canBeFunctionCall = true;
+        return bool;
     }
 
     checkLiteral() {
