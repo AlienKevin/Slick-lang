@@ -362,14 +362,15 @@ export class CodeGenerator implements Visitor {
     funcExpr(expr: Function) {
         this.indent();
         const padding = this.begin();
-        return "$SLK.curry(function (" + expr.params.map((param) => {
+        let str = "$SLK.curry(function (" + expr.params.map((param) => {
             return CodeGenerator.mangle(param.lexeme);
         }).join(", ") + ") "
         + "{"
         + this.localDeclaration(expr, padding)
         + padding + "return " + this.expression(expr.body)
-        + "}"
-        + ")";
+        this.outdent();
+        str += this.begin() + "})";
+        return str;
     }
 
     visitVariableExpr(expr: Variable) {
