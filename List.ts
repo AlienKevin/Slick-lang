@@ -61,6 +61,9 @@ const adjust = R.curry(function<T>(index: Decimal, fn: (a: T) => T, list: readon
 const length = function<T>(list: readonly T[]) {
     return new Decimal(list.length);
 };
+const range = R.curry(function(from: Decimal, to: Decimal) {
+    return R.range(from.toNumber(), to.toNumber() + 1).map((num) => new Decimal(num));
+});
 
 export default {
     map,
@@ -89,5 +92,6 @@ export default {
     dropLast,
     concat,
     adjust,
-    length
+    length,
+    range
 };

@@ -1,6 +1,6 @@
 {
   "name": "slick-lang",
-  "version": "4.3.2",
+  "version": "4.4.0",
   "description": "Uncluttered programming",
   "main": "dist/Runner.js",
   "types": "dist/Runner.d.ts",
