@@ -558,7 +558,7 @@ export class Parser {
                 let subtype;
                 let parameters = [];
                 let isRecord;
-                if (this.match(IDENTIFIER)) {
+                if (this.match(IDENTIFIER, UNDERSCORE)) {
                     subtype = this.previous();
                     if (cases
                         .filter((individualCase) =>

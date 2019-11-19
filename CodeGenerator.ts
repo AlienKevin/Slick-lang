@@ -231,7 +231,7 @@ export class CodeGenerator implements Visitor {
                     if (currentCase.subtype instanceof Literal) {
                         caseStr +=
                             "if (" + "$SLK.eq(" + "$expr, " + this.expression(currentCase.subtype) + ")) {";
-                    } else if (currentCase.subtype.lexeme !== "else") {
+                    } else if (currentCase.subtype.lexeme !== "_") {
                         caseStr +=
                             "if ($expr.name === \""  + currentCase.subtype + "\") {";
                     } else {

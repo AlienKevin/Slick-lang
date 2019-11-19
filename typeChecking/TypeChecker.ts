@@ -278,8 +278,8 @@ export class Checker implements Visitor {
         caseExpr.cases.forEach(({subtype, parameters, result}, index) => {
             if (subtype instanceof Token) {
                 if (supertype instanceof CustomType) {
-                    if (subtype.lexeme === "else") {
-                        throw this.error(subtype, `Cannot use 'else' in case expression with custom types.\nMust handle all subtypes explicitly!`)
+                    if (subtype.lexeme === "_") {
+                        throw this.error(subtype, `Cannot use placeholder '_' in case expression with custom types.\nMust handle all subtypes explicitly!`)
                     }
                     const subtypes = this.env.getSubtypes(supertype.name);
                     if (subtypes.hasOwnProperty(subtype.lexeme)) {
@@ -316,10 +316,10 @@ export class Checker implements Visitor {
                         throw this.error(subtype, `Subtype ${subtype} does not exist in ${supertype}!`);
                     }
                 } else {
-                    if (subtype.lexeme === "else") {
+                    if (subtype.lexeme === "_") {
                         // 'else' is not the last case condition
                         if (index < caseExpr.cases.length - 1) {
-                            throw this.error(subtype, `'else' must be the last case condition of non-custom types!`);
+                            throw this.error(subtype, `Placeholder '_' must be the last case condition of non-custom types!`);
                         }
                     } else {
                         throw this.error(subtype, `Expected case condition to be a ${supertype}, not a custom type ${subtype}!`);
@@ -328,7 +328,7 @@ export class Checker implements Visitor {
             } else {
                 // last case condition reached
                 if (index === caseExpr.cases.length - 1) {
-                    throw this.error(subtype, `'else' must be the last case condition of non-custom types!`);
+                    throw this.error(subtype, `Placeholder '_' must be the last case condition of non-custom types!`);
                 }
                 const sub = this.expression(subtype);
                 const isSubtype = this.sameTypes(sub, supertype, {isFirstSubtype: true, looseCustomType: false});
