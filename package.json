@@ -1,12 +1,13 @@
 {
   "name": "slick-lang",
-  "version": "4.3.1",
+  "version": "4.3.2",
   "description": "Uncluttered programming",
   "main": "dist/Runner.js",
   "types": "dist/Runner.d.ts",
   "scripts": {
     "s": "node dist/tests/simple.js",
-    "t": "node dist/tests/test.js"
+    "t": "node dist/tests/test.js",
+    "release": "release-it"
   },
   "dependencies": {
     "decimal.js": "^10.2.0",
@@ -25,6 +26,7 @@
     "ascii-table": "0.0.9",
     "colors": "^1.3.3",
     "diff": "^4.0.1",
+    "release-it": "^12.4.3",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.3"
   }
