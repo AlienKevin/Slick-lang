@@ -424,6 +424,12 @@ export class Parser {
             }
             if (!this.check(F)) {
                 this.beginBlock('All expressions except functions must be on its own line!');
+                if (this.check(F)) {
+                    throw this.error(
+                        this.peek(),
+                        "Function declaration must starts at the same line as ':'.\nAll other expressions should be on a separate line!"
+                    )
+                }
             }
             const enclosing = this.env;
             this.env = this.newEnv(enclosing);
