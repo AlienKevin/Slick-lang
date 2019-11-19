@@ -86,7 +86,6 @@ export class Parser {
     private env: Environment;
     private groupMembers = 0;
     private endKeywordNames: String[] = [];
-    private inVarDeclaration = false;
     public types: {[alias: string]: Type} = (function(o) {
         o["Text"] = PrimitiveType.Text;
         o["Num"] = PrimitiveType.Num;
@@ -362,9 +361,7 @@ export class Parser {
                 this.beginBlock("Expected the body of function to be on it's own line!");
                 locals = this.letInExpr(params.map((param) => param.lexeme));
                 const expr = this.expression();
-                if (!this.inVarDeclaration) {
-                    this.endBlock("Expected dedentation to end the body of function!");
-                }
+                this.endBlock("Expected dedentation to end the body of function!");
                 return expr;
             })()
             : (() => {
@@ -421,11 +418,11 @@ export class Parser {
         }
         const operator = this.consume([EQUAL, COLON], `Variable '${name}' must be initialized when declared!`);
         if (operator.type === COLON) {
-            this.inVarDeclaration = true;
             const mutable = false;
             if (nameToken.type !== UNDERSCORE) {
                 this.env.declare(nameToken, mutable);
             }
+            const needEndStmt = !this.check(F);
             if (!this.check(F)) {
                 this.beginBlock('All expressions except functions must be on its own line!');
                 if (this.check(F)) {
@@ -440,8 +437,9 @@ export class Parser {
             const locals = this.letInExpr([name]);
             const initializer: Expr = this.expression();
             this.env = enclosing;
-            this.endStmt("value", {dedent: true});
-            this.inVarDeclaration = false;
+            if (needEndStmt) {
+                this.endStmt("value", {dedent: true});
+            }
             return new VarDeclaration(nameToken, locals, initializer, declaredType);
         } else if (operator.type === EQUAL) {
             const type: Type = this.typeDeclaration();
