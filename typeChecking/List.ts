@@ -1,5 +1,6 @@
 const declaration  = 
 `map        (a → b) → List a → List b
+mapIndexed  (a → Num → b) → List a → List b
 filter      (a → Bool) → List a → List a
 reject      (a → Bool) → List a → List a
 find        (a → Bool) → List a → Maybe a

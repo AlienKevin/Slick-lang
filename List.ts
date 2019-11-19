@@ -3,6 +3,13 @@ import Decimal from "decimal.js";
 import { number, maybe } from "./utils";
 
 const map = R.map;
+const mapIndexed = R.curry(function<T, U>(f: (a: T, index: Decimal) => U, list: readonly T[]) {
+    let arr = [];
+    for (let i = 0; i < list.length; i++) {
+        arr.push(f(list[i], new Decimal(i)));
+    }
+    return arr;
+});
 const filter = R.filter;
 const reject = R.reject;
 const find = R.curry(function<T>(f: (a: T) => boolean, list: readonly T[]) {
@@ -57,6 +64,7 @@ const length = function<T>(list: readonly T[]) {
 
 export default {
     map,
+    mapIndexed,
     filter,
     reject,
     find,
