@@ -84,7 +84,7 @@ const functinos = [
 export class Parser {
     public current: number;
     private env: Environment;
-    private groupMembers = 0;
+    private argList = [0];
     private endKeywordNames: String[] = [];
     public types: {[alias: string]: Type} = (function(o) {
         o["Text"] = PrimitiveType.Text;
@@ -211,6 +211,7 @@ export class Parser {
         if (condition) {
             this.consume(NEWLINE, message);
             this.indent();
+            this.beginArgList();
         }
     }
 
@@ -222,7 +223,28 @@ export class Parser {
             if (!hadEnd) {
                 throw this.error(this.peek(), message);
             }
+            this.endArgList();
         }
+    }
+
+    peekArg() {
+        return this.argList[this.argList.length - 1];
+    }
+
+    clearArg() {
+        this.argList[this.argList.length - 1] = 0;
+    }
+
+    addArg() {
+        this.argList[this.argList.length - 1] += 1;
+    }
+
+    beginArgList() {
+        this.argList.push(0);
+    }
+
+    endArgList() {
+        this.argList.pop();
     }
 
     declaration() {
@@ -401,7 +423,8 @@ export class Parser {
                     numberOfUnderscores ++;
                 }
                 locals[name] = declaration;
-            } while (!this.match(DEDENT));
+            } while (!this.check(DEDENT));
+            this.endBlock("Expected dedentation before 'in' to end the let...in block!");
             this.prelude();
             this.consume(IN, `Expected 'in' keyword at the end of let expression!`);
             this.consume(NEWLINE, `Expected linebreak after 'in' keyword!`);
@@ -439,6 +462,7 @@ export class Parser {
             this.env = enclosing;
             if (needEndStmt) {
                 this.endStmt("value", {dedent: true});
+                this.endArgList();
             }
             return new VarDeclaration(nameToken, locals, initializer, declaredType);
         } else if (operator.type === EQUAL) {
@@ -639,6 +663,7 @@ export class Parser {
         if (this.match(NEWLINE)) {
             isMultiline = true;
             this.indent();
+            this.beginArgList();
         }
         const thenBranch = this.getExprKeywordsAware(this.expression, ["elif", "else"]);
         this.endBlock(endMessage, isMultiline);
@@ -724,8 +749,8 @@ export class Parser {
     //       → "[" arguments? "]"
     call(required = false) {
         let expr: Expr = this.funcExpr();
-        this.groupMembers ++;
-        if (this.groupMembers === 1) {
+        this.addArg();
+        if (this.peekArg() === 1) {
             // maybe start of a function call
             if (this.maybeFunctionCall(expr)) {
                 const funcName: Token = this.previous();
@@ -739,7 +764,7 @@ export class Parser {
                 }
             }
         }
-        this.groupMembers = 0;
+        this.clearArg();
         return expr;
     }
 
@@ -782,10 +807,10 @@ export class Parser {
         //             # variable 'foo' to consume 'b' as its argument
         //      b: 'text'
         // }
-        if (this.groupMembers === 1 && this.check(SOFT_NEWLINE)) {
+        this.match(NEWLINE);
+        if (this.peekArg() === 1 && this.check(SOFT_NEWLINE)) {
             return false;
         }
-        this.match(NEWLINE);
         return (
             this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN, F)
             && !this.endKeywordNames.includes(this.peek().lexeme)
@@ -796,9 +821,9 @@ export class Parser {
     getArgumentList() {
         let list: Expr[] = [];
         while (this.checkLiteral()) {
-            list.push(this.funcExpr());
+            list.push(this.expression());
         }
-        this.groupMembers = 0;
+        this.clearArg();
         return list;
     }
 
@@ -855,8 +880,7 @@ export class Parser {
     basicPrimary() {
         // record literal
         if (this.match(LEFT_BRACE)) {
-            const enclosingGroupMembers = this.groupMembers;
-            this.groupMembers = 0;
+            this.beginArgList();
             const first = this.previous();
             let keyNames: string[] = [];
             let keys: Token[] = [];
@@ -898,7 +922,7 @@ export class Parser {
                 && this.peek().type !== RIGHT_BRACE);
             }
             this.consume(RIGHT_BRACE, `Expect right '}' after arguments!`);
-            this.groupMembers = enclosingGroupMembers;
+            this.endArgList();
             return new RecordLiteral(
                 first,
                 keyNames.reduce((record, key, index) => 
@@ -912,12 +936,11 @@ export class Parser {
         }
         // list literal
         if (this.match(LEFT_BRACKET)) {
-            const enclosingGroupMembers = this.groupMembers;
-            this.groupMembers = 0;
+            this.beginArgList();
             const first = this.previous();
             const list = this.getList(TokenType.RIGHT_BRACKET, COMMA);
             this.consume([TokenType.RIGHT_BRACKET], `Expect ']' after arguments!`);
-            this.groupMembers = enclosingGroupMembers;
+            this.endArgList();
             return new ListLiteral(first, list);
         }
         const primitive = this.primitiveLiteral();
@@ -926,11 +949,10 @@ export class Parser {
         }
         if (this.match(LEFT_PAREN)) {
             const first = this.previous();
-            const enclosingGroupMembers = this.groupMembers;
-            this.groupMembers = 0;
+            this.beginArgList();
             const expr = this.expression();
             this.consume(RIGHT_PAREN, "Expect ')' after expression!");
-            this.groupMembers = enclosingGroupMembers;
+            this.endArgList();
             return new Grouping(first, expr);
         }
         if (this.peek().type === IDENTIFIER) {
