@@ -196,16 +196,22 @@ export class CodeGenerator implements Visitor {
         }
         this.indent();
         const padding = this.begin();
+        const wrapToString = this.isLastStmt && this.isTestCode;
         let str = (
-                this.isLastStmt && this.isTestCode
-                ? ""
+                wrapToString
+                ? "$SLK.toString("
                 : "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
             )
             + "(function () {"
             + this.localDeclaration(stmt, padding)
             + padding + "return " + this.expression(stmt.initializer) + ";"
         this.outdent();
-        str += this.begin() + "})();";
+        str += this.begin() + "})()"
+        str += (
+            wrapToString
+            ? ");"
+            : ";"
+        );
         return str;
     }
 
