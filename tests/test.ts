@@ -39,7 +39,7 @@ a :
             'else'
 `,
 
-"else"
+"'else'"
 ],
 [
 `
@@ -51,7 +51,7 @@ foo :
             'success'
 `,
 
-"success"
+"'success'"
 ],
 // function expression
 [
@@ -154,6 +154,53 @@ a :
 
 "9"
 ],
+[
+`
+foo :
+    List.map
+    ƒ a
+        a
+    (List.range -1 1)
+`,
+
+"[-1, 0, 1]"
+],
+// complex hybrid test
+[
+`
+getNeighborSum = Num → Num → List List Num → List List Num
+getNeighborSum : ƒ r c grid
+    List.map
+    ƒ dr
+        List.map
+        ƒ dc
+            let
+                value :
+                    List.nth
+                    (c + dc)
+                    case List.nth (r + dr) grid of
+                        Nothing →
+                            []
+                        Just list →
+                            list
+            in
+            if dc = 0 ⋏ dr = 0 then
+                0
+            else
+                case value of
+                    Nothing →
+                        0
+                    Just n →
+                        n
+        (List.range -1 1)
+    (List.range -1 1)
+
+end :
+    'end'
+`,
+
+"'end'"
+]
 ]);
 import { test } from "./Tester";
 import { Runner } from "../Runner";
