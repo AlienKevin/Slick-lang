@@ -669,14 +669,6 @@ export class Checker implements Visitor {
         }
     }
 
-    visitIfStmt(stmt: If) {
-        this.boolean(this.expression(stmt.condition), stmt.condition);
-        this.statement(stmt.thenBranch);
-        if (stmt.elseBranch !== undefined) {
-            this.statement(stmt.elseBranch);
-        }
-    }
-
     visitCustomTypeDeclarationStmt(stmt: CustomTypeDeclaration) {
         const name = stmt.name.lexeme;
         const customType = new CustomType(name, stmt.typeParameters);
