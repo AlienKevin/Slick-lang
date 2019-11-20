@@ -71,10 +71,18 @@ class Runner {
         }
 
         // generate code
-        const code = new CodeGenerator(this.runtimePath).generateCode(statements, options.mode !== TEST);
+        const code = new CodeGenerator({
+            runtimePath: this.runtimePath,
+            isTestCode: this.mode === TEST
+        }).generateCode(statements, true);
         if (options.mode === RUN) {
             // fs.writeFileSync("./tests/dist.js", code);
             eval(code);
+        } else if (options.mode === TEST) {
+            const oldLog = console.log;
+            console.log = (ignore) => {};
+            this.output(eval(code));
+            console.log = oldLog;
         } else {
             this.output(code);
         }

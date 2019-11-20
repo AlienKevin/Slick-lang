@@ -73,6 +73,8 @@ export class CodeGenerator implements Visitor {
     private frontMatter: string[];
     private indentation: number = 0;
     private uniqueNumbers: {[name: string]: true} = {};
+    private isLastStmt = false;
+    private isTestCode : boolean;
     private operatorTransform = $SLK.stone({
         "AND": (expr: Binary) => {
             return (
@@ -101,8 +103,9 @@ export class CodeGenerator implements Visitor {
         "SLASH": "$SLK.div",
         "MODULO": "$SLK.mod",
     });
-    constructor(runtimePath = "./Runtime") {
+    constructor({runtimePath = "./Runtime", isTestCode = false}: {runtimePath?: string, isTestCode: boolean} ) {
         this.frontMatter = [`const $SLK = require("${runtimePath}").default;\n`];
+        this.isTestCode = isTestCode;
     }
 
     public generateCode(stmts: Stmt[], generateFrontMatters = true) {
@@ -167,7 +170,8 @@ export class CodeGenerator implements Visitor {
 
     public statements(stmts: Stmt[]) {
         const padding = this.begin();
-        return stmts.map((stmt) => {
+        return stmts.map((stmt, index) => {
+            this.isLastStmt = index === stmts.length - 1;
             return padding + this.statement(stmt);
         }).join("");
     }
@@ -192,8 +196,11 @@ export class CodeGenerator implements Visitor {
         }
         this.indent();
         const padding = this.begin();
-        let str =
-            "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
+        let str = (
+                this.isLastStmt && this.isTestCode
+                ? ""
+                : "var " + CodeGenerator.mangle(stmt.name.lexeme) + " = "
+            )
             + "(function () {"
             + this.localDeclaration(stmt, padding)
             + padding + "return " + this.expression(stmt.initializer) + ";"
