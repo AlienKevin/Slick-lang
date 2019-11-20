@@ -781,6 +781,7 @@ export class Parser {
         if (this.groupMembers === 1 && this.check(SOFT_NEWLINE)) {
             return false;
         }
+        this.match(NEWLINE);
         return (
             this.check(...literals, LEFT_BRACE, LEFT_BRACKET, LEFT_PAREN, F)
             && !this.endKeywordNames.includes(this.peek().lexeme)

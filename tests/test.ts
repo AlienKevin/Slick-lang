@@ -89,7 +89,52 @@ _ :
 `,
 
 "12"
-]
+],
+// function call
+[
+`
+foo : ƒ a b
+    a + b
+a :
+    foo
+    2
+    3
+`,
+
+"5"
+],
+[
+`
+foo : ƒ a b
+    a + b
+bar : ƒ a b
+    a * b
+a :
+    foo
+    (bar 2 3)
+    3
+`,
+
+"9"
+],
+[
+`
+foo : ƒ a b
+    a + b
+bar : ƒ a b
+    a * b
+a :
+    foo
+    (
+        bar
+        2
+        3
+    )
+    3
+`,
+
+"9"
+],
 ]);
 import { test } from "./Tester";
 import { Runner } from "../Runner";
