@@ -18,7 +18,12 @@ function print(any) {
 
 function toString(any, padding = 4) {
     if (isNumber(any)) {
-        return any.toDecimalPlaces(5).toString();
+        const rounded = any.toDecimalPlaces(5);
+        if (rounded.isZero()) {
+            return any.toString();
+        } else {
+            return rounded.toString();
+        }
     }
     if (isBoolean(any)) {
         return any ? "True" : "False";
