@@ -1028,6 +1028,9 @@ export class Parser {
     }
 
     private peek() {
+        if (this.tokens[this.current].type === SOFT_NEWLINE) {
+            this.advance(); // skip over soft newline
+        }
         return this.tokens[this.current];
     }
 
