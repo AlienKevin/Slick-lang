@@ -1,383 +1,97 @@
 const source = new Map([
+// text functions
 [
-`call print 3e-10`,
+`a :
+    Text.length '⭐🐮🎃🎡👩‍💻🎌'
+`,
 
-`$SLK.print($SLK3e_10);`
+"6"
 ],
+// case expression
 [
-`var mySimpleNameOfAVariable: 'a string 📆🤞🌈'`,
+`
+a :
+    case 'something else' of
+        'a' →
+            'a'
+        'b' →
+            'b'
+        _ →
+            'else'
+`,
 
-`var my_simple_name_of_a_variable = "a string 📆🤞🌈";`
-],
-[
-`var exit: f finalValue
-    var elementNr: 0
-    return finalValue`,
-    
-`var exit = $SLK.stone(function (final_value) {
-    var element_nr = $SLK0;
-    return final_value;
-});`
-],
-[
-`var elementNr: 10
-var callbackFunction: f reduction element elementNr exit
-    # function details omitted
-    return null
-while elementNr ≥ 0
-    let elementNr: elementNr - 1
-    # fake some variables
-    var reduction: null
-    var array: null
-    var exit: null
-    call (
-        callbackFunction
-        reduction
-        array
-        elementNr
-        exit
-    )`,
-
-`var element_nr = $SLK10;
-var callback_function = $SLK.stone(function (reduction, element, element_nr, exit) {
-    return undefined;
-});
-while ($SLK.ge(element_nr, $SLK0)){
-    element_nr = $SLK.sub(element_nr, $SLK1);
-    var reduction = undefined;
-    var array = undefined;
-    var exit = undefined;
-    callback_function(reduction, array, element_nr, exit);
-}`
-],
-[
-`var myHero: 'butterfly'
-if myHero = 'monster'
-    call print 'blood curdling scream'
-elif myHero = 'butterfly'
-    call print 'do not make a sound'
-else
-    call print 'sing like a rainbow'`,
-
-`var my_hero = "butterfly";
-if ($SLK.eq(my_hero, "monster")){
-    $SLK.print("blood curdling scream");
-} else if ($SLK.eq(my_hero, "butterfly")){
-    $SLK.print("do not make a sound");
-} else {
-    $SLK.print("sing like a rainbow");
-}`
-],
-// records
-[
-`var obj: {
-    three: 3.230
-    hello: {
-        something: true
-    }
-}`,
-
-`var obj = (function (o) {
-    o["three"] = $SLK3_23;
-    o["hello"] = (function (o) {
-        o["something"] = true;
-        return o;
-    }(Object.create(null)));
-    return o;
-}(Object.create(null)));`
-],
-[
-
-`var a: {one: 32}`,
-
-`var a = (function (o) {
-    o["one"] = $SLK32;
-    return o;
-}(Object.create(null)));`
-],
-[
-`var wala : {
-    someThing: true
-}
-var three: {
-    a: 0.1
-    b: 'lala'
-    aLongVarName: wala
-}`,
-
-`var wala = (function (o) {
-    o["someThing"] = true;
-    return o;
-}(Object.create(null)));
-var three = (function (o) {
-    o["a"] = $SLK0_1;
-    o["b"] = "lala";
-    o["aLongVarName"] = wala;
-    return o;
-}(Object.create(null)));`
-],
-[
-`var three: {
-    a: 0.1
-    b: 'lala'
-}
-call print three.a`,
-
-`var three = (function (o) {
-    o["a"] = $SLK0_1;
-    o["b"] = "lala";
-    return o;
-}(Object.create(null)));
-$SLK.print($SLK.get(three, "a"));`
-],
-[
-`var record1: {}`,
-
-`var record1 = Object.create(null);`
-],
-[
-`var a: [1, 2, '3']`,
-
-`var a = [$SLK1, $SLK2, "3"];`
-],
-[
-`var a: []`,
-
-`var a = [];`
-],
-[
-`var a: [
-    'we'
-    3.0
-    true
-    false
-]`,
-
-`var a = ["we", $SLK3, true, false];`
-],
-[
-`var a: [
-    'we',
-    3.0,
-    true,
-    false
-]`,
-
-`var a = ["we", $SLK3, true, false];`
-],
-[
-`#comment1
-#comment2`,
-
-``
-],
-[
-`var a: 3 #comment1
-#comment2
-call print (a)`,
-
-`var a = $SLK3;
-$SLK.print((a));`
+"else"
 ],
 [
 `
-
-# comment
-
-# comment 1
-# comment 2
+foo :
+    case if False then 'a' else 'b' of
+        'a' →
+            'fail'
+        _ →
+            'success'
 `,
 
-``
+"success"
 ],
-// multi-line expression
+// function expression
 [
-`var a: (
-    1
-    +
-    2
-)`,
+`
+foo : ƒ a
+    let
+        b :
+            3
+    in
+    if a % 2 = 0 then
+        a / 2
+    else
+        a * 3 + 1
 
-`var a = ($SLK.add($SLK1, $SLK2));`
-],
-[
-`var a: (
-    false
-        ? 3
-        ! (
-            3 ≠ 4
-            ? '3 ≠ 4'
-            ! '3 = 4'
-        )
-)`,
+load = Text
+load :
+    'abc'
 
-`var a = (
-    false
-    ? $SLK3
-    : (
-        $SLK.ne($SLK3, $SLK4)
-        ? "3 ≠ 4"
-        : "3 = 4"
-    )
-);`
-],
-// logical connectives
-[
-`var a: true ⋎ false`,
+_ :
+    print (foo 10)
+`,
 
-`var a = (true || false);`
+"5"
 ],
 [
-`var a: true ⋏ false`,
+`
+foo :
+    let
+        c :
+            3
+    in
+    ƒ a
+        let
+            c :
+                a * 2
+        in
+        c
 
-`var a = (true && false);`
+_ :
+    print (foo 3)
+`,
+
+"6"
 ],
 [
-`var a: (
-    true ⋏ false ⋎ true
-    ⋏ false
-)`,
+`
+foo = Num → Num → Num
+foo : ƒ a
+    ƒ b
+        a * b
 
-`var a = ((true && false) || (true && false));`
-],
-[
-`var firstBooleanVariable: true
-var secondBooleanVariable: false
-if firstBooleanVariable ⋎ secondBooleanVariable
-    call print 'Either the first or the second is true'`,
+_ :
+    print (foo 3 4)
+`,
 
-`var first_boolean_variable = true;
-var second_boolean_variable = false;
-if (($SLK.assert_boolean(first_boolean_variable) || $SLK.assert_boolean(second_boolean_variable))){
-    $SLK.print("Either the first or the second is true");
-}`
-],
-// using keyword as identifier
-[
-`var var: 3
-call print var`,
-
-`var $SLKvar = $SLK3;
-$SLK.print($SLKvar);`
-],
-// functions
-[
-`var foo: f a b
-    return a * b
-call print (foo 2 3)`,
-
-`var foo = $SLK.stone(function (a, b) {
-    return $SLK.mul(a, b);
-});
-$SLK.print((foo($SLK2, $SLK3)));`
-],
-[
-`var foo: f a b (
-    a * b
-)
-call print (foo 2 3)`,
-
-`var foo = $SLK.stone(function (a, b) {return ($SLK.mul(a, b))});
-$SLK.print((foo($SLK2, $SLK3)));`
-],
-// functinos
-[
-`var bool: f⋏ true false`,
-
-`var bool = $SLK.and(true, false);`
-],
-[
-`var bool: f⋎ false false`,
-
-`var bool = $SLK.or(false, false);`
-],
-[
-`var a: f+ 0.1 0.2`,
-
-`var a = $SLK.add($SLK0_1, $SLK0_2);`
-],
-[
-`var a: f- 0.1 0.2`,
-
-`var a = $SLK.sub($SLK0_1, $SLK0_2);`
-],
-[
-`var a: f* 0.1 0.2`,
-
-`var a = $SLK.mul($SLK0_1, $SLK0_2);`
-],
-[
-`var a: f/ 0.1 0.2`,
-
-`var a = $SLK.div($SLK0_1, $SLK0_2);`
-],
-[
-`var a: f% 0.1 0.2`,
-
-`var a = $SLK.mod($SLK0_1, $SLK0_2);`
-],
-[
-`var a: f= 'a' 'b'`,
-
-`var a = $SLK.eq("a", "b");`
-],
-[
-`var a: f≠ 'a' 'b'`,
-
-`var a = $SLK.ne("a", "b");`
-],
-[
-`var a: f< 'a' 'b'`,
-
-`var a = $SLK.lt("a", "b");`
-],
-[
-`var a: f≥ 'a' 'b'`,
-
-`var a = $SLK.ge("a", "b");`
-],
-[
-`var a: f> 'a' 'b'`,
-
-`var a = $SLK.gt("a", "b");`
-],
-[
-`var a: f& 'abcd' 0.3e-10`,
-
-`var a = $SLK.cat("abcd", $SLK3e_11);`
-],
-// logical not function
-[
-`var a: not true`,
-
-`var a = $SLK.not(true);`
-],
-// negation function
-[
-`var a: neg -3`,
-
-`var a = $SLK.neg($SLK_3);`
-],
-// minus operator
-[
-`var a: 3 - 0.2e-10`,
-
-`var a = $SLK.sub($SLK3, $SLK2e_11);`
-],
-// pipe function
-[
-`var a: (pipe (f⋏ false) (f⋎ true) not) true`,
-
-`var a = ($SLK.pipe(($SLK.and(false)), ($SLK.or(true)), $SLK.not))(true);`
-],
-// string concatenation
-[
-`call print ('abcd' & 'a' & 0.3e-10)`,
-
-`$SLK.print(($SLK.cat($SLK.cat("abcd", "a"), $SLK3e_11)));`
+"12"
 ]
 ]);
 import { test } from "./Tester";
 import { Runner } from "../Runner";
-const runner = new Runner();
+const runner = new Runner("./Runtime");
 test(source, runner);
