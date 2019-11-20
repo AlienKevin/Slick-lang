@@ -532,8 +532,8 @@ export class Checker implements Visitor {
                 this.env.define(arg.name, paramType);
             } else {
                 this.matchTypes(
-                    paramType,
                     argType,
+                    paramType,
                     `Argument type ${argType} does not match paramter type ${paramType}!`,
                     arg,
                     {
