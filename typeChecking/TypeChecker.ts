@@ -369,8 +369,12 @@ export class Checker implements Visitor {
         const elseBranch = this.expression(expr.elseBranch);
         this.matchTypes(
             thenBranch, elseBranch,
-            "Types in then and else branch do not match!",
-            expr
+            `Type ${thenBranch} of then branch does not match type ${elseBranch} of else branch!`,
+            expr,
+            {
+                isFirstSubtype: false,
+                looseCustomType: true
+            }
         );
         return thenBranch;
     }
