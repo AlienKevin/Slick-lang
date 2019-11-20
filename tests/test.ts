@@ -7,6 +7,25 @@ const source = new Map([
 
 "6"
 ],
+// list functions
+[
+`a :
+    List.sum [0, -2, 3, -0.4]`,
+
+"0.6"
+],
+[
+`a :
+    List.sum [0.1e-10]`,
+
+"1e-11"
+],
+[
+`a :
+    List.sum []`,
+
+"0"
+],
 // case expression
 [
 `

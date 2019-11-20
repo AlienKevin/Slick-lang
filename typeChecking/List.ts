@@ -26,6 +26,7 @@ dropLast   Num → List a → List a
 concat      List a → List a → List a
 adjust      Num → (a → a) → List a → List a
 length      List a → Num
-range       Num → Num → List Num`;
+range       Num → Num → List Num
+sum         List Num → Num`;
 
 export default declaration;

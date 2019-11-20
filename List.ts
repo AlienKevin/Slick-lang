@@ -64,6 +64,11 @@ const length = function<T>(list: readonly T[]) {
 const range = R.curry(function(from: Decimal, to: Decimal) {
     return R.range(from.toNumber(), to.toNumber() + 1).map((num) => new Decimal(num));
 });
+const sum = R.curry(function(list: Decimal[]) {
+    return list.reduce((sum, value) => {
+        return sum.add(value)
+    }, new Decimal(0));
+});
 
 export default {
     map,
@@ -93,5 +98,6 @@ export default {
     concat,
     adjust,
     length,
-    range
+    range,
+    sum
 };
