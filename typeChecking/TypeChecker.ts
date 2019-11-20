@@ -171,6 +171,9 @@ export class Checker implements Visitor {
     }
 
     public sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean, looseCustomType: boolean} = {isFirstSubtype: false, looseCustomType: false}): boolean {
+        if (opts.isFirstSubtype && b instanceof AnyType) {
+            return true;
+        }
         if (a === undefined || b === undefined) {
             return true;
         }
