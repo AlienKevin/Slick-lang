@@ -642,7 +642,7 @@ export class Parser {
             isMultiline = true;
             this.indent();
         }
-        const thenBranch = this.getExprKeywordsAware(this.or, ["elif", "else"]);
+        const thenBranch = this.getExprKeywordsAware(this.expression, ["elif", "else"]);
         this.endBlock(endMessage, isMultiline);
         this.prelude();
         if (this.match(ELIF)) {
@@ -651,7 +651,7 @@ export class Parser {
         // last else without if
         this.consume(ELSE, `Expected 'else' at the end of every if expression!`);
         this.beginBlock(beginMessage, isMultiline);
-        const expr = new If(condition, thenBranch, this.or());
+        const expr = new If(condition, thenBranch, this.expression());
         this.endBlock(endMessage, isMultiline);
         return expr;
     }
