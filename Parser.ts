@@ -1021,15 +1021,23 @@ export class Parser {
 
     private check(...tokenType: TokenType[]) {
         return tokenType.some((tokenType) => {
-            if (this.peek().type === SOFT_NEWLINE &&
+            // soft newline is just another type of newline
+            if (tokenType === NEWLINE && this.peekPlain().type === SOFT_NEWLINE) {
+                return true;
+            }
+            if (this.peekPlain().type === SOFT_NEWLINE &&
                 tokenType !== SOFT_NEWLINE &&
                 // skip over soft newline only if next token is what we want to find
                 // otherwise, soft newline is what we need for error report
                 this.peekNext().type === tokenType) {
                 this.advance(); // skip over soft newline
             }
-            return this.peek().type === tokenType;
+            return this.peekPlain().type === tokenType;
         });
+    }
+
+    private peekPlain() {
+        return this.tokens[this.current];
     }
 
     private peek() {
