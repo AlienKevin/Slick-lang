@@ -86,6 +86,7 @@ export class Parser {
     private env: Environment;
     private argList = [0];
     private endKeywordNames: String[] = [];
+    private declaredFunctionKeyword;
     public types: {[alias: string]: Type} = (function(o) {
         o["Text"] = PrimitiveType.Text;
         o["Num"] = PrimitiveType.Num;
@@ -383,7 +384,9 @@ export class Parser {
                 this.beginBlock("Expected the body of function to be on it's own line!");
                 locals = this.letInExpr(params.map((param) => param.lexeme));
                 const expr = this.expression();
-                this.endBlock("Expected dedentation to end the body of function!");
+                if (first !== this.declaredFunctionKeyword) {
+                    this.endBlock("Expected dedentation to end the body of function!");
+                }
                 return expr;
             })()
             : (() => {
@@ -445,8 +448,9 @@ export class Parser {
             if (nameToken.type !== UNDERSCORE) {
                 this.env.declare(nameToken, mutable);
             }
-            const needEndStmt = !this.check(F);
-            if (!this.check(F)) {
+            if (this.check(F)) {
+                this.declaredFunctionKeyword = this.peek();
+            } else {
                 this.beginBlock('All expressions except functions must be on its own line!');
                 if (this.check(F)) {
                     throw this.error(
@@ -460,10 +464,8 @@ export class Parser {
             const locals = this.letInExpr([name]);
             const initializer: Expr = this.expression();
             this.env = enclosing;
-            if (needEndStmt) {
-                this.endStmt("value", {dedent: true});
-                this.endArgList();
-            }
+            this.endStmt("value", {dedent: true});
+            this.endArgList();
             return new VarDeclaration(nameToken, locals, initializer, declaredType);
         } else if (operator.type === EQUAL) {
             const type: Type = this.typeDeclaration();
@@ -769,23 +771,12 @@ export class Parser {
     }
 
     maybeFunctionCall(expr: Expr) {
-        const bool = (
-            (
-                this.peekNext() !== undefined
-                ? (
-                    this.peekNext().type !== EQUAL
-                    && this.peekNext().type !== COLON
-                )
-                : true
-            )
-            && (
-                expr instanceof Variable
-                || expr instanceof Get
-                || (expr instanceof Function && expr.body instanceof Expr)
-                || expr instanceof Grouping
-            )
-        );
-        return bool;
+        return (
+            expr instanceof Variable
+            || expr instanceof Get
+            || (expr instanceof Function && expr.body instanceof Expr)
+            || expr instanceof Grouping
+        )
     }
 
     checkLiteral() {

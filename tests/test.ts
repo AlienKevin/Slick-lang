@@ -109,6 +109,19 @@ _ :
 
 "12"
 ],
+[
+`
+bar : ƒ a
+    a
+foo :
+    if bar 1 = 1 then
+        1
+    else
+        0
+`,
+
+"1"
+],
 // function call
 [
 `
