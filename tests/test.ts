@@ -1,11 +1,31 @@
 const source = new Map([
 // text functions
+// Text.length
 [
 `a :
     Text.length '⭐🐮🎃🎡👩‍💻🎌'
 `,
 
 "6"
+],
+// Text.join
+[
+`_ :
+    print (Text.join '' [])`,
+
+"''"
+],
+[
+`_ :
+    print (Text.join '' ['a'])`,
+
+"'a'"
+],
+[
+`_ :
+    print (Text.join '🏳‍🌈' ['a', 'b', 'c'])`,
+
+"'a🏳‍🌈b🏳‍🌈c'"
 ],
 // list functions
 [

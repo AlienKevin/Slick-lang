@@ -60,6 +60,7 @@ const char = function (code: Decimal) {
         return maybe(undefined);
     }
 }
+const join = R.join;
 
 export default {
     lower,
@@ -77,5 +78,6 @@ export default {
     slice,
     member,
     length,
-    char
+    char,
+    join
 }

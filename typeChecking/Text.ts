@@ -14,6 +14,7 @@ startsWith Text → Text → Bool
 slice       Num → Num → Text → Text
 member      Text → Text → Bool
 length      Text → Num
-char        Num → Maybe Text`;
+char        Num → Maybe Text
+join        Text → List Text → Text`;
 
 export default declaration;
