@@ -569,7 +569,9 @@ export class Parser {
             }
             this.advance();
             const keyword = this.previous();
+            this.beginArgList();
             let expr = this.getExprKeywordsAware(this.if, ["of"]);
+            this.endArgList();
             this.prelude();
             this.consume(OF, `Expected 'of' keyword after case condition!`);
             this.consume(NEWLINE, `Expected a linebreak before caes branches!`);
