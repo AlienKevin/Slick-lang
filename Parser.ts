@@ -768,7 +768,6 @@ export class Parser {
                 }
             }
         }
-        this.clearArg();
         return expr;
     }
 
