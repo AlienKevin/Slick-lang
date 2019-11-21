@@ -4,6 +4,7 @@ import { CError } from "./CompileError";
 import { Checker } from "./TypeChecker";
 import { Expr } from "../Expr";
 import { AnyType } from "./AnyType";
+import { CustomType } from "./CustomType";
 
 interface Value {
     mutable: boolean,
@@ -17,12 +18,13 @@ export class Env {
     // current function
     public functionParams: Token[];
     public functionName: string;
-    public customTypes : {[name: string] : Subtypes} = Object.create(null);
+    public customTypesWithSubtypes : {[name: string] : Subtypes} = Object.create(null);
+    private customTypes : {[name: string]: CustomType} = Object.create(null);
     constructor(readonly checker: Checker, readonly enclosing?: Env) {}
 
     getSubtypes(name: string) : Subtypes {
-        if (this.customTypes[name] !== undefined) {
-            return this.customTypes[name];
+        if (this.customTypesWithSubtypes[name] !== undefined) {
+            return this.customTypesWithSubtypes[name];
         }
         if (this.enclosing !== undefined) {
             return this.enclosing.getSubtypes(name);
@@ -30,8 +32,25 @@ export class Env {
         return undefined;
     }
 
-    declareCustomType(name: string, subtypes: Subtypes) {
-        this.customTypes[name] = subtypes;
+    getCustomType(subtypeName: string): CustomType {
+        const customType = Object.entries(this.customTypesWithSubtypes).find(([customTypeName, subtypes]) =>
+            Object.keys(subtypes).includes(subtypeName)
+        );
+        if (customType === undefined) {
+            return (
+                this.enclosing !== undefined
+                ? this.enclosing.getCustomType(subtypeName)
+                : undefined
+            );
+        } else {
+            const customTypeName = customType[0]
+            return this.customTypes[customTypeName];
+        }
+    }
+
+    declareCustomType(name: string, subtypes: Subtypes, customType: CustomType) {
+        this.customTypesWithSubtypes[name] = subtypes;
+        this.customTypes[name] = customType;
     }
 
     get(nameToken: Token): Type {
@@ -51,6 +70,18 @@ export class Env {
         if (this.enclosing !== undefined) {
             return this.enclosing.get(nameToken);
         }
+    }
+
+    substituteAnyType(anyType: AnyType, substituteType: CustomType) {
+        this.values = Object.entries(this.values).reduce((newValues, [name, value]) => {
+            return {
+                ...newValues,
+                [name]: {
+                    ...value,
+                    type: this.checker.substituteReturnType(value.type, {[anyType.name]: substituteType})
+                }
+            }
+        }, Object.create(null));
     }
 
     declare(nameToken: Token | string, type: Type, mutable: boolean) {

@@ -276,7 +276,7 @@ export class Checker implements Visitor {
     //     else →
     //          else result
     visitCaseExpr(caseExpr: Case) {
-        const supertype = this.expression(caseExpr.expr);
+        let supertype = this.expression(caseExpr.expr);
         let returnType;
         caseExpr.cases.forEach(({subtype, parameters, result}, index) => {
             if (subtype instanceof Token) {
@@ -324,19 +324,26 @@ export class Checker implements Visitor {
                         if (index < caseExpr.cases.length - 1) {
                             throw this.error(subtype, `Placeholder '_' must be the last case condition of non-custom types!`);
                         }
+                    } else if (supertype instanceof AnyType) {
+                        const customType = this.env.getCustomType(subtype.lexeme);
+                        if (customType === undefined) {
+                            throw this.error(subtype, `Subtype ${subtype} does not exist in ${supertype}!`);
+                        }
+                        this.env.substituteAnyType(supertype, customType);
+                        supertype = customType;
                     } else {
                         throw this.error(subtype, `Expected case condition to be a ${supertype}, not a custom type ${subtype}!`);
                     }
                 }
             } else {
-                // last case condition reached
-                if (index === caseExpr.cases.length - 1) {
-                    throw this.error(subtype, `Placeholder '_' must be the last case condition of non-custom types!`);
-                }
                 const sub = this.expression(subtype);
                 const isSubtype = this.sameTypes(sub, supertype, {isFirstSubtype: true, looseCustomType: false});
                 if (!isSubtype) {
                     throw this.error(subtype, `Expected case condition to be a ${supertype}, not a ${sub}!`);
+                }
+                // last case condition reached
+                if (index === caseExpr.cases.length - 1) {
+                    throw this.error(subtype, `Placeholder '_' must be the last case condition of non-custom types!`);
                 }
             }
 
@@ -672,7 +679,7 @@ export class Checker implements Visitor {
     visitCustomTypeDeclarationStmt(stmt: CustomTypeDeclaration) {
         const name = stmt.name.lexeme;
         const customType = new CustomType(name, stmt.typeParameters);
-        this.env.declareCustomType(name, stmt.subtypes);
+        this.env.declareCustomType(name, stmt.subtypes, customType);
         Object.entries(stmt.subtypes).forEach(([name, type]) => {
             if (type === undefined) {
                 this.env.declare(name, customType, false);

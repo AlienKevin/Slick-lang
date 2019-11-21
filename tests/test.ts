@@ -53,6 +53,81 @@ foo :
 
 "'success'"
 ],
+[
+`
+type Cell :
+    Live
+    Dead
+
+type Foo :
+    Foo
+    Bar
+
+id : ƒ a
+    a
+
+getCellValue = Text → Num
+getCellValue : ƒ cell
+    case id cell of
+        Live →
+            1
+        Foo →
+            0
+`,
+
+"[SyntaxError] Line 18 at 'Foo': Subtype Foo does not exist in Cell!"
+],
+[
+`
+type Cell :
+    Live
+    Dead
+
+type Foo :
+    Foo
+    Bar
+
+id : ƒ a
+    a
+
+getCellValue = Text → Num
+getCellValue : ƒ cell
+    case id cell of
+        Live →
+            1
+        Dead →
+            0
+`,
+
+"[SyntaxError] Line 14 at 'ƒ': Declared type Text → Num and actual type Cell → Num do not match!"
+],
+[
+`
+type Cell :
+    Live
+    Dead
+
+type Foo :
+    Foo
+    Bar
+
+id : ƒ a
+    a
+
+getCellValue = Cell → Num
+getCellValue : ƒ cell
+    case id cell of
+        Live →
+            1
+        Dead →
+            0
+
+_ :
+    getCellValue Live
+`,
+
+"1"
+],
 // function expression
 [
 `
@@ -224,7 +299,6 @@ end :
 `,
 
 "'end'"
-]
 ]
 ]);
 import { test } from "./Tester";
