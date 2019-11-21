@@ -660,7 +660,9 @@ export class Parser {
     }
 
     ifHelper(isMultiline = false) {
+        this.beginArgList();
         const condition = this.getExprKeywordsAware(this.or, ["then"]);
+        this.endArgList();
         this.prelude();
         this.consume(THEN, `Expected 'then' after if condition!`);
         const beginMessage = `Expected the body of this branch on its own line!`;
