@@ -11,19 +11,19 @@ const source = new Map([
 // Text.join
 [
 `_ :
-    print (Text.join '' [])`,
+    Text.join '' []`,
 
 "''"
 ],
 [
 `_ :
-    print (Text.join '' ['a'])`,
+    Text.join '' ['a']`,
 
 "'a'"
 ],
 [
 `_ :
-    print (Text.join '🏳‍🌈' ['a', 'b', 'c'])`,
+    Text.join '🏳‍🌈' ['a', 'b', 'c']`,
 
 "'a🏳‍🌈b🏳‍🌈c'"
 ],
@@ -166,7 +166,7 @@ load :
     'abc'
 
 _ :
-    print (foo 10)
+    foo 10
 `,
 
 "5"
@@ -186,7 +186,7 @@ foo :
         c
 
 _ :
-    print (foo 3)
+    foo 3
 `,
 
 "6"
@@ -199,7 +199,7 @@ foo : ƒ a
         a * b
 
 _ :
-    print (foo 3 4)
+    foo 3 4
 `,
 
 "12"

@@ -11,12 +11,13 @@ Decimal.set({
 });
 
 function print(any) {
-    const string = toString(any);
+    const string = toString(any, {quotedText : false});
     console.log(string);
     return string;
 }
 
-function toString(any, padding = 4) {
+function toString(any, opts: {padding? : number, quotedText : boolean} = {quotedText : true}) {
+    const {padding = 4, quotedText = true} = opts;
     if (isNumber(any)) {
         const rounded = any.toDecimalPlaces(5);
         if (rounded.isZero()) {
@@ -29,7 +30,11 @@ function toString(any, padding = 4) {
         return any ? "True" : "False";
     }
     if (isText(any)) {
-        return "'" + any + "'";
+        return (
+            quotedText
+            ? "'" + any + "'"
+            : any.toString()
+        );
     }
     if (isCustomType(any)) {
         return (
@@ -37,12 +42,12 @@ function toString(any, padding = 4) {
             + (
                 any.parameters === undefined
                 ? ""
-                : " " + toString(any.parameters, padding)
+                : " " + toString(any.parameters, {padding, quotedText})
             )
         );
     }
     if (isList(any)) {
-        return "[" + any.map(any => toString(any, padding)).join(", ") + "]";
+        return "[" + any.map(any => toString(any, {padding, quotedText})).join(", ") + "]";
     }
     if (typeof any === "object") {
         let linebreak = "\n";
@@ -50,7 +55,10 @@ function toString(any, padding = 4) {
         return (
             "{" + linebreak
             + Object.entries(any).map(([key, value]) => 
-                " ".repeat(padding) + toString(key, padding + indent) + ": " + toString(value, padding + indent)
+                " ".repeat(padding)
+                + toString(key, {padding: padding + indent, quotedText})
+                + ": "
+                + toString(value, {padding: padding + indent, quotedText})
             ).join(linebreak)
             + linebreak
             + " ".repeat(padding - indent) + "}"

@@ -191,12 +191,17 @@ export class CodeGenerator implements Visitor {
     }
 
     visitVarDeclarationStmt(stmt: VarDeclaration) {
+        const wrapToString = this.isLastStmt && this.isTestCode;
         if (stmt.name.type === TokenType.UNDERSCORE) {
-            return this.expression(stmt.initializer);
+            const expr = this.expression(stmt.initializer);
+            return (
+                wrapToString
+                ? "$SLK.toString(" + expr + ")"
+                : expr
+            );
         }
         this.indent();
         const padding = this.begin();
-        const wrapToString = this.isLastStmt && this.isTestCode;
         let str = (
                 wrapToString
                 ? "$SLK.toString("
