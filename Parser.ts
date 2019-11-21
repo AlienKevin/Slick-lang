@@ -391,7 +391,9 @@ export class Parser {
             })()
             : (() => {
                 this.consume(LEFT_PAREN, `Expected '(' before function body!`);
+                this.beginArgList();
                 const expr = this.expression();
+                this.endArgList();
                 this.consume(RIGHT_PAREN, `Expected ')' after function body!`);
                 return expr;
             })()

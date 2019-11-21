@@ -178,6 +178,17 @@ foo :
 
 "[-1, 0, 1]"
 ],
+[
+`
+row :
+    [1, 2, 3]
+
+row2 :
+    List.map ƒ cell (cell) row
+`,
+
+"[1, 2, 3]"
+],
 // complex hybrid test
 [
 `
@@ -213,6 +224,7 @@ end :
 `,
 
 "'end'"
+]
 ]
 ]);
 import { test } from "./Tester";
