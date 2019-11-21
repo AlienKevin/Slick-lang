@@ -9,7 +9,11 @@ export class CustomType {
             + (
                 this.typeParameters === undefined
                 ? ""
-                : " " + Object.values(this.typeParameters).join(" ")
+                : (
+                    Object.values(this.typeParameters).length > 0
+                    ? " " + Object.values(this.typeParameters).join(" ")
+                    : ""
+                )
             )
         );
     }
