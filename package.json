@@ -1,6 +1,6 @@
 {
   "name": "slick-lang",
-  "version": "4.7.1",
+  "version": "4.7.2",
   "description": "Uncluttered programming",
   "main": "dist/Runner.js",
   "types": "dist/Runner.d.ts",
@@ -29,5 +29,17 @@
     "release-it": "^12.4.3",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.3"
+  },
+  "release-it": {
+    "git": {
+      "commit": false,
+      "tag": true
+    },
+    "github": {
+      "release": false
+    },
+    "npm": {
+      "publish": true
+    }
   }
 }
