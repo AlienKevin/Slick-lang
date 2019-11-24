@@ -1,4 +1,32 @@
 const source = new Map([
+// Int type and Num type
+[
+`
+a = Int
+a :
+    -3 / 1
+`,
+
+`[SyntaxError] Line 4 at '-3': Declared type Int and actual type Num do not match!`
+],
+[
+`
+a = Int
+a :
+    -3 * 1.0
+`,
+
+`-3`
+],
+[
+`
+a = Int
+a :
+    -2.3e1 * 2.0
+`,
+
+`-46`
+],
 // text functions
 // Text.length
 [

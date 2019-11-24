@@ -90,6 +90,7 @@ export class Parser {
     public types: {[alias: string]: Type} = (function(o) {
         o["Text"] = PrimitiveType.Text;
         o["Num"] = PrimitiveType.Num;
+        o["Int"] = PrimitiveType.Int;
         o["Bool"] = PrimitiveType.Bool;
         o["List"] = ListType;
         return o;

@@ -8,7 +8,7 @@ import { TokenType } from "../TokenType";
 import { Token } from "../Token";
 import { Type } from "./Type";
 import { RecordType } from "./RecordType";
-import { isList, capitalize, isNumber, isBoolean, isText, nextChar } from "../utils";
+import { isList, capitalize, isNumber, isBoolean, isText, nextChar, isInteger } from "../utils";
 import { Env } from "./Environment";
 import { ListType } from "./ListType";
 import { FunctionType } from "./FunctionType";
@@ -20,6 +20,7 @@ import { CustomType } from "./CustomType";
 import { zip } from 'zip-array';
 
 const NUMBER = PrimitiveType.Num;
+const INTEGER = PrimitiveType.Int;
 const TEXT = PrimitiveType.Text;
 const BOOLEAN = PrimitiveType.Bool;
 
@@ -160,6 +161,9 @@ export class Checker implements Visitor {
             return BOOLEAN;
         }
         if (isNumber(expr)) {
+            if (isInteger(expr)) {
+                return INTEGER;
+            }
             return NUMBER;
         }
     }
@@ -212,33 +216,39 @@ export class Checker implements Visitor {
                 this.sameTypes(a.inputType, b.inputType, opts)
                 && this.sameTypes(a.outputType, b.outputType, opts)
             )
+        } else if (opts.isFirstSubtype && a === INTEGER && b === NUMBER) {
+            return true;
         } else if (a === b) {
             return true;
         }
         return false;
     }
 
-    number(valueType: any, operand: Expr, name?: string) {
-        return this.matchType(NUMBER, valueType, operand, name);
+    number(valueType: Type, operand: Expr, name?: string) {
+        return this.matchType(valueType, NUMBER, operand, name);
     }
 
-    boolean(valueType: any, operand: Expr, name?: string) {
-        return this.matchType(BOOLEAN, valueType, operand, name);
+    boolean(valueType: Type, operand: Expr, name?: string) {
+        return this.matchType(valueType, BOOLEAN, operand, name);
     }
 
-    text(valueType: any, operand: Expr, name?: string) {
-        return this.matchType(TEXT, valueType, operand, name);
+    text(valueType: Type, operand: Expr, name?: string) {
+        return this.matchType(valueType, TEXT, operand, name);
     }
 
-    matchType(target: Type, value: Type, operand: Expr, name = "operand") {
+    matchType(value: Type, target: Type, operand: Expr, name = "operand") {
         if (value instanceof AnyType && operand instanceof Variable) {
             this.env.define(operand.name, target);
         } else {
             this.matchTypes(
-                target,
                 value,
+                target,
                 `${capitalize(name)} must be a ${target}, not ${value}!`,
-                operand
+                operand,
+                {
+                    isFirstSubtype : true,
+                    looseCustomType : false
+                }
             );
         }
     }
@@ -248,6 +258,9 @@ export class Checker implements Visitor {
             this.env.define(leftOperand.name, rightType);
         } else if (rightType instanceof AnyType && rightOperand instanceof Variable) {
             this.env.define(rightOperand.name, leftType);
+        } else if ((leftType === INTEGER || leftType === NUMBER)
+            && (rightType === INTEGER || rightType === NUMBER)) {
+            return true;
         } else {
             this.matchTypes(
                 leftType,
@@ -407,6 +420,10 @@ export class Checker implements Visitor {
             case TokenType.MODULO:
                 this.number(leftType, expr.left);
                 this.number(rightType, expr.right);
+                if (expr.operator.type !== TokenType.SLASH
+                    && leftType === INTEGER && rightType === INTEGER) {
+                    return INTEGER;
+                }
                 return NUMBER;
             
             case TokenType.AMPERSAND:
