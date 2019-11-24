@@ -76,7 +76,7 @@ const keywords = new Map([
 ]);
 
 const functinos = [
-    QUESTION, AND, OR, EQUAL, NOT_EQUAL,
+    AND, OR, EQUAL, NOT_EQUAL,
     LESS, GREATER_EQUAL, GREATER, LESS_EQUAL,
     PLUS, MINUS, STAR, SLASH, MODULO, AMPERSAND
 ];
@@ -455,7 +455,7 @@ export class Parser {
                 this.declaredFunctionKeyword = this.peek();
             } else {
                 this.beginBlock('All expressions except functions must be on its own line!');
-                if (this.check(F)) {
+                if (this.check(F) && !functinos.includes(this.peekNext().type)) {
                     throw this.error(
                         this.peek(),
                         "Function declaration must starts at the same line as ':'.\nAll other expressions should be on a separate line!"
