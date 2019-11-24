@@ -638,15 +638,22 @@ export class Checker implements Visitor {
         return new AnyType(curr);
     }
 
-    visitFunctionExpr(expr: Function) {
+    visitFunctionExpr(expr: Function, declaredType?: FunctionType) {
         const enclosing = this.env;
         this.env = this.newEnv(enclosing);
         this.env.functionName = enclosing.functionName;
+        let declaredParamType: Type = declaredType;
         expr.params.forEach((param) => {
             if (param.lexeme === this.env.functionName) {
                 throw this.error(param, `Parameter '${param.lexeme}' cannot have the same name as the function!`);
             }
-            const paramType = this.generateAnyType();
+            let paramType: Type;
+            if (declaredType !== undefined) {
+                paramType = (declaredParamType as FunctionType).inputType;
+                declaredParamType = (declaredParamType as FunctionType).outputType;
+            } else {
+                paramType = this.generateAnyType();
+            }
             this.env.declare(param, paramType, false);
         });
         this.env.functionParams = expr.params;
@@ -719,19 +726,31 @@ export class Checker implements Visitor {
         Object.values(stmt.locals).forEach((declaration) =>
             this.visitVarDeclarationStmt(declaration)
         )
-        let type = this.expression(stmt.initializer);
+        let actualType = this.expression(stmt.initializer);
         const declaredType = stmt.typeDeclaration;
         if (stmt.typeDeclaration !== undefined) {
+            actualType = this.substituteAnyTypes(actualType, declaredType, {});
             this.matchTypes(
-                this.substituteAnyTypes(type, declaredType, {}),
-                declaredType, 
-                `Declared type ${declaredType} and actual type ${type} do not match!`,
+                actualType,
+                declaredType,
+                `Declared type ${declaredType} and actual type ${actualType} do not match!`,
                 stmt.initializer,
                 {
                     isFirstSubtype: true,
-                    looseCustomType: false
                 }
             );
+            if (stmt.initializer instanceof Function
+                && declaredType instanceof FunctionType) {
+                const actualType = this.visitFunctionExpr(stmt.initializer, declaredType);
+                const actualReturnType = Checker.getFunctionOutputType(actualType);
+                const declaredReturntype = Checker.getFunctionOutputType(declaredType);
+                this.matchTypes(
+                    declaredReturntype,
+                    actualReturnType,
+                    `Declared type ${declaredType} and actual type ${actualType} do not match!`,
+                    stmt.initializer,
+                );
+            }
         }
         if (stmt.initializer instanceof Function) {
             this.env.functionName = undefined;
@@ -739,9 +758,17 @@ export class Checker implements Visitor {
         this.env.declare(
             stmt.name,
             declaredType === undefined
-                ? type
+                ? actualType
                 : declaredType,
             mutable);
+    }
+
+    private static getFunctionOutputType(funcType: FunctionType) {
+        let type: Type = funcType;
+        while (type instanceof FunctionType) {
+            type = type.outputType;
+        }
+        return type;
     }
 
     private substituteAnyTypes(declaredType: Type, actualType: Type, anyTypes: {[name: string]: Type}): Type {

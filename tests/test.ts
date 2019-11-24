@@ -29,17 +29,12 @@ a :
 ],
 [
 `
-foo = Int → Int
-foo : ƒ a
-    a
-
 bar = Int → Num
 bar : ƒ a
     a
-
 `,
 
-"<function>"
+"[SyntaxError] Line 3 at 'ƒ': Declared type Int → Num and actual type Int → Int do not match!"
 ],
 [
 `
@@ -48,7 +43,7 @@ bar : ƒ a
     a
 `,
 
-`[SyntaxError] Line 3 at 'ƒ': Declared type Num → Int and actual type a → a do not match!`
+`[SyntaxError] Line 3 at 'ƒ': Declared type Num → Int and actual type Num → Num do not match!`
 ],
 // text functions
 // Text.length
@@ -206,7 +201,7 @@ type Foo :
 id : ƒ a
     a
 
-getCellValue = Cell → Num
+getCellValue = Cell → Int
 getCellValue : ƒ cell
     case id cell of
         Live →
@@ -359,7 +354,7 @@ row2 :
 // complex hybrid test
 [
 `
-getNeighborSum = Num → Num → List List Num → List List Num
+getNeighborSum = Num → Num → List List Int → List List Int
 getNeighborSum : ƒ r c grid
     List.map
     ƒ dr
