@@ -27,6 +27,29 @@ a :
 
 `-46`
 ],
+[
+`
+foo = Int → Int
+foo : ƒ a
+    a
+
+bar = Int → Num
+bar : ƒ a
+    a
+
+`,
+
+"<function>"
+],
+[
+`
+bar = Num → Int
+bar : ƒ a
+    a
+`,
+
+`[SyntaxError] Line 3 at 'ƒ': Declared type Num → Int and actual type a → a do not match!`
+],
 // text functions
 // Text.length
 [
