@@ -523,14 +523,15 @@ export class Checker implements Visitor {
         let callee = this.expression(expr.callee);
         if (callee instanceof AnyType) {
             const argTypes = expr.argumentList.map(arg => this.expression(arg));
+            const returnType = this.generateAnyType();
             const calleeType = Checker.createFunctionType([
                 ...argTypes,
-                this.generateAnyType()
+                returnType
             ]);
             if (expr.callee instanceof Variable) {
                 this.env.define(expr.callee.name, calleeType);
             }
-            return calleeType;
+            return returnType;
         }
         const func = callee;
         if (!(callee instanceof FunctionType)) {
