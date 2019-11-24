@@ -168,13 +168,13 @@ export class Checker implements Visitor {
         }
     }
 
-    public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype: boolean, looseCustomType: boolean}) {
+    public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype: boolean, looseCustomType?: boolean}) {
         if (!this.sameTypes(a, b, opts)) {
             throw this.error(location, message);
         }
     }
 
-    public sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean, looseCustomType: boolean} = {isFirstSubtype: false, looseCustomType: false}): boolean {
+    public sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean, looseCustomType?: boolean} = {isFirstSubtype: false, looseCustomType: false}): boolean {
         if (opts.isFirstSubtype && b instanceof AnyType) {
             return true;
         }
@@ -468,12 +468,17 @@ export class Checker implements Visitor {
             const elementType = this.expression(element);
             if (type === undefined) {
                 type = elementType;
+            } else if (elementType === NUMBER && type === INTEGER) {
+                type = elementType;
             } else {
                 this.matchTypes(
-                    type,
                     elementType,
+                    type,
                     `List elements must be the same types!\n${elementType} does not match ${type}!`,
-                    element
+                    element,
+                    {
+                        isFirstSubtype : true
+                    }
                 );
             }
         });

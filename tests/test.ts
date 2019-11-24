@@ -63,6 +63,27 @@ a :
 "0.6"
 ],
 [
+`a = List Int
+a :
+    [0, -2, 3, -0.4]`,
+
+"[SyntaxError] Line 3 at '[': Declared type List Int and actual type List Num do not match!"
+],
+[
+`a = List Int
+a :
+    []`,
+
+"[]"
+],
+[
+`a = List Int
+a :
+    [0, -2, 3.3289e10, -0.0]`,
+
+"[0, -2, 3.3289e+10, 0]"
+],
+[
 `a :
     List.sum [0.1e-10]`,
 
@@ -147,7 +168,7 @@ getCellValue : ƒ cell
             0
 `,
 
-"[SyntaxError] Line 14 at 'ƒ': Declared type Text → Num and actual type Cell → Num do not match!"
+"[SyntaxError] Line 14 at 'ƒ': Declared type Text → Num and actual type Cell → Int do not match!"
 ],
 [
 `
