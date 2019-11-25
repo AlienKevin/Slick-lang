@@ -639,7 +639,7 @@ export class Checker implements Visitor {
         return new AnyType(curr);
     }
 
-    visitFunctionExpr(expr: Function, declaredType?: FunctionType) {
+    visitFunctionExpr(expr: Function, declaredType?: FunctionType): FunctionType {
         const enclosing = this.env;
         this.env = this.newEnv(enclosing);
         this.env.functionName = enclosing.functionName;
