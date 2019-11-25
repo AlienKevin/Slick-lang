@@ -192,9 +192,9 @@ export class Checker implements Visitor {
                     ? (
                         aParameter instanceof AnyType
                         || bParameter instanceof AnyType
-                        || this.sameTypes(aParameter, bParameter)
+                        || this.sameTypes(aParameter, bParameter, opts)
                     )
-                    : this.sameTypes(aParameter, bParameter)
+                    : this.sameTypes(aParameter, bParameter, opts)
                 )
             );
         } else if (a instanceof ListType && b instanceof ListType) {
