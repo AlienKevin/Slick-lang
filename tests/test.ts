@@ -1,5 +1,5 @@
 const source = new Map([
-// Int type and Num type
+// Int type and Float type
 [
 `
 a = Int
@@ -7,7 +7,7 @@ a :
     -3 / 1
 `,
 
-`[SyntaxError] Line 4 at '-3': Declared type Int and actual type Num do not match!`
+`[SyntaxError] Line 4 at '-3': Declared type Int and actual type Float do not match!`
 ],
 [
 `
@@ -29,21 +29,48 @@ a :
 ],
 [
 `
-bar = Int → Num
+bar = Int → Float
 bar : ƒ a
     a
 `,
 
-"[SyntaxError] Line 3 at 'ƒ': Declared type Int → Num and actual type Int → Int do not match!"
+"[SyntaxError] Line 3 at 'ƒ': Declared type Int → Float and actual type Int → Int do not match!"
 ],
 [
 `
-bar = Num → Int
+bar = Float → Int
 bar : ƒ a
     a
 `,
 
-`[SyntaxError] Line 3 at 'ƒ': Declared type Num → Int and actual type Num → Num do not match!`
+"[SyntaxError] Line 3 at 'ƒ': Declared type Float → Int and actual type Float → Float do not match!"
+],
+[
+`
+bar = Float → Int → Int
+bar : ƒ a b
+    a * b
+`,
+
+"[SyntaxError] Line 3 at 'ƒ': Declared type Float → Int → Int and actual type Float → Int → Float do not match!"
+],
+[
+`
+foo = List lala → Int → (Maybe lala → b) → b
+foo : ƒ a b c
+    c (List.nth b a)
+
+_ :
+    foo [1, 2] 1
+    ƒ x
+        case x of
+            Nothing →
+                2
+            Just n →
+                n + 2
+`,
+
+"4"
 ],
 // text functions
 // Text.length
@@ -73,6 +100,14 @@ bar : ƒ a
 
 "'a🏳‍🌈b🏳‍🌈c'"
 ],
+// Text.slice
+[
+`_ :
+    Text.slice -1 2 'abc'
+`,
+
+"''"
+],
 // list functions
 [
 `a :
@@ -85,7 +120,7 @@ bar : ƒ a
 a :
     [0, -2, 3, -0.4]`,
 
-"[SyntaxError] Line 3 at '[': Declared type List Int and actual type List Num do not match!"
+"[SyntaxError] Line 3 at '[': Declared type List Int and actual type List Float do not match!"
 ],
 [
 `a = List Int
@@ -112,6 +147,30 @@ a :
     List.sum []`,
 
 "0"
+],
+[
+`a :
+    List.take 5 [1, 2, 3, 4]`,
+
+`[1, 2, 3, 4]`
+],
+[
+`a :
+    List.take 1 [1, 2, 3, 4]`,
+
+`[1]`
+],
+[
+`a :
+    List.take 0 [1, 2, 3, 4]`,
+
+`[]`
+],
+[
+`a :
+    List.take 0.2 [1, 2, 3, 4]`,
+
+`[SyntaxError] Line 2 at '0.2': Argument type Float does not match paramter type Int!`
 ],
 // case expression
 [
@@ -153,7 +212,7 @@ type Foo :
 id : ƒ a
     a
 
-getCellValue = Text → Num
+getCellValue = Text → Float
 getCellValue : ƒ cell
     case id cell of
         Live →
@@ -177,7 +236,7 @@ type Foo :
 id : ƒ a
     a
 
-getCellValue = Text → Num
+getCellValue = Text → Float
 getCellValue : ƒ cell
     case id cell of
         Live →
@@ -186,7 +245,7 @@ getCellValue : ƒ cell
             0
 `,
 
-"[SyntaxError] Line 14 at 'ƒ': Declared type Text → Num and actual type Cell → Int do not match!"
+"[SyntaxError] Line 14 at 'ƒ': Declared type Text → Float and actual type Cell → Int do not match!"
 ],
 [
 `
@@ -260,7 +319,7 @@ _ :
 ],
 [
 `
-foo = Num → Num → Num
+foo = Float → Float → Float
 foo : ƒ a
     ƒ b
         a * b
@@ -354,7 +413,7 @@ row2 :
 // complex hybrid test
 [
 `
-getNeighborSum = Num → Num → List List Int → List List Int
+getNeighborSum = Int → Int → List List Int → List List Int
 getNeighborSum : ƒ r c grid
     List.map
     ƒ dr

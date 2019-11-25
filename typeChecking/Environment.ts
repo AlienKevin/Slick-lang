@@ -72,7 +72,7 @@ export class Env {
         }
     }
 
-    substituteAnyType(anyType: AnyType, substituteType: CustomType) {
+    substituteAnyType(anyType: AnyType, substituteType: Type) {
         this.values = Object.entries(this.values).reduce((newValues, [name, value]) => {
             return {
                 ...newValues,
@@ -82,6 +82,9 @@ export class Env {
                 }
             }
         }, Object.create(null));
+        anyType.anyTypes.forEach((type) =>
+            this.substituteAnyType(type, substituteType)
+        );
     }
 
     declare(nameToken: Token | string, type: Type, mutable: boolean) {

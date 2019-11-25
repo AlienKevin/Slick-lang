@@ -18,8 +18,9 @@ import { Scanner } from "../Tokenizer";
 import { Parser } from "../Parser";
 import { CustomType } from "./CustomType";
 import { zip } from 'zip-array';
+import isEqual from "lodash.isequal";
 
-const NUMBER = PrimitiveType.Num;
+const FLOAT = PrimitiveType.Float;
 const INTEGER = PrimitiveType.Int;
 const TEXT = PrimitiveType.Text;
 const BOOLEAN = PrimitiveType.Bool;
@@ -29,6 +30,7 @@ type Location = Token | Expr;
 export class Checker implements Visitor {
     private env: Env;
     private anyTypeName = 'a';
+    private constraintTypeIndex = 1;
     constructor(private runner: Runner) {
         // global environment
         const globals = this.newEnv();
@@ -53,39 +55,39 @@ export class Checker implements Visitor {
         this.declareMaybeType();
 
         const primordials = 
-        `abs       Num → Num
-        max        Num → Num → Num
-        min        Num → Num → Num
-        neg        Num → Num
+        `abs       num → num
+        max        num → num → num
+        min        num → num → num
+        neg        num → num
         not        Bool → Bool
         print      a → Text
-        sqrt       Num → Num
-        round      Num → Num
-        floor      Num → Num
-        ceil       Num → Num
-        trunc      Num → Num
-        pi         Num
-        e          Num
-        sin        Num → Num
-        cos        Num → Num
-        tan        Num → Num
-        asin       Num → Num
-        acos       Num → Num
-        atan       Num → Num
-        atan2      Num → Num → Num
+        sqrt       num → num
+        round      num → Int
+        floor      num → Int
+        ceil       num → Int
+        trunc      num → Int
+        pi         num
+        e          num
+        sin        num → num
+        cos        num → num
+        tan        num → num
+        asin       num → num
+        acos       num → num
+        atan       num → num
+        atan2      num → num → num
         ƒ⋏         Bool → Bool → Bool
         ƒ⋎         Bool → Bool → Bool
         ƒ=         a → a → Bool
         ƒ≠         a → a → Bool
-        ƒ<         Num → Num → Bool
-        ƒ≥         Num → Num → Bool
-        ƒ>         Num → Num → Bool
-        ƒ≤         Num → Num → Bool
-        ƒ+         Num → Num → Num
-        ƒ-         Num → Num → Num
-        ƒ*         Num → Num → Num
-        ƒ/         Num → Num → Num
-        ƒ%         Num → Num → Num
+        ƒ<         num → num → Bool
+        ƒ≥         num → num → Bool
+        ƒ>         num → num → Bool
+        ƒ≤         num → num → Bool
+        ƒ+         num → num → num
+        ƒ-         num → num → num
+        ƒ*         num → num → num
+        ƒ/         Float → Float → Float
+        ƒ%         num → num → num
         ƒ&         Text → Text → Text`;
         const types = Checker.parseTypeDeclarations(primordials);
         Object.entries(types).forEach(([name, type]) => 
@@ -164,25 +166,42 @@ export class Checker implements Visitor {
             if (isInteger(expr)) {
                 return INTEGER;
             }
-            return NUMBER;
+            return FLOAT;
         }
     }
 
-    public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype: boolean, looseCustomType?: boolean}) {
-        if (!this.sameTypes(a, b, opts)) {
+    public matchTypes(a: Type, b: Type, message: string, location: Location, opts?: {isFirstSubtype?: boolean, looseCustomType?: boolean, looseNumberType?: boolean}) {
+        if (Checker.isConstraintNumberType(a) && Checker.isConcreteNumberType(b)) {
+            this.env.substituteAnyType(a, b);
+        } else if (Checker.isConstraintNumberType(b) && Checker.isConcreteNumberType(a)) {
+            this.env.substituteAnyType(b, a);
+        } else if (!Checker.sameTypes(a, b, opts)) {
             throw this.error(location, message);
         }
     }
 
-    public sameTypes(a: Type, b: Type, opts: {isFirstSubtype: boolean, looseCustomType?: boolean} = {isFirstSubtype: false, looseCustomType: false}): boolean {
-        if (opts.isFirstSubtype && b instanceof AnyType) {
+    public static sameTypes(a: Type, b: Type, opts: {isFirstSubtype?: boolean, looseCustomType?: boolean, looseNumberType?: boolean} = {isFirstSubtype: false, looseCustomType: false, looseNumberType: false}): boolean {
+        if (opts.isFirstSubtype
+            && b instanceof AnyType
+            && (
+                b.types.length === 0
+                ? true
+                : (
+                    a instanceof AnyType
+                    ? a.types.every(type => b.types.includes(type))
+                    : b.types.includes(a)
+                )
+            )) {
             return true;
         }
         if (a === undefined || b === undefined) {
             return true;
         }
         if (a instanceof AnyType && b instanceof AnyType) {
-            return a.name === b.name;
+            return (
+                a.name === b.name
+                || isEqual(a.types, b.types)
+            );
         }
         if (a instanceof CustomType && b instanceof CustomType) {
             return (
@@ -216,7 +235,9 @@ export class Checker implements Visitor {
                 this.sameTypes(a.inputType, b.inputType, opts)
                 && this.sameTypes(a.outputType, b.outputType, opts)
             )
-        } else if (opts.isFirstSubtype && a === INTEGER && b === NUMBER) {
+        } else if (opts.isFirstSubtype && Checker.isIntType(a) && Checker.isFloatType(b)) {
+            return true;
+        } else if (opts.looseNumberType && Checker.isNumberType(a) && Checker.isNumberType(b)) {
             return true;
         } else if (a === b) {
             return true;
@@ -225,7 +246,9 @@ export class Checker implements Visitor {
     }
 
     number(valueType: Type, operand: Expr, name?: string) {
-        return this.matchType(valueType, NUMBER, operand, name);
+        const numberType = this.generateConstraintType("num", [INTEGER, FLOAT]);
+        this.matchType(valueType, numberType, operand, name);
+        return Checker.specializeType(numberType, valueType);
     }
 
     boolean(valueType: Type, operand: Expr, name?: string) {
@@ -258,16 +281,81 @@ export class Checker implements Visitor {
             this.env.define(leftOperand.name, rightType);
         } else if (rightType instanceof AnyType && rightOperand instanceof Variable) {
             this.env.define(rightOperand.name, leftType);
-        } else if ((leftType === INTEGER || leftType === NUMBER)
-            && (rightType === INTEGER || rightType === NUMBER)) {
-            return true;
         } else {
             this.matchTypes(
                 leftType,
                 rightType,
                 `Right operand typed ${rightType} does not match left operand typed ${leftType}!`,
-                rightOperand
+                rightOperand,
+                {
+                    looseNumberType: true
+                }
             );
+        }
+    }
+
+    private static isFloatType(type: Type) {
+        return (
+            type === FLOAT
+            || (Checker.isConstraintNumberType(type) && isEqual(type.types, [FLOAT]))
+        );
+    }
+
+    private static isIntType(type: Type) {
+        return (
+            type === INTEGER
+            || (Checker.isConstraintNumberType(type) && isEqual(type.types, [INTEGER]))
+        );
+    }
+
+    private static isConstraintNumberType(type: Type): type is AnyType {
+        return (type instanceof AnyType && (
+            /num\d*/.test(type.name)
+            || type.types.every(Checker.isConcreteNumberType)
+        ));
+    }
+
+    private static isConcreteNumberType(type: Type) {
+        return (type === FLOAT || type === INTEGER)
+    }
+
+    private static isNumberType(type: Type) {
+        return (Checker.isConcreteNumberType(type) || Checker.isConstraintNumberType(type));
+    }
+
+    private generalizeType(type1: Type, type2: Type) {
+        if (Checker.isConcreteNumberType(type1) && type2 instanceof AnyType) {
+            const constraintType = this.generateConstraintType("num", [type1]);
+            this.env.substituteAnyType(type2, constraintType);
+            return constraintType;
+        } else if (Checker.isConcreteNumberType(type2) && type1 instanceof AnyType) {
+            const constraintType = this.generateConstraintType("num", [type2]);
+            this.env.substituteAnyType(type1, constraintType);
+            return constraintType;
+        } else if (Checker.sameTypes(type1, type2, {isFirstSubtype: true})) {
+            return type2;
+        } else if (Checker.sameTypes(type2, type1, {isFirstSubtype: true})) {
+            return type1;
+        } else if (type1 instanceof AnyType) {
+            return type1;
+        } else if (type2 instanceof AnyType) {
+            return type2;
+        } else {
+            return type1;
+        }
+    }
+
+    private static specializeType(type1: Type, type2: Type) {
+        if (Checker.sameTypes(type1, type2, {isFirstSubtype: true})) {
+            return type1;
+        } else if (Checker.sameTypes(type2, type1, {isFirstSubtype: true})) {
+            return type2;
+        } else if (type1 instanceof AnyType) {
+            return type2;
+        } else if (type2 instanceof AnyType) {
+            return type1;
+        } else {
+            return type1;
         }
     }
 
@@ -290,7 +378,8 @@ export class Checker implements Visitor {
     //          else result
     visitCaseExpr(caseExpr: Case) {
         let supertype = this.expression(caseExpr.expr);
-        let returnType;
+        let returnType: Type;
+        let customType: CustomType;
         caseExpr.cases.forEach(({subtype, parameters, result}, index) => {
             if (subtype instanceof Token) {
                 if (supertype instanceof CustomType) {
@@ -308,26 +397,7 @@ export class Checker implements Visitor {
                             )
                         );
 
-                        if (typeParameters === undefined) {
-                            if (parameters.length > 0) {
-                                throw this.error(subtype, `Expected 0 parameter for subtype ${subtype} but got ${parameters.length}!`);
-                            }
-                        } else if (typeParameters instanceof RecordType) {
-                            parameters.forEach((parameter) => {
-                                const declaredType = typeParameters.record[parameter.lexeme];
-                                if (declaredType === undefined) {
-                                    throw this.error(parameter, `Paramter ${parameter} does not exist on custom type ${supertype}!`);
-                                }
-                                // declare parameter types temporarily
-                                this.env.declare(parameter, declaredType , false);
-                            });
-                        } else {
-                            if (parameters.length > 1) {
-                                throw this.error(parameters[1], `Expected 1 parameter but got ${parameters.length}!`);
-                            }
-                            // declare parameter type temporarily
-                            this.env.declare(parameters[0], typeParameters , false);
-                        }
+                        this.declareTypeParameters(parameters, typeParameters, supertype, subtype);
                     } else {
                         throw this.error(subtype, `Subtype ${subtype} does not exist in ${supertype}!`);
                     }
@@ -338,19 +408,19 @@ export class Checker implements Visitor {
                             throw this.error(subtype, `Placeholder '_' must be the last case condition of non-custom types!`);
                         }
                     } else if (supertype instanceof AnyType) {
-                        const customType = this.env.getCustomType(subtype.lexeme);
+                        customType = this.env.getCustomType(subtype.lexeme);
                         if (customType === undefined) {
                             throw this.error(subtype, `Subtype ${subtype} does not exist in ${supertype}!`);
+                        } else {
+                            this.declareTypeParameters(parameters, customType.typeParameters, supertype, subtype);
                         }
-                        this.env.substituteAnyType(supertype, customType);
-                        supertype = customType;
                     } else {
                         throw this.error(subtype, `Expected case condition to be a ${supertype}, not a custom type ${subtype}!`);
                     }
                 }
             } else {
                 const sub = this.expression(subtype);
-                const isSubtype = this.sameTypes(sub, supertype, {isFirstSubtype: true, looseCustomType: false});
+                const isSubtype = Checker.sameTypes(sub, supertype, {isFirstSubtype: true});
                 if (!isSubtype) {
                     throw this.error(subtype, `Expected case condition to be a ${supertype}, not a ${sub}!`);
                 }
@@ -369,18 +439,51 @@ export class Checker implements Visitor {
 
             if (returnType === undefined) {
                 returnType = currentReturnType
+            } else if (returnType instanceof CustomType) {
+                returnType = this.substituteAnyTypes(returnType, currentReturnType, {});
             } else if (
-                this.sameTypes(currentReturnType, returnType)
+                Checker.sameTypes(currentReturnType, returnType,
+                    {
+                        looseNumberType: true
+                    })
                 || currentReturnType instanceof AnyType
                 || returnType instanceof AnyType
             ) {
-                returnType = this.substituteAnyTypes(returnType, currentReturnType, {});
+                returnType = this.generalizeType(returnType, currentReturnType);
             } else {
-                throw this.error(result, `Return type ${currentReturnType} of this case expression does not match previous return type ${returnType}!`);
+                throw this.error(result, `Return type ${currentReturnType} of this case branch does not match previous return type ${returnType}!`);
+            }
+            if (supertype instanceof AnyType && subtype instanceof Token) {
+                this.env.substituteAnyType(supertype, customType);
+                supertype = customType;
             }
         });
 
         return returnType;
+    }
+
+    private declareTypeParameters(parameters: Token[], typeParameters, supertype: Type, subtype: Token) {
+        if (typeParameters === undefined) {
+            if (parameters.length > 0) {
+                throw this.error(subtype, `Expected 0 parameter for subtype ${subtype} but got ${parameters.length}!`);
+            }
+        } else if (typeParameters instanceof RecordType) {
+            parameters.forEach((parameter) => {
+                const declaredType = typeParameters.record[parameter.lexeme];
+                if (declaredType === undefined) {
+                    throw this.error(parameter, `Paramter ${parameter} does not exist on custom type ${supertype}!`);
+                }
+                // declare parameter types temporarily
+                this.env.declare(parameter,declaredType , false);
+            });
+        } else {
+            if (parameters.length > 1) {
+                throw this.error(parameters[1], `Expected 1 parameter but got ${parameters.length}!`);
+            }
+            const firstTypeParameter = Object.keys(typeParameters)[0];
+            // declare parameter type temporarily
+            this.env.declare(parameters[0],  typeParameters[firstTypeParameter], false);
+        }
     }
 
     visitIfExpr(expr: If) {
@@ -392,11 +495,11 @@ export class Checker implements Visitor {
             `Type ${thenBranch} of then branch does not match type ${elseBranch} of else branch!`,
             expr,
             {
-                isFirstSubtype: false,
-                looseCustomType: true
+                looseCustomType: true,
+                looseNumberType: true
             }
         );
-        return thenBranch;
+        return this.generalizeType(thenBranch, elseBranch);
     }
     visitBinaryExpr(expr: Binary) {
         const leftType = this.expression(expr.left);
@@ -418,13 +521,49 @@ export class Checker implements Visitor {
             case TokenType.SLASH:
             case TokenType.STAR:
             case TokenType.MODULO:
-                this.number(leftType, expr.left);
-                this.number(rightType, expr.right);
-                if (expr.operator.type !== TokenType.SLASH
-                    && leftType === INTEGER && rightType === INTEGER) {
-                    return INTEGER;
+                const type1 = this.number(leftType, expr.left);
+                console.log("TCL: visitBinaryExpr -> type1", type1)
+                const type2 = this.number(rightType, expr.right);
+                console.log("TCL: visitBinaryExpr -> type2", type2)
+                if (expr.operator.type !== TokenType.SLASH) {
+                    if (Checker.isIntType(leftType) && Checker.isIntType(rightType)) {
+                        return INTEGER;
+                    } else if (Checker.isIntType(type1) && type2 instanceof AnyType) {
+                        return this.generateConstraintType(
+                            "num",
+                            [INTEGER, FLOAT],
+                            [type2]
+                        );
+                    } else if (Checker.isIntType(type2) && type1 instanceof AnyType) {
+                        return this.generateConstraintType(
+                            "num",
+                            [INTEGER, FLOAT],
+                            [type1]
+                        );
+                    } else if (type1 instanceof AnyType && type2 instanceof AnyType) {
+                        return this.generateConstraintType(
+                            "num",
+                            [INTEGER, FLOAT],
+                            [type1, type2]
+                        );
+                    } else if (Checker.isFloatType(type1) && type2 instanceof AnyType) {
+                        this.env.substituteAnyType(type2, FLOAT);
+                        return FLOAT;
+                    } else if (Checker.isFloatType(type2) && type1 instanceof AnyType) {
+                        this.env.substituteAnyType(type1, FLOAT);
+                        return FLOAT;
+                    } else {
+                        return this.generalizeType(type1, type2);
+                    }
+                } else {
+                    if (leftType instanceof AnyType) {
+                        this.env.substituteAnyType(leftType, type1);
+                    }
+                    if (rightType instanceof AnyType) {
+                        this.env.substituteAnyType(rightType, type2);
+                    }
+                    return FLOAT;
                 }
-                return NUMBER;
             
             case TokenType.AMPERSAND:
                 this.text(leftType, expr.left);
@@ -468,7 +607,7 @@ export class Checker implements Visitor {
             const elementType = this.expression(element);
             if (type === undefined) {
                 type = elementType;
-            } else if (elementType === NUMBER && type === INTEGER) {
+            } else if (Checker.isFloatType(elementType) && Checker.isIntType(type)) {
                 type = elementType;
             } else {
                 this.matchTypes(
@@ -533,10 +672,10 @@ export class Checker implements Visitor {
             }
             return returnType;
         }
-        const func = callee;
         if (!(callee instanceof FunctionType)) {
             throw this.error(expr.paren, `Callee must be a function!`);
         }
+        const func = callee;
         let paramType = callee.inputType;
         const argTypes = expr.argumentList.map(arg => this.expression(arg));
         let anyTypes = {};
@@ -632,6 +771,15 @@ export class Checker implements Visitor {
         this.anyTypeName = 'a';
     }
 
+    resetConstraintTypeIndex() {
+        this.constraintTypeIndex = 1;
+    }
+
+    generateConstraintType(name: string, types: Type[], anyTypes?: AnyType[]) {
+        this.constraintTypeIndex ++;
+        return new AnyType(name + (this.constraintTypeIndex - 1), types, anyTypes);
+    }
+
     generateAnyType() {
         const curr = this.anyTypeName;
         const next = nextChar(curr);
@@ -678,6 +826,7 @@ export class Checker implements Visitor {
         this.env.functionParams = undefined;
         this.env.functionName = undefined;
         this.resetAnyTypeName();
+        this.resetConstraintTypeIndex();
         return returnType;
     }
 
@@ -731,23 +880,27 @@ export class Checker implements Visitor {
         const declaredType = stmt.typeDeclaration;
         if (stmt.typeDeclaration !== undefined) {
             actualType = this.substituteAnyTypes(actualType, declaredType, {});
-            this.matchTypes(
-                actualType,
-                declaredType,
-                `Declared type ${declaredType} and actual type ${actualType} do not match!`,
-                stmt.initializer,
-                {
-                    isFirstSubtype: true,
-                }
-            );
             if (stmt.initializer instanceof Function
                 && declaredType instanceof FunctionType) {
-                const actualType = this.visitFunctionExpr(stmt.initializer, declaredType);
+                this.matchTypes(
+                    actualType,
+                    declaredType,
+                    `Declared type ${declaredType} and actual type ${actualType} do not match!`,
+                    stmt.initializer,
+                );
+                actualType = this.visitFunctionExpr(stmt.initializer, declaredType);
                 const actualReturnType = Checker.getFunctionOutputType(actualType);
                 const declaredReturntype = Checker.getFunctionOutputType(declaredType);
                 this.matchTypes(
                     declaredReturntype,
                     actualReturnType,
+                    `Declared type ${declaredType} and actual type ${actualType} do not match!`,
+                    stmt.initializer,
+                );
+            } else {
+                this.matchTypes(
+                    declaredType,
+                    actualType,
                     `Declared type ${declaredType} and actual type ${actualType} do not match!`,
                     stmt.initializer,
                 );
@@ -842,15 +995,21 @@ export class Checker implements Visitor {
                             storedType instanceof AnyType
                             && !(actualType instanceof AnyType)
                         )
-                        || this.sameTypes(storedType, actualType)
+                        || Checker.sameTypes(storedType, actualType)
                     )
                 ) {
                     return storedType;
                 }
             }
-            // add new type mapping
-            anyTypes[declaredType.name] = actualType;
-            return actualType;
+            // check for both normal AnyType and constraint type
+            if (declaredType.types.length === 0
+                || declaredType.types.some((type) => Checker.sameTypes(type, actualType))) {
+                // add new type mapping
+                anyTypes[declaredType.name] = actualType;
+                return actualType;
+            } else {
+                return declaredType;
+            }
         }
         return declaredType;
     }
