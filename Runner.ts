@@ -67,7 +67,12 @@ class Runner {
             "use strict";
             const oldLog = console.log;
             console.log = (ignore) => {};
-            this.output(eval(code));
+            const result = eval(code);
+            this.output(
+                result === undefined
+                ? ""
+                : result
+            );
             console.log = oldLog;
         }
 
