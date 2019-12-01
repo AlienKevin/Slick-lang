@@ -13,7 +13,6 @@
     "decimal.js": "^10.2.0",
     "esm": "^3.2.25",
     "lodash.clone": "^4.5.0",
-    "lodash.isequal": "^4.5.0",
     "ramda": "^0.26.1",
     "string-unified": "^2.0.0",
     "zip-array": "^1.0.1"

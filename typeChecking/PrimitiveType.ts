@@ -1,6 +1,5 @@
 export enum PrimitiveType {
-    Float = "Float",
-    Int = "Int",
+    Num = "Num",
     Bool = "Bool",
     Text = "Text"
 }

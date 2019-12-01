@@ -89,8 +89,7 @@ export class Parser {
     private declaredFunctionKeyword;
     public types: {[alias: string]: Type} = (function(o) {
         o["Text"] = PrimitiveType.Text;
-        o["Float"] = PrimitiveType.Float;
-        o["Int"] = PrimitiveType.Int;
+        o["Num"] = PrimitiveType.Num;
         o["Bool"] = PrimitiveType.Bool;
         o["List"] = ListType;
         return o;
@@ -511,8 +510,8 @@ export class Parser {
             case "Text":
                 type = PrimitiveType.Text;
                 break;
-            case "Float":
-                type = PrimitiveType.Float;
+            case "Num":
+                type = PrimitiveType.Num;
                 break;
             default:
                 if (isUpper(first.lexeme[0])) {

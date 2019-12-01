@@ -29,10 +29,6 @@ export function isNumber(value: any): value is Decimal {
     return Decimal.isDecimal(value);
 }
 
-export function isInteger(value: Decimal) {
-    return value.isInteger();
-}
-
 export function isText(value: any): value is string {
     return typeof value === "string";
 }
