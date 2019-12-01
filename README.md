@@ -424,6 +424,18 @@ Install [slick-vscode-extension](https://marketplace.visualstudio.com/items?item
 
 ![Slick vscode extension demo](medias/vscode_demo.png)
 
+# Symbol Shorthands
+|You type   | to get  |
+|---|---|
+|`\f` |`ƒ`  |
+|`->` |`→`  |
+|`>=` |`≥`  |
+|`<=` |`≤`  |
+|`!=` |`≠`  |
+|`/\` |`⋏`  |
+|`\/` |`⋎`  |
+
+
 # API functions
 
 ## Text functions
