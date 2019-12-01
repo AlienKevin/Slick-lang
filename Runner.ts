@@ -57,7 +57,10 @@ class Runner {
 
         const evalCode = (code: string) => {
             "use strict";
-            return eval(code);
+            const oldLog = console.log;
+            console.log = (ignore) => {};
+            this.output(eval(code));
+            console.log = oldLog;
         }
 
         // generate code
@@ -65,14 +68,9 @@ class Runner {
             runtimePath: this.runtimePath,
             mode: this.mode
         }).generateCode(statements, true);
-        if (options.mode === RUN) {
+        if (options.mode === RUN || options.mode === TEST) {
             evalCode(code);
-        } else if (options.mode === TEST) {
-            const oldLog = console.log;
-            console.log = (ignore) => {};
-            this.output(evalCode(code));
-            console.log = oldLog;
-        } else {
+        } else if (options.mode === MAKE) {
             this.output(code);
         }
     }
