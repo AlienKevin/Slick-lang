@@ -407,6 +407,14 @@ package-lock.json
 package.json
 ```
 
+In your `package.json`, add a `scripts` property:
+
+```bash
+"scripts": {
+    "slick": "node node_modules/slick-make/dist/cli.js"
+}
+```
+
 Run you slick program:
 
 ```bash
