@@ -422,7 +422,7 @@ See the `examples` folder for more examples.
 # Set up Slick in Visual Studio Code
 Install [slick-vscode-extension](https://marketplace.visualstudio.com/items?itemName=KevinLi.slick-lang) and you are all set with full syntax highlighting and symbol shorthands.
 
-![Slick vscode extension demo](medias/vscode-extension.png)
+![Slick vscode extension demo](medias/vscode_demo.png)
 
 # API functions
 
