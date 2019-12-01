@@ -718,18 +718,6 @@ export class Checker implements Visitor {
                     isFirstSubtype: true,
                 }
             );
-            if (stmt.initializer instanceof Function
-                && declaredType instanceof FunctionType) {
-                const actualType = this.visitFunctionExpr(stmt.initializer, declaredType);
-                const actualReturnType = Checker.getFunctionOutputType(actualType);
-                const declaredReturntype = Checker.getFunctionOutputType(declaredType);
-                this.matchTypes(
-                    declaredReturntype,
-                    actualReturnType,
-                    `Declared type ${declaredType} and actual type ${actualType} do not match!`,
-                    stmt.initializer,
-                );
-            }
         }
         if (stmt.initializer instanceof Function) {
             this.env.functionName = undefined;
