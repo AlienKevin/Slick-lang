@@ -4,6 +4,7 @@ import { Token } from "./Token";
 import { Parser } from "./Parser";
 import { Checker } from "./typeChecking/TypeChecker";
 import { TokenType } from "./TokenType";
+import { Visitor } from "./interfaces/Visitor";
 const $SLK = require("./Runtime").default;
 
 enum RUN_MODE {
@@ -192,5 +193,6 @@ export {
     MAKE,
     TEST,
     Scanner,
-    Parser
+    Parser,
+    Visitor
 }
