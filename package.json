@@ -1,6 +1,6 @@
 {
   "name": "slick-lang",
-  "version": "4.11.0",
+  "version": "4.11.1",
   "description": "Uncluttered programming",
   "main": "dist/Runner.js",
   "types": "dist/Runner.d.ts",
@@ -10,7 +10,7 @@
     "release": "release-it"
   },
   "dependencies": {
-    "decimal.js": "^10.2.0",
+    "decimal.js": "github:AlienKevin/decimal-js-no-use-strict#master",
     "esm": "^3.2.25",
     "lodash.clone": "^4.5.0",
     "ramda": "^0.26.1",
