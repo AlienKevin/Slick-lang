@@ -1,5 +1,7 @@
 # Slick
 
+<img src="slick_logo.png" width="200px" style="margin-left: 35%; margin-top: 5%; margin-bottom: 5%"/>
+
 # Introduction
 
 Slick is a statically and strongly typed functional programming language transpiled to JavaScript.
@@ -414,6 +416,8 @@ Hello World from Slick!
 ```
 
 🎉🎉🎉 Congratulation! You just ran you first Slick program!
+
+See the `examples` folder for more examples.
 
 # API functions
 
