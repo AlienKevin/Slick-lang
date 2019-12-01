@@ -4,6 +4,7 @@ import { Token } from "./Token";
 import { Parser } from "./Parser";
 import { Checker } from "./typeChecking/TypeChecker";
 import { TokenType } from "./TokenType";
+const $SLK = require("./Runtime").default;
 
 enum RUN_MODE {
     RUN,
@@ -56,7 +57,6 @@ class Runner {
 
         const evalCode = (code: string) => {
             "use strict";
-            const $SLK = require(this.runtimePath).default;
             return eval(code);
         }
 
