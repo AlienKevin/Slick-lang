@@ -21,7 +21,7 @@ class Runner {
     private source: string;
     private mode: RUN_MODE;
 
-    constructor(private runtimePath?: string, public input?: (prompt: string) => string, public output = console["log"]) {}
+    constructor(private runtimePath = "./Runtime", public input?: (prompt: string) => string, public output = console["log"]) {}
 
     run(source: string, options = {
             mode: RUN | MAKE | TEST
@@ -54,18 +54,23 @@ class Runner {
             throw "Type checker error!";
         }
 
+        const evalCode = (code: string) => {
+            "use strict";
+            const $SLK = require(this.runtimePath).default;
+            return eval(code);
+        }
+
         // generate code
         const code = new CodeGenerator({
             runtimePath: this.runtimePath,
-            isTestCode: this.mode === TEST
+            mode: this.mode
         }).generateCode(statements, true);
         if (options.mode === RUN) {
-            // fs.writeFileSync("./tests/dist.js", code);
-            eval(code);
+            evalCode(code);
         } else if (options.mode === TEST) {
             const oldLog = console.log;
             console.log = (ignore) => {};
-            this.output(eval(code));
+            this.output(evalCode(code));
             console.log = oldLog;
         } else {
             this.output(code);

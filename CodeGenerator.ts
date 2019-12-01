@@ -6,6 +6,7 @@ import { Visitor } from "./interfaces/Visitor";
 import { Token } from "./Token";
 import { isNumber, isText, isBoolean } from "./utils";
 import { TokenType } from "./TokenType";
+import { RUN, TEST, MAKE } from "./Runner";
 
 const reserved = makeSet([
     "arguments", "await", "break", "case", "catch", "class", "const",
@@ -103,9 +104,13 @@ export class CodeGenerator implements Visitor {
         "SLASH": "$SLK.div",
         "MODULO": "$SLK.mod",
     });
-    constructor({runtimePath = "./Runtime", isTestCode = false}: {runtimePath?: string, isTestCode: boolean} ) {
-        this.frontMatter = [`const $SLK = require("${runtimePath}").default;\n`];
-        this.isTestCode = isTestCode;
+    constructor({runtimePath = "./Runtime", mode = RUN}: {runtimePath?: string, mode: any} ) {
+        this.frontMatter = (
+            mode === MAKE
+            ? [`const $SLK = require("${runtimePath}").default;\n`]
+            : []
+        );
+        this.isTestCode = mode === TEST;
     }
 
     public generateCode(stmts: Stmt[], generateFrontMatters = true) {
