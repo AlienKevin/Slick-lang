@@ -35,21 +35,6 @@ class Runner {
         const scanner = new Scanner(source, this);
         scanner.scan();
 
-        // display token list
-        if (options.printTokenList) {
-            const AsciiTable = require("ascii-table");
-            const table = new AsciiTable();
-            table.setHeading("Type", "Lexeme", "Literal", "Line", "Index");
-            scanner.tokens.forEach((token) => {
-                let lexeme = token.lexeme;
-                if (token.lexeme.indexOf("\n") >= 0) { // don't print line break in table
-                    lexeme = token.lexeme.replace(/\n/g, "\\n");
-                }
-                table.addRow(token.type, lexeme, token.literal, token.line, token.index);
-            });
-            console.log(table.toString());
-        }
-
         // parse
         const parser = new Parser(scanner.tokens, this);
         const statements = parser.parse();
