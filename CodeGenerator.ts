@@ -75,7 +75,7 @@ export class CodeGenerator implements Visitor {
     private indentation: number = 0;
     private uniqueNumbers: {[name: string]: true} = {};
     private isLastStmt = false;
-    private isTestCode : boolean;
+    private wrapToString : boolean;
     private operatorTransform = $SLK.stone({
         "AND": (expr: Binary) => {
             return (
@@ -110,7 +110,7 @@ export class CodeGenerator implements Visitor {
             ? [`const $SLK = require("${runtimePath}").default;\n`]
             : []
         );
-        this.isTestCode = mode === TEST;
+        this.wrapToString = mode === TEST || mode === RUN;
     }
 
     public generateCode(stmts: Stmt[], generateFrontMatters = true) {
@@ -196,7 +196,7 @@ export class CodeGenerator implements Visitor {
     }
 
     visitVarDeclarationStmt(stmt: VarDeclaration) {
-        const wrapToString = this.isLastStmt && this.isTestCode;
+        const wrapToString = this.isLastStmt && this.wrapToString;
         if (stmt.name.type === TokenType.UNDERSCORE) {
             const expr = this.expression(stmt.initializer);
             return (
