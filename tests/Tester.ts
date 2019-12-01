@@ -12,7 +12,6 @@ export function test(source: Map<string, string>, runner: Runner) {
     source.forEach((answer, source) => {
         try {
             runner.run(source, {
-                printTokenList: false,
                 mode: TEST
             });
         } catch (ignore) {

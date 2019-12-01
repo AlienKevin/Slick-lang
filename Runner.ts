@@ -24,8 +24,7 @@ class Runner {
     constructor(private runtimePath?: string, public input?: (prompt: string) => string, public output = console["log"]) {}
 
     run(source: string, options = {
-        printTokenList: false,
-        mode: RUN | MAKE | TEST
+            mode: RUN | MAKE | TEST
         }) {
         this.source = source;
         this.mode = options.mode;
