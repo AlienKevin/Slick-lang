@@ -67,12 +67,18 @@ class Runner {
             "use strict";
             const oldLog = console.log;
             console.log = (ignore) => {};
-            const result = eval(code);
-            this.output(
-                result === undefined
-                ? ""
-                : result
-            );
+            try {
+                const result = eval(code);
+                this.output(
+                    result === undefined
+                    ? ""
+                    : result
+                );
+            } catch(error) {
+                if (error instanceof RangeError) {
+                    this.output("Stack overflow: Maximum call stack size exceeded!");
+                }
+            }
             console.log = oldLog;
         }
 
