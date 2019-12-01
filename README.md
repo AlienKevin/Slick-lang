@@ -8,6 +8,8 @@ Slick is a statically typed functional programming language transpiled to JavaSc
 
 Slick aims to *unclutter* software development and is heavily influenced by [Elm](https://elm-lang.org/) and [Neo](https://github.com/douglascrockford/howjavascriptworks).
 
+Slick is an experimental language and is not intended to be used in production. However, contributions are always welcome! 😁
+
 # Hello World
 
 ```
