@@ -1,4 +1,4 @@
-import R from "ramda";
+import * as R from "ramda";
 import Decimal from "decimal.js";
 import { number, maybe } from "./utils";
 import * as unified from "string-unified";

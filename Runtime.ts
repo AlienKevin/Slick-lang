@@ -1,7 +1,7 @@
 import { isList, isNumber, isText, isBoolean, isCustomType, createCustomType } from "./utils";
 import List from "./List";
 import Text from "./Text";
-import R from "ramda"
+import * as R from "ramda"
 import Decimal from "decimal.js";
 
 Decimal.set({
