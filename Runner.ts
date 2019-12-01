@@ -190,5 +190,7 @@ export {
     Runner,
     RUN,
     MAKE,
-    TEST
+    TEST,
+    Scanner,
+    Parser
 }
