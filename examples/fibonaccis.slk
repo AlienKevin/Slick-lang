@@ -1,0 +1,12 @@
+fib = Num → Num
+fib : ƒ n
+    if n ≤ 2 then
+        1
+    else
+        (fib (n - 1)) + (fib (n - 2))
+
+# Generate the first 10 fibonacci numbers
+_ :
+    List.map
+    fib
+    (List.range 1 10)
