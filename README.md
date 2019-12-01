@@ -1,6 +1,6 @@
 # Slick
 
-<img src="slick_logo.png" width="200px" style="margin-left: 35%; margin-top: 5%; margin-bottom: 5%"/>
+<img src="medias/slick_logo.png" width="200px"/>
 
 # Introduction
 
@@ -418,6 +418,11 @@ Hello World from Slick!
 🎉🎉🎉 Congratulation! You just ran you first Slick program!
 
 See the `examples` folder for more examples.
+
+# Set up Slick in Visual Studio Code
+Install [slick-vscode-extension](https://marketplace.visualstudio.com/items?itemName=KevinLi.slick-lang) and you are all set with full syntax highlighting and symbol shorthands.
+
+![Slick vscode extension demo](medias/vscode-extension.png)
 
 # API functions
 
