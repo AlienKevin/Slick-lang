@@ -1,0 +1,218 @@
+# Conway's game of life
+# Rules:
+# Any live cell with two or three neighbors survives.
+# Any dead cell with three live neighbors becomes a live cell.
+# All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+
+type Cell :
+    Live
+    Dead
+
+type alias Grid :
+    List List Cell
+
+# r : 5
+# c : 5
+blink :
+    (
+        '-----'
+        & '--X--'
+        & '--X--'
+        & '--X--'
+        & '-----'
+    )
+
+# r : 20
+# c : 45
+glider :
+    (
+        '---------------------------------------------'
+        & '--------------------X------------------------'
+        & '--------------------X-X----------------------'
+        & '---------------------X-X-------X-------------'
+        & '--------XX-----------X--X------XX------------'
+        & '--------XX-----------X-X--XX----XX-----------'
+        & '--------------------X-X---XX----XXX-------XX-'
+        & '--------------------X-----XX----XX--------XX-'
+        & '-------------------------------XX------------'
+        & '-------------------------------X-------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+        & '---------------------------------------------'
+    )
+
+# r : 20
+# c : 31
+snowflake :
+    (
+        '-------------------------------'
+        & '-------------------------------'
+        & '-------------------------------'
+        & '-----------XXX---XXX-----------'
+        & '-------------------------------'
+        & '---------X----X-X----X---------'
+        & '---------X----X-X----X---------'
+        & '---------X----X-X----X---------'
+        & '-----------XXX---XXX-----------'
+        & '-------------------------------'
+        & '-----------XXX---XXX-----------'
+        & '---------X----X-X----X---------'
+        & '---------X----X-X----X---------'
+        & '---------X----X-X----X---------'
+        & '-------------------------------'
+        & '-----------XXX---XXX-----------'
+        & '-------------------------------'
+        & '-------------------------------'
+        & '-------------------------------'
+        & '-------------------------------'
+    )
+
+convertRowToGrid = List a → Num → List List a
+convertRowToGrid : ƒ row width
+    if (List.length row) = 0 then
+        []
+    else
+        List.prepend (List.take width row) (convertRowToGrid (List.drop width row) width)
+
+loadGrid = Text → Num → Grid
+loadGrid : ƒ grid width
+    let
+        rawRow :
+            Text.split '' grid
+        row :
+            List.map ƒ cell (if cell = 'X' then Live else Dead) rawRow
+    in
+    convertRowToGrid row width
+
+
+getCellValue = Cell → Num
+getCellValue : ƒ cell
+    case cell of
+        Live →
+            1
+        Dead →
+            0
+
+
+getNeighborValues = Num → Num → Grid → List List Num
+getNeighborValues : ƒ r c grid
+    List.map
+    ƒ dr
+        List.map
+        ƒ dc
+            let
+                wrappedRow :
+                    if r + dr ≥ List.length grid then
+                        0
+                    else
+                        r + dr
+                row :
+                    case List.nth wrappedRow grid of
+                        Nothing →
+                            []
+                        Just row →
+                            row
+                wrappedCol :
+                    if c + dc ≥ List.length row then
+                        0
+                    else
+                        c + dc
+                cell :
+                    List.nth
+                    wrappedCol
+                    row
+            in
+            if dc = 0 ⋏ dr = 0 then
+                0
+            else
+                getCellValue
+                case cell of
+                    Nothing →
+                        Dead
+                    Just c →
+                        c
+        (List.range -1 1)
+    (List.range -1 1)
+
+
+getNeighborSum = Num → Num → Grid → Num
+getNeighborSum : ƒ r c grid
+    List.reduce
+    ƒ sum row
+        sum + (List.sum row)
+    0
+    (getNeighborValues r c grid)
+
+
+step = Grid → Grid
+step : ƒ grid
+    List.mapIndexed
+    ƒ row r
+        List.mapIndexed
+        ƒ cell c
+            let
+                sum :
+                    getNeighborSum r c grid
+            in
+            if sum = 3 then
+                Live
+            elif sum = 2 then
+                case cell of
+                    Live →
+                        Live
+                    Dead →
+                        Dead
+            else
+                Dead
+        row
+    grid
+
+
+cellToText = Cell → Text
+cellToText : ƒ cell
+    case cell of
+        Live →
+            'X'
+        Dead →
+            '-'
+
+
+printGrid = Grid → Text
+printGrid : ƒ g
+    let
+        rows :
+            List.map
+            ƒ row
+                print ((Text.join '' (List.map cellToText row)))
+            g
+    in
+    (Text.join '' rows) & (print '')
+
+
+run = Grid → Num → Grid
+run : ƒ grid times
+    let
+        next :
+            step grid
+        _ :
+            printGrid next
+    in
+    if times ≤ 0 then
+        grid
+    else
+        run next (times - 1)
+
+
+grid :
+    # loadGrid snowflake 31
+    loadGrid glider 45
+
+_ :
+    printGrid (run grid 70)
