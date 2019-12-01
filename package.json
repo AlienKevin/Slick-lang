@@ -5,8 +5,8 @@
   "main": "dist/Runner.js",
   "types": "dist/Runner.d.ts",
   "scripts": {
-    "s": "node dist/tests/simple.js",
-    "t": "node dist/tests/test.js",
+    "s": "node -r esm dist/tests/simple.js",
+    "t": "node -r esm dist/tests/test.js",
     "release": "release-it"
   },
   "dependencies": {
