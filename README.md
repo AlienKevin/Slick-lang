@@ -10,6 +10,8 @@ Slick aims to *unclutter* software development and is heavily influenced by [Elm
 
 Slick is an experimental language and is not intended to be used in production. However, contributions are always welcome! 😁
 
+[Try Slick online now!](https://slick-playground.netlify.com)
+
 # Hello World
 
 ```
