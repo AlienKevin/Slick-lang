@@ -322,6 +322,4 @@ end :
 ]
 ]);
 import { test } from "./Tester";
-import { Runner } from "../Runner";
-const runner = new Runner("./Runtime");
-test(source, runner);
+test(source);

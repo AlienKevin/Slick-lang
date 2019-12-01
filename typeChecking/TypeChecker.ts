@@ -111,7 +111,7 @@ export class Checker implements Visitor {
         while ((match = regex.exec(declarations)) !== null) {
             const name = match[1];
             const typeString = match[2];
-            const runner = new Runner();
+            const runner = new Runner({});
             runner.lineStarts = [];
             const scanner = new Scanner(typeString, runner);
             scanner.scan();

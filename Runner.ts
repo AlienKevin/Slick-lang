@@ -21,8 +21,16 @@ class Runner {
     public lineStarts: number[];
     private source: string;
     private mode: RUN_MODE;
+    private runtimePath: string;
+    private output: any;
 
-    constructor(private runtimePath = "./Runtime", public input?: (prompt: string) => string, public output = console["log"]) {}
+    constructor(
+        {runtimePath = "./Runtime", output = console["log"]}:
+        {runtimePath?: string, output?: (prompt: string) => any}
+    ) {
+        this.runtimePath = runtimePath;
+        this.output = output;
+    }
 
     run(source: string, options = {
             mode: RUN | MAKE | TEST

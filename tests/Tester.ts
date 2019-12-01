@@ -2,9 +2,12 @@ import "colors";
 import * as differ from 'diff'
 import { TEST, Runner } from "../Runner";
 
-export function test(source: Map<string, string>, runner: Runner) {
+export function test(source: Map<string, string>) {
     let outputs = "";
-    runner.output = (output: string) => (outputs += output + "\n");
+    const output = (output: string) => (outputs += output + "\n");
+    const runner = new Runner({
+        output: output
+    });
     let numOfTestsPassed = 0;
     const total = source.size;
     let passedAllTests = true;
