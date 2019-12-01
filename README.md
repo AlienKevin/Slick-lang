@@ -4,9 +4,9 @@
 
 # Introduction
 
-Slick is a statically and strongly typed functional programming language transpiled to JavaScript.
+Slick is a statically typed functional programming language transpiled to JavaScript.
 
-Slick aims to be unclutter software development and is heavily influenced by [Elm](https://elm-lang.org/) and [Neo](https://github.com/douglascrockford/howjavascriptworks).
+Slick aims to *unclutter* software development and is heavily influenced by [Elm](https://elm-lang.org/) and [Neo](https://github.com/douglascrockford/howjavascriptworks).
 
 # Hello World
 
