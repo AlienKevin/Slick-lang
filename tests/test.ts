@@ -284,6 +284,20 @@ row2 :
 
 "[1, 2, 3]"
 ],
+[
+`
+fib : ƒ n
+    if n ≤ 1 then
+        1
+    else
+        fib (n - 1) + fib (n - 2)
+
+_ :
+    fib 10
+`,
+
+"89"
+],
 // complex hybrid test
 [
 `

@@ -817,7 +817,17 @@ export class Parser {
     getArgumentList() {
         let list: Expr[] = [];
         while (this.checkLiteral()) {
-            list.push(this.expression());
+            const keyword = this.peek().lexeme;
+            const arg = (
+                keyword === "if"
+                ? this.if()
+                : (
+                    keyword === "case"
+                    ? this.caseExpr()
+                    : this.funcExpr()
+                )
+            );
+            list.push(arg);
         }
         this.clearArg();
         return list;
