@@ -3,3 +3,4 @@ dist
 .vscode
 tests/simple.ts
 tests/dist.js
+build

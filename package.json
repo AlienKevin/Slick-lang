@@ -5,8 +5,10 @@
   "main": "dist/Runner.js",
   "types": "dist/Runner.d.ts",
   "scripts": {
-    "s": "node -r esm dist/tests/simple.js",
-    "t": "node -r esm dist/tests/test.js",
+    "s": "node build/tests/simple.js",
+    "t": "node build/tests/test.js",
+    "start": "tsc -w -p tsconfig.dev.json",
+    "dist": "rm -rf ./dist/ && tsc -p tsconfig.prod.json",
     "release": "release-it"
   },
   "dependencies": {
