@@ -17,6 +17,14 @@ const RUN = RUN_MODE.RUN;
 const MAKE = RUN_MODE.MAKE;
 const TEST = RUN_MODE.TEST;
 
+enum RUN_LEVEL {
+    TOKENIZE,
+    PARSE,
+}
+
+const TOKENIZE = RUN_LEVEL.TOKENIZE;
+const PARSE = RUN_LEVEL.PARSE;
+
 class Runner {
     public hadError = false;
     public lineStarts: number[];
@@ -33,20 +41,34 @@ class Runner {
         this.output = output;
     }
 
-    run(source: string, options = {
-            mode: RUN | MAKE | TEST
+    run(source: string,
+        {
+            level = undefined,
+            mode = undefined
+        }:
+        {
+            mode : RUN_MODE,
+            level ?: RUN_LEVEL
         }) {
         this.source = source;
-        this.mode = options.mode;
+        this.mode = mode;
         this.lineStarts = [];
 
         // scann
         const scanner = new Scanner(source, this);
         scanner.scan();
 
+        if (level === TOKENIZE) {
+            return scanner.tokens;
+        }
+
         // parse
         const parser = new Parser(scanner.tokens, this);
         const statements = parser.parse();
+
+        if (level === PARSE) {
+            return statements;
+        }
 
         if (this.hadError) {
             // reset back to default!!!
@@ -88,9 +110,9 @@ class Runner {
             runtimePath: this.runtimePath,
             mode: this.mode
         }).generateCode(statements, true);
-        if (options.mode === RUN || options.mode === TEST) {
+        if (mode === RUN || mode === TEST) {
             evalCode(code);
-        } else if (options.mode === MAKE) {
+        } else if (mode === MAKE) {
             this.output(code);
         }
     }
@@ -192,7 +214,7 @@ export {
     RUN,
     MAKE,
     TEST,
-    Scanner,
-    Parser,
-    Visitor
+    Visitor,
+    TOKENIZE,
+    PARSE
 }
