@@ -1,10 +1,6 @@
 {
     "compilerOptions": {
         "target": "es6",
-        "module": "esnext",
-        "sourceMap": true,
-        "declaration": true,
-        "outDir": "./dist/",
         "esModuleInterop": true,
         "moduleResolution": "node",
         "lib": ["es2019"],
